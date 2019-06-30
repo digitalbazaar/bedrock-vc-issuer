@@ -26,11 +26,11 @@
     "assert-plus": "^1.0.0",
     "cors": "^2.8.4",
     "jsonld-signatures": "^4.1.1",
-    "ocapld": "digitalbazaar/ocapld.js#master",
-    "secure-data-hub-client": "digitalbazaar/secure-data-hub-client#add-meta-support",
+    "ocapld": "^1.2.1",
+    "secure-data-hub-client": "digitalbazaar/secure-data-hub-client#initial",
     "uuid-random": "^1.0.6",
     "vc-js": "digitalbazaar/vc-js#master",
-    "web-kms-client": "github:digitalbazaar/web-kms-client#ocap-refactor"
+    "web-kms-client": "github:digitalbazaar/web-kms-client#initial"
   },
   "peerDependencies": {
     "bedrock": "^1.12.1",
