@@ -27,7 +27,7 @@
     "cors": "^2.8.4",
     "jsonld-signatures": "^4.1.1",
     "ocapld": "^1.3.0",
-    "secure-data-hub-client": "digitalbazaar/secure-data-hub-client#initial",
+    "secure-data-hub-client": "digitalbazaar/secure-data-hub-client#key-agreement",
     "vc-js": "digitalbazaar/vc-js#master",
     "web-kms-client": "github:digitalbazaar/web-kms-client#http-sig"
   },
