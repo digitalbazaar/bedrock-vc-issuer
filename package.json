@@ -25,11 +25,11 @@
   "dependencies": {
     "assert-plus": "^1.0.0",
     "cors": "^2.8.4",
-    "jsonld-signatures": "^4.1.1",
-    "ocapld": "^1.3.0",
-    "secure-data-hub-client": "^1.0.0",
+    "edv-client": "^2.0.0",
+    "jsonld-signatures": "^4.5.1",
+    "ocapld": "^1.4.0",
     "vc-js": "digitalbazaar/vc-js#master",
-    "web-kms-client": "github:digitalbazaar/web-kms-client#http-sig"
+    "webkms-client": "^1.0.0"
   },
   "peerDependencies": {
     "bedrock": "^1.12.1",
