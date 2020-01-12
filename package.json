@@ -24,6 +24,7 @@
   "homepage": "https://github.com/digitalbazaar/bedrock-vc-issuer",
   "dependencies": {
     "assert-plus": "^1.0.0",
+    "bs58": "^4.0.1",
     "cors": "^2.8.4",
     "edv-client": "^2.0.0",
     "jsonld-signatures": "^4.5.1",
