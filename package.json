@@ -3,7 +3,9 @@
   "version": "0.0.1-0",
   "description": "Bedrock Verifiable Credential Issuer",
   "main": "./lib",
-  "scripts": {},
+  "scripts": {
+    "lint": "eslint 'lib/**.js'"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/digitalbazaar/bedrock-vc-issuer"
@@ -43,6 +45,10 @@
     "bedrock-server": "^2.3.2",
     "bedrock-validation": "^4.1.0",
     "bedrock-zcap-storage": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-digitalbazaar": "^2.0.1"
   },
   "directories": {
     "lib": "./lib"
