@@ -6,6 +6,7 @@
 // const bedrock = require('bedrock');
 // const {config} = bedrock;
 // const {schemas} = require('bedrock-validation');
+const {presentation} = require('./subs/presentation');
 
 const instancesQuery = {
   title: 'Instances Query',
@@ -34,3 +35,4 @@ const instancesCreate = {
 
 module.exports.instancesCreate = () => instancesCreate;
 module.exports.instancesQuery = () => instancesQuery;
+module.exports.presentation = () => presentation;
