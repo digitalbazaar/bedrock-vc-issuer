@@ -4,6 +4,7 @@
 'use strict';
 
 const {schemas} = require('bedrock-validation');
+const {authenticationProof} = require('./subs/vc-common');
 
 /**
  *  DID AUTH REQ BODY workerPid=19432, details={
@@ -25,20 +26,6 @@ const {schemas} = require('bedrock-validation');
 }
 */
 
-const proof = () => ({
-  type: 'object',
-  title: 'Json Ld Proof',
-  required: ['type', 'created', 'proofPurpose', 'verificationMethod', 'jws'],
-  properties: {
-    type: {type: 'string'},
-    proofPurpose: {type: 'string'},
-    verificationMethod: {type: 'string'},
-    created: {type: 'string'},
-    challenge: {type: 'string'},
-    jws: {type: 'string'}
-  }
-});
-
 const login = {
   type: 'object',
   title: 'DID Login',
@@ -48,7 +35,6 @@ const login = {
       title: 'DID Login Presentation',
       type: 'object',
       required: ['@context', 'type', 'holder', 'proof'],
-      additionalProperties: false,
       properties: {
         '@context': schemas.jsonldContext(),
         type: {
@@ -57,7 +43,7 @@ const login = {
         holder: {
           type: 'string'
         },
-        proof: proof()
+        proof: authenticationProof()
       }
     }
   }
