@@ -14,7 +14,7 @@ const proof = () => ({
     type: {type: 'string'},
     proofPurpose: {type: 'string'},
     verificationMethod: {type: 'string'},
-    created: {type: 'string'},
+    created: schemas.w3cDateTime(),
     challenge: {type: 'string'},
     jws: {type: 'string'}
   }
@@ -31,6 +31,18 @@ const capabilityDelegationProof = () => {
     minItems: 1
   };
   return _proof;
+};
+
+const allowedActionArray = {
+  title: 'Allowed Action Array',
+  type: 'array',
+  items: {type: 'string'},
+  minItems: 1
+};
+
+const allowedActionString = {
+  title: 'Allowed Action String',
+  type: 'string'
 };
 
 const delegationZCap = () => ({
@@ -50,9 +62,8 @@ const delegationZCap = () => ({
     delegator: {type: 'string'},
     referenceId: {type: 'string'},
     allowedAction: {
-      type: 'array',
-      items: {type: 'string'},
-      minItems: 1
+      title: 'Allowed Action',
+      anyOf: [allowedActionArray, allowedActionString]
     },
     invocationTarget: {
       title: 'Invocation Target',
