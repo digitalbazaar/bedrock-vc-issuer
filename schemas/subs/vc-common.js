@@ -21,13 +21,16 @@ const proof = () => ({
 });
 
 // add the capabilitychain for the CapabilityDelegationProof.
-const capabilityDelegationProof = proof();
-capabilityDelegationProof.title = 'Capability Delegation Proof';
-capabilityDelegationProof.required.push('capabilityChain');
-capabilityDelegationProof.properties.capabilityChain = {
-  type: 'array',
-  items: {type: 'string'},
-  minItems: 1
+const capabilityDelegationProof = () => {
+  const _proof = proof();
+  _proof.title = 'Capability Delegation Proof';
+  _proof.required.push('capabilityChain');
+  _proof.properties.capabilityChain = {
+    type: 'array',
+    items: {type: 'string'},
+    minItems: 1
+  };
+  return _proof;
 };
 
 const delegationZCap = () => ({
@@ -61,7 +64,7 @@ const delegationZCap = () => ({
       }
     },
     parentCapability: {type: 'string'},
-    proof: capabilityDelegationProof,
+    proof: capabilityDelegationProof(),
     jws: {type: 'string'}
   }
 });
@@ -77,5 +80,6 @@ const authenticationProof = () => {
 };
 
 module.exports.delegationZCap = delegationZCap;
+module.exports.capabilityDelegationProof = capabilityDelegationProof;
 module.exports.authenticationProof = authenticationProof;
 module.exports.proof = proof;
