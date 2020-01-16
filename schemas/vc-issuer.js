@@ -7,6 +7,10 @@
 // const {config} = bedrock;
 // const {schemas} = require('bedrock-validation');
 const {presentation} = require('./subs/presentation');
+const {
+  authenticationProof,
+  delegationZCap
+} = require('./subs/vc-common');
 
 const instancesQuery = {
   title: 'Instances Query',
@@ -41,32 +45,6 @@ CREATE ISSUER JSON {
     "type": "VerifiablePresentation",
     "holder": "did:v1:test:nym:z6Mkm8ukp7U3Vnz5tengH9tNyUcR9FkkzhE7AXZuebdYsKbe",
     "capability": [
-      {
-        "@context": "https://w3id.org/security/v2",
-        "id": "urn:zcap:z1A239D93uPoWkQGL1zS4XtCC",
-        "invoker": "did:key:z6MksjyK6sEf39xPAxUVdYBGCuE6sfuAxqnpzbod4JBuoGqv",
-        "delegator": "did:key:z6MksjyK6sEf39xPAxUVdYBGCuE6sfuAxqnpzbod4JBuoGqv",
-        "referenceId": "d548b050-1fbc-4763-932c-1de0a85d3fa7-edv-configuration",
-        "allowedAction": [
-          "read",
-          "write"
-        ],
-        "invocationTarget": {
-          "id": "https://localhost:38443/edvs/z1A9SL5HWmLqzZWaXyk3ECvaR/documents",
-          "type": "urn:edv:documents"
-        },
-        "parentCapability": "https://localhost:38443/edvs/z1A9SL5HWmLqzZWaXyk3ECvaR/zcaps/documents",
-        "proof": {
-          "type": "Ed25519Signature2018",
-          "created": "2020-01-15T21:39:44Z",
-          "verificationMethod": "did:key:z6MkfFetqA1WKhxkvtLo6C7CKWsYz4f59BnVLFBcXFnxgkdR",
-          "proofPurpose": "capabilityDelegation",
-          "capabilityChain": [
-            "https://localhost:38443/edvs/z1A9SL5HWmLqzZWaXyk3ECvaR/zcaps/documents"
-          ],
-          "jws": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..2X7EyV9aC-gzd1_0KZETYuvkvjopRWttcRRtKU5jT-Eb-P6P7yk1hOemYdh_-ycyQ2OnkCoocDiQl718fTA_Ag"
-        }
-      },
       {
         "@context": "https://w3id.org/security/v2",
         "id": "urn:zcap:z19rhnRvuGmb8718ivL2WuysA",
@@ -155,6 +133,11 @@ CREATE ISSUER JSON {
 }
 */
 
+const instancesUpdate = {
+
+};
+
+module.exports.instancesUpdate = () => instancesUpdate;
 module.exports.instancesCreate = () => instancesCreate;
 module.exports.instancesQuery = () => instancesQuery;
 module.exports.presentation = () => presentation;
