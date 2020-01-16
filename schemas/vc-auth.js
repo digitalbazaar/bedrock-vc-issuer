@@ -25,17 +25,48 @@ const {schemas} = require('bedrock-validation');
 }
 */
 
+const proof = () => ({
+  type: 'object',
+  title: 'Json Ld Proof',
+  required: ['type', 'created', 'proofPurpose', 'verificationMethod', 'jws'],
+  properties: {
+    type: {type: 'string'},
+    proofPurpose: {type: 'string'},
+    verificationMethod: {type: 'string'},
+    created: {type: 'string'},
+    challenge: {type: 'string'},
+    jws: {type: 'string'}
+  }
+});
+
 const login = {
   type: 'object',
   title: 'DID Login',
+  required: ['presentation'],
   properties: {
-    '@context': schemas.jsonldContext()
+    presentation: {
+      title: 'DID Login Presentation',
+      type: 'object',
+      required: ['@context', 'type', 'holder', 'proof'],
+      additionalProperties: false,
+      properties: {
+        '@context': schemas.jsonldContext(),
+        type: {
+          type: 'string'
+        },
+        holder: {
+          type: 'string'
+        },
+        proof: proof()
+      }
+    }
   }
 };
 
 const claimUser = {
   type: 'object',
   title: 'User Claim',
+  additionalProperties: false,
   required: ['token', 'instanceId'],
   properties: {
     token: {
