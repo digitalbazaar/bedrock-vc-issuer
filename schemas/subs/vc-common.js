@@ -1,4 +1,12 @@
+/*!
+ * Copyright (c) 2020 Digital Bazaar, Inc. All rights reserved.
+ */
+'use strict';
+
+const {config} = require('bedrock');
 const {schemas} = require('bedrock-validation');
+
+const {constants} = config;
 
 const proof = () => ({
   type: 'object',
@@ -56,7 +64,7 @@ const delegationZCap = () => ({
     'proof'
   ],
   properties: {
-    '@context': schemas.jsonldContext(),
+    '@context': schemas.jsonldContext(constants.SECURITY_CONTEXT_V2_URL),
     id: {type: 'string'},
     invoker: {type: 'string'},
     delegator: {type: 'string'},
