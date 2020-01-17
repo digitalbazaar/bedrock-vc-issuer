@@ -43,7 +43,7 @@
     "bedrock-passport": "4.0.2 - 5.x",
     "bedrock-permission": "^2.5.0",
     "bedrock-mongodb": "3.x - 6.x",
-    "bedrock-security-context": "^3.0.0",
+    "bedrock-credentials-context": "^1.0.0",
     "bedrock-server": "^2.3.2",
     "bedrock-validation": "^4.1.0",
     "bedrock-zcap-storage": "^1.0.0"
