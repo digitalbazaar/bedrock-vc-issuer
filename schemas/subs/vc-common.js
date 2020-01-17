@@ -95,9 +95,13 @@ const delegationZCap = () => ({
       title: 'Invocation Target',
       type: 'object',
       required: ['id', 'type'],
+      additionalProperties: false,
       properties: {
         id: {type: 'string'},
-        type: {type: 'string'}
+        type: {type: 'string'},
+        // verificationMethod is only required for target type
+        // Ed25519VerificationKey2018
+        verificationMethod: {type: 'string'},
       }
     },
     parentCapability: {type: 'string'},
