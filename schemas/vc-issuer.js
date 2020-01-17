@@ -17,6 +17,7 @@ const instancesQuery = {
   type: 'object',
   additionalProperties: false,
   required: ['controller'],
+  $schema: 'http://json-schema.org/draft-07/schema#',
   properties: {
     controller: {type: 'string'},
   }
@@ -27,6 +28,7 @@ const instancesCreate = {
   type: 'object',
   additionalProperties: false,
   required: ['controller', 'id', 'name'],
+  $schema: 'http://json-schema.org/draft-07/schema#',
   properties: {
     // urn:uuid:a99bfceb-f888-44f2-9319-d51e36038062
     controller: {type: 'string'},
@@ -41,6 +43,7 @@ const instancesUpdate = {
   title: 'Issuer Instance Update',
   type: 'object',
   required: ['controller', 'presentation'],
+  $schema: 'http://json-schema.org/draft-07/schema#',
   properties: {
     controller: {
       type: 'string',
