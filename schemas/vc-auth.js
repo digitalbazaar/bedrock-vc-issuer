@@ -13,6 +13,7 @@ const login = {
   type: 'object',
   title: 'DID Login',
   required: ['presentation'],
+  $schema: 'http://json-schema.org/draft-07/schema#',
   properties: {
     presentation: {
       title: 'DID Login Presentation',
@@ -33,6 +34,7 @@ const claimUser = {
   title: 'User Claim',
   additionalProperties: false,
   required: ['token', 'instanceId'],
+  $schema: 'http://json-schema.org/draft-07/schema#',
   properties: {
     token: {
       type: 'string'
