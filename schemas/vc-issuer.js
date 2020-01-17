@@ -4,7 +4,6 @@
 'use strict';
 const {config} = require('bedrock');
 const {schemas} = require('bedrock-validation');
-const {presentation} = require('./subs/presentation');
 const {
   authenticationProof,
   verifiablePresentationType,
@@ -91,4 +90,3 @@ const instancesUpdate = {
 module.exports.instancesUpdate = () => instancesUpdate;
 module.exports.instancesCreate = () => instancesCreate;
 module.exports.instancesQuery = () => instancesQuery;
-module.exports.presentation = () => presentation;
