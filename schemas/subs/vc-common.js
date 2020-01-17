@@ -98,6 +98,15 @@ const authenticationProof = () => {
   return _proof;
 };
 
+// used to Verify that the type of a presentation
+// matches VerifiablePresentation exactly.
+const verifiablePresentationType = () => ({
+  title: 'Verifiable Presentation Type',
+  type: 'string',
+  const: 'VerifiablePresentation'
+});
+
+module.exports.verifiablePresentationType = verifiablePresentationType;
 module.exports.delegationZCap = delegationZCap;
 module.exports.capabilityDelegationProof = capabilityDelegationProof;
 module.exports.authenticationProof = authenticationProof;

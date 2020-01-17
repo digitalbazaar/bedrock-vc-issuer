@@ -5,7 +5,10 @@
 
 const {config} = require('bedrock');
 const {schemas} = require('bedrock-validation');
-const {authenticationProof} = require('./subs/vc-common');
+const {
+  verifiablePresentationType,
+  authenticationProof
+} = require('./subs/vc-common');
 
 const {constants} = config;
 
@@ -21,7 +24,7 @@ const login = {
       required: ['@context', 'type', 'holder', 'proof'],
       properties: {
         '@context': schemas.jsonldContext(constants.CREDENTIALS_CONTEXT_V1_URL),
-        type: {type: 'string'},
+        type: verifiablePresentationType(),
         holder: {type: 'string'},
         proof: authenticationProof()
       }
