@@ -7,6 +7,7 @@ const {schemas} = require('bedrock-validation');
 const {presentation} = require('./subs/presentation');
 const {
   authenticationProof,
+  verifiablePresentationType,
   delegationZCap
 } = require('./subs/vc-common');
 
@@ -66,13 +67,7 @@ const instancesUpdate = {
       ],
       properties: {
         '@context': schemas.jsonldContext(constants.CREDENTIALS_CONTEXT_V1_URL),
-        type: {
-          $id: '#/properties/presentation/properties/type',
-          type: 'string',
-          title: 'The Type Schema',
-          examples: ['VerifiablePresentation'],
-          pattern: '^(.*)$'
-        },
+        type: verifiablePresentationType(),
         holder: {
           $id: '#/properties/presentation/properties/holder',
           type: 'string',
