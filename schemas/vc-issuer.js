@@ -2,13 +2,15 @@
  * Copyright (c) 2020 Digital Bazaar, Inc. All rights reserved.
  */
 'use strict';
-
+const {config} = require('bedrock');
 const {schemas} = require('bedrock-validation');
 const {presentation} = require('./subs/presentation');
 const {
   authenticationProof,
   delegationZCap
 } = require('./subs/vc-common');
+
+const {constants} = config;
 
 const instancesQuery = {
   title: 'Instances Query',
@@ -60,7 +62,7 @@ const instancesUpdate = {
         'proof'
       ],
       properties: {
-        '@context': schemas.jsonldContext(),
+        '@context': schemas.jsonldContext(constants.CREDENTIALS_CONTEXT_V1_URL),
         type: {
           $id: '#/properties/presentation/properties/type',
           type: 'string',
