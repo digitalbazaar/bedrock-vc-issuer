@@ -48,16 +48,27 @@ const capabilityDelegationProof = () => {
   return _proof;
 };
 
-const allowedActionArray = {
-  title: 'Allowed Action Array',
-  type: 'array',
-  items: {type: 'string'},
-  minItems: 1
+const authenticationProof = () => {
+  const _proof = proof();
+  _proof.title = 'Authentication Proof';
+  _proof.required.push('challenge');
+  _proof.properties.challenge = {
+    challenge: {type: 'string'}
+  };
+  _proof.properties.proofPurpose.const = 'authentication';
+  return _proof;
 };
 
 const allowedActionString = {
   title: 'Allowed Action String',
   type: 'string'
+};
+
+const allowedActionArray = {
+  title: 'Allowed Action Array',
+  type: 'array',
+  items: allowedActionString,
+  minItems: 1
 };
 
 const delegationZCap = () => ({
@@ -94,17 +105,6 @@ const delegationZCap = () => ({
     jws: {type: 'string'}
   }
 });
-
-const authenticationProof = () => {
-  const _proof = proof();
-  _proof.title = 'Authentication Proof',
-  _proof.required.push('challenge');
-  _proof.properties.challenge = {
-    challenge: {type: 'string'}
-  };
-  _proof.properties.proofPurpose.const = 'authentication';
-  return _proof;
-};
 
 // used to Verify that the type of a presentation
 // matches VerifiablePresentation exactly.
