@@ -20,7 +20,13 @@ const proof = () => ({
   ],
   properties: {
     type: {type: 'string'},
-    proofPurpose: {type: 'string'},
+    proofPurpose: {
+      type: 'string',
+      examples: [
+        'authentication',
+        'capabilityDelegation'
+      ]
+    },
     verificationMethod: {type: 'string'},
     created: schemas.w3cDateTime(),
     challenge: {type: 'string'},
@@ -38,6 +44,7 @@ const capabilityDelegationProof = () => {
     items: {type: 'string'},
     minItems: 1
   };
+  _proof.properties.proofPurpose.const = 'capabilityDelegation';
   return _proof;
 };
 
@@ -95,6 +102,7 @@ const authenticationProof = () => {
   _proof.properties.challenge = {
     challenge: {type: 'string'}
   };
+  _proof.properties.proofPurpose.const = 'authentication';
   return _proof;
 };
 
