@@ -41,6 +41,7 @@
     "bedrock-credentials-context": "^1.0.0",
     "bedrock-express": "2.0.8 - 3.x",
     "bedrock-https-agent": "^1.0.1",
+    "bedrock-jsonld-document-loader": "^1.0.1",
     "bedrock-passport": "4.0.2 - 5.x",
     "bedrock-permission": "^2.5.0",
     "bedrock-mongodb": "3.x - 6.x",
