@@ -31,7 +31,7 @@
     "cors": "^2.8.4",
     "edv-client": "^2.0.0",
     "jsonld-signatures": "^4.5.1",
-    "ocapld": "^1.4.0",
+    "ocapld": "=1.5.0",
     "vc-js": "digitalbazaar/vc-js#master",
     "webkms-client": "^1.0.0"
   },
