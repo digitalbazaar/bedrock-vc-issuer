@@ -33,7 +33,7 @@
     "jsonld-signatures": "^5.0.0",
     "ocapld": "^1.4.0",
     "vc-js": "digitalbazaar/vc-js#master",
-    "webkms-client": "^1.0.0"
+    "webkms-client": "digitalbazaar/webkms-client#refactor"
   },
   "peerDependencies": {
     "bedrock": "1.12.1 - 3.x",
