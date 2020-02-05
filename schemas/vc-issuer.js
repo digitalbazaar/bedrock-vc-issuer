@@ -124,8 +124,20 @@ const claimUser = {
   }
 };
 
+const capabilitiesQuery = {
+  title: 'Capabilities Query',
+  type: 'object',
+  additionalProperties: false,
+  required: ['account'],
+  $schema: 'http://json-schema.org/draft-07/schema#',
+  properties: {
+    account: {type: 'string'},
+  }
+};
+
 exports.login = () => login;
 exports.claimUser = () => claimUser;
+exports.capabilitiesQuery = () => capabilitiesQuery;
 module.exports.instancesUpdate = () => instancesUpdate;
 module.exports.instancesCreate = () => instancesCreate;
 module.exports.instancesQuery = () => instancesQuery;
