@@ -32,7 +32,7 @@
     "edv-client": "^2.0.0",
     "jsonld-signatures": "^5.0.0",
     "ocapld": "^1.7.0",
-    "vc-js": "digitalbazaar/vc-js#master",
+    "vc-js": "^0.4.0",
     "webkms-client": "^2.0.1"
   },
   "peerDependencies": {
