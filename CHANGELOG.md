@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 1.0.0 -
+## 1.0.0 - 2020-02-27
 
 ### Added
 - Added core files.
