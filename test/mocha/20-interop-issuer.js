@@ -6,8 +6,6 @@
 const {config} = require('bedrock');
 const {create} = require('apisauce');
 const {httpsAgent} = require('bedrock-https-agent');
-// const sinon = require('sinon');
-// const brPassport = require('bedrock-passport');
 
 const api = create({
   baseURL: `${config.server.baseUri}/credentials`,
@@ -15,17 +13,24 @@ const api = create({
   timeout: 1000,
 });
 
-// FIXME: using embedded context:
+// NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
-// is this context supposed to be supported in a documentLoader
-// it has been dropped from the credentials-context package
 const mockCredential = require('./mock-credential');
 
 describe('Interop Credentials API', () => {
   it('issues a credential', async () => {
-    const result = await api.post('/issueCredential', {
-      credential: mockCredential
-    });
+    let error;
+    let result;
+    try {
+      result = await api.post('/issueCredential', {
+        credential: mockCredential
+      });
+    } catch(e) {
+      error = e;
+    }
+    should.not.exist(error);
+    // apisauce API does not throw it puts errors in `result.problem`
+    should.not.exist(result.problem);
     should.exist(result.data.proof);
   });
 });
