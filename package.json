@@ -32,7 +32,7 @@
     "crypto-ld": "^3.7.0",
     "edv-client": "^2.0.0",
     "jsonld-signatures": "^5.0.0",
-    "ocapld": "digitalbazaar/ocapld.js#master",
+    "ocapld": "^2.0.0",
     "vc-js": "^0.5.0",
     "webkms-client": "^2.0.1"
   },
