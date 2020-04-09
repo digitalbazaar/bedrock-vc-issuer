@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 3.0.0 - 2020-04-09
+
+### Changed
+- **BREAKING**: Obsolete APIs have been removed. See git history for changes.
+
 ## 2.0.0 - 2020-04-07
 
 ### Changed
