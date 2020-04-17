@@ -3,6 +3,9 @@
  */
 const bedrock = require('bedrock');
 
+require('bedrock-https-agent');
+require('bedrock-kms');
+require('bedrock-mongodb');
 require('bedrock-vc-issuer');
 
 require('bedrock-test');

@@ -13,4 +13,6 @@ config.mongodb.name = 'bedrock_vc_issuer_test';
 config.mongodb.dropCollections.onInit = true;
 config.mongodb.dropCollections.collections = [];
 
+config.kms.allowedHost = config.server.host;
+
 config['https-agent'].rejectUnauthorized = false;

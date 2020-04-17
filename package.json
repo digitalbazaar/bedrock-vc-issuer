@@ -4,7 +4,7 @@
   "description": "Bedrock Verifiable Credential Issuer",
   "main": "./lib",
   "scripts": {
-    "lint": "eslint 'lib/**.js'"
+    "lint": "eslint lib test"
   },
   "repository": {
     "type": "git",
@@ -53,7 +53,7 @@
     "bedrock-security-context": "^3.0.0",
     "bedrock-server": "^2.3.2",
     "bedrock-validation": "^4.1.0",
-    "bedrock-zcap-storage": "^1.0.0"
+    "bedrock-zcap-storage": "^2.0.0"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
