@@ -16,3 +16,5 @@ config.mongodb.dropCollections.collections = [];
 config.kms.allowedHost = config.server.host;
 
 config['https-agent'].rejectUnauthorized = false;
+config.kms.allowedHost = config.server.host;
+config['kms-http'].requireAuthentication = false;
