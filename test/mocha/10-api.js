@@ -6,6 +6,7 @@
 const {config} = require('bedrock');
 const {create} = require('apisauce');
 const {httpsAgent} = require('bedrock-https-agent');
+const helpers = require('./helpers.js');
 const sinon = require('sinon');
 const brPassport = require('bedrock-passport');
 
@@ -13,6 +14,16 @@ const api = create({
   baseURL: `${config.server.baseUri}/vc-issuer`,
   httpsAgent,
   timeout: 1000,
+});
+
+describe('create an issuer instance', function() {
+  let agents, passportStub = null;
+  beforeEach(async function() {
+    agents = await helpers.insertIssuerAgent();
+  });
+  it('should', async function() {
+    console.log('agents', agents);
+  });
 });
 
 // FIXME: tests need to be updated to use new endpoints

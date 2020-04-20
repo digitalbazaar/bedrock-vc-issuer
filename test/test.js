@@ -5,6 +5,7 @@ const bedrock = require('bedrock');
 
 require('bedrock-https-agent');
 require('bedrock-kms');
+require('bedrock-kms-http');
 require('bedrock-mongodb');
 require('bedrock-vc-issuer');
 
