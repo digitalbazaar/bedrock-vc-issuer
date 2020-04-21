@@ -11,7 +11,7 @@ const {
   Hmac,
   KmsClient
 } = require('webkms-client');
-const {util: {uuid}} = bedrock;
+const {config, util: {uuid}} = bedrock;
 
 async function insertIssuerAgent({id, token}) {
   // this is the profile associated with an issuer account
@@ -21,8 +21,19 @@ async function insertIssuerAgent({id, token}) {
   const {profileAgent, secrets} = profileAgentRecord;
   const {profileCapabilityInvocationKey} = profileAgent.zcaps;
   const invocationSigner = await profileAgents.getSigner({profileAgentRecord});
-  const {capabilityAgent, keystoreAgent} = await profileAgents.getAgents({profileAgent, secrets});
-console.log('profile\'s profileAgent', capabilityAgent, keystoreAgent);
+  const {capabilityAgent, keystoreAgent} = await profileAgents.getAgents(
+    {profileAgent, secrets});
+  const [keyAgreementKey, hmac] = await Promise.all([
+    keystoreAgent.generateKey({
+      type: 'keyAgreement',
+      kmsModule: config.kmsModule,
+    }),
+    keystoreAgent.generateKey({
+      type: 'hmac',
+      kmsModule: config.kmsModule,
+    })
+  ]);
+console.log('profile\'s profileAgent', keyAgreementKey, hmac);
   // this is the userProfileEdv usually created in the wallet.
 /**
   const config = {
