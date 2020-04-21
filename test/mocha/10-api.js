@@ -16,13 +16,21 @@ const api = create({
   timeout: 1000,
 });
 
-describe('create an issuer instance', function() {
-  let agents, passportStub = null;
+describe('issue POST endpoint', function() {
+  let agents;
   beforeEach(async function() {
     agents = await helpers.insertIssuerAgent();
   });
-  it('should', async function() {
-    console.log('agents', agents);
+  it('should issue a credential', async function() {
+    const {integration: {secrets}} = agents;
+    const credential = {};
+    const {token} = secrets;
+    const response = await api.post(
+      '/issue',
+      {credential},
+      {headers: {Authorization: `Bearer ${token}`}}
+    );
+    console.log(response);
   });
 });
 
