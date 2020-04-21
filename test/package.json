@@ -30,6 +30,7 @@
     "bedrock-server": "^2.6.0",
     "bedrock-test": "^5.2.0",
     "bedrock-validation": "^4.3.0",
+    "bedrock-ssm-mongodb": "^2.0.1",
     "bedrock-vc-issuer": "file:..",
     "bedrock-vc-revocation-list-context": "^1.0.0",
     "bedrock-zcap-storage": "^2.0.0",
