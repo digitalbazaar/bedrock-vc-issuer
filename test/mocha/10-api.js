@@ -26,12 +26,11 @@ describe('issue POST endpoint', function() {
     const {integration: {secrets}} = agents;
     const credential = {};
     const {token} = secrets;
-    const response = await api.post(
+    return api.post(
       '/issue',
       {credential},
       {headers: {Authorization: `Bearer ${token}`}}
     );
-    console.log(response);
   });
 });
 
