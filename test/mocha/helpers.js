@@ -2,6 +2,7 @@ const sinon = require('sinon');
 const bedrock = require('bedrock');
 const brPassport = require('bedrock-passport');
 const edvStorage = require('bedrock-edv-storage');
+const edvHelpers = require('bedrock-edv-storage/lib/helpers');
 const {profiles, profileAgents} = require('bedrock-profile');
 const {
   AsymmetricKey,
@@ -12,6 +13,8 @@ const {
   KmsClient
 } = require('webkms-client');
 const {config, util: {uuid}} = bedrock;
+
+const {kmsModule, server: {baseUri}} = config;
 
 async function insertIssuerAgent({id, token}) {
   // this is the profile associated with an issuer account
@@ -26,24 +29,26 @@ async function insertIssuerAgent({id, token}) {
   const [keyAgreementKey, hmac] = await Promise.all([
     keystoreAgent.generateKey({
       type: 'keyAgreement',
-      kmsModule: config.kmsModule,
+      kmsModule
     }),
     keystoreAgent.generateKey({
       type: 'hmac',
-      kmsModule: config.kmsModule,
+      kmsModule
     })
   ]);
 console.log('profile\'s profileAgent', keyAgreementKey, hmac);
   // this is the userProfileEdv usually created in the wallet.
-/**
+  const edvId = `${baseUri}/edvs/${(await edvHelpers.generateRandom())}`;
   const config = {
-    id: `urn:uuid:${uuid()}`,
+    id: edvId,
     sequence: 0,
     controller: profileId,
     referenceId: 'vc-issuer-test-user',
     keyAgreementKey: {id: keyAgreementKey.id, type: keyAgreementKey.type},
     hmac: {id: hmac.id, type: hmac.type}
   };
+  const result = await edvStorage.insertConfig({actor: null, config});
+console.log('edv storage result', result);
 
   const delegateEdvDocumentRequest = {
     referenceId: `profile-agent-edv-document`,
@@ -52,23 +57,11 @@ console.log('profile\'s profileAgent', keyAgreementKey, hmac);
     controller: profileId,
     parentCapability: `${edvId}/zcaps/documents`
   };
-*/
+
   // this is the profileAgent created for an issuer instance integration
   // this is the profileAgent used to issue a credential.
   const integration = await profileAgents.create({profileId, token});
   return {instance: {id: profileId}, integration};
 }
-
-exports.stubPassport = ({actor}) => {
-  const passportStub = sinon.stub(brPassport, 'optionallyAuthenticated');
-  passportStub.callsFake((req, res, next) => {
-    req.user = {
-      account: {},
-      actor,
-    };
-    next();
-  });
-  return passportStub;
-};
 
 exports.insertIssuerAgent = insertIssuerAgent;
