@@ -9,5 +9,8 @@ require('bedrock-kms-http');
 require('bedrock-mongodb');
 require('bedrock-vc-issuer');
 
+// this is responsible for providing the `ssm-v1` key store
+require('bedrock-ssm-mongodb');
+
 require('bedrock-test');
 bedrock.start();
