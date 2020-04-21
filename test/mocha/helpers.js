@@ -3,14 +3,26 @@ const bedrock = require('bedrock');
 const brPassport = require('bedrock-passport');
 const edvStorage = require('bedrock-edv-storage');
 const {profiles, profileAgents} = require('bedrock-profile');
+const {
+  AsymmetricKey,
+  CapabilityAgent,
+  KeystoreAgent,
+  KeyAgreementKey,
+  Hmac,
+  KmsClient
+} = require('webkms-client');
 const {util: {uuid}} = bedrock;
 
 async function insertIssuerAgent({id, token}) {
   // this is the profile associated with an issuer account
   const {id: profileId} = await profiles.create({accountId: id});
-  const profileAgent = await profileAgents.getByProfile(
+  const profileAgentRecord = await profileAgents.getByProfile(
     {profileId, accountId: id, includeSecrets: true})
-console.log('profile\'s profileAgent', profileAgent);
+  const {profileAgent, secrets} = profileAgentRecord;
+  const {profileCapabilityInvocationKey} = profileAgent.zcaps;
+  const invocationSigner = await profileAgents.getSigner({profileAgentRecord});
+  const {capabilityAgent, keystoreAgent} = await profileAgents.getAgents({profileAgent, secrets});
+console.log('profile\'s profileAgent', capabilityAgent, keystoreAgent);
   // this is the userProfileEdv usually created in the wallet.
 /**
   const config = {
