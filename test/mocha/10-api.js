@@ -19,7 +19,8 @@ const api = create({
 describe('issue POST endpoint', function() {
   let agents;
   beforeEach(async function() {
-    agents = await helpers.insertIssuerAgent();
+    // FIXME id should be a valid account id
+    agents = await helpers.insertIssuerAgent({id: 'foo', token: 'test-token'});
   });
   it('should issue a credential', async function() {
     const {integration: {secrets}} = agents;
