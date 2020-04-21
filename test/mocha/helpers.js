@@ -1,15 +1,13 @@
 const sinon = require('sinon');
 const brPassport = require('bedrock-passport');
-const {profileAgents} = require('bedrock-profile');
+const {profiles, profileAgents} = require('bedrock-profile');
 
 async function insertIssuerAgent() {
-  const instance = await profileAgents.create(
+  const profile = await profiles.create(
     {accountId: 'foo'});
-console.log('instance', instance);
   const integration = await profileAgents.create(
-    {profileId: instance.id, token: 'foo'});
-console.log('integration', integration);
-  return {instance, integration};
+    {profileId: profile.id, token: 'test-issuer'});
+  return {instance: profile, integration};
 }
 
 exports.stubPassport = ({actor}) => {
