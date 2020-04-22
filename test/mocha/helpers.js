@@ -5,6 +5,7 @@ const edvStorage = require('bedrock-edv-storage');
 const edvHelpers = require('bedrock-edv-storage/lib/helpers');
 const {profiles, profileAgents} = require('bedrock-profile');
 const {EdvClient, EdvDocument} = require('edv-client');
+const {AsymmetricKey} = require('webkms-client');
 const {config, util: {uuid}} = bedrock;
 
 const {kmsModule, server: {baseUri}} = config;
@@ -36,9 +37,15 @@ async function insertIssuerAgent({id, token}) {
     {profileId, accountId: id, includeSecrets: true});
   const {profileAgent, secrets} = profileAgentRecord;
   // we will need this to delegate and invoke
-  const invocationSigner = await profileAgents.getSigner({profileAgentRecord});
   const {capabilityAgent, keystoreAgent} = await profileAgents.getAgents(
     {profileAgent, secrets});
+  const agentSigner = await profileAgents.getSigner({profileAgentRecord});
+  const {profileCapabilityInvocationKey} = profileAgent.zcaps;
+  const profileSigner = new AsymmetricKey({
+    capability: profileCapabilityInvocationKey,
+    invocationSigner: agentSigner,
+    kmsClient: keystoreAgent.kmsClient
+  });
   // creates an edv for the profile-agent-edv-document
   // this is the userProfileEdv usually created in the wallet.
   const {edvId, hmac, keyAgreementKey} = await createProfileEdv({
@@ -56,7 +63,7 @@ async function insertIssuerAgent({id, token}) {
     profileContent,
     hmac,
     keyAgreementKey,
-    invocationSigner,
+    invocationSigner: profileSigner,
     profileAgentRecord
   });
 
