@@ -41,6 +41,7 @@ async function insertIssuerAgent({id, token}) {
     {profileAgent, secrets});
   const agentSigner = await profileAgents.getSigner({profileAgentRecord});
   const {profileCapabilityInvocationKey} = profileAgent.zcaps;
+  // the profile signer is authorized to sign with the profileAgent's key?
   const profileSigner = new AsymmetricKey({
     capability: profileCapabilityInvocationKey,
     invocationSigner: agentSigner,
@@ -68,7 +69,7 @@ async function insertIssuerAgent({id, token}) {
   });
 
   // this is the profileAgent created for an issuer instance integration
-  // this is the profileAgent used to issue a credential.
+  // it is used to issue a credential.
   const integration = await profileAgents.create({profileId, token});
   return {instance: {id: profileId}, integration};
 }
@@ -147,15 +148,12 @@ async function initializeAccessManagement({
     accessManagement,
     zcaps: profileZcaps
   };
-console.log('write document');
-// getting 400 unauthorized here probably need an auth stub
   await profileUserDoc.write({
     doc: {
       id: profileDocId,
       content: profile
     }
   });
-console.log('wrote document');
   const documentsUrl = `${edvId}/documents`;
   // now that we have an edv for the test
   // we need to delegate read only access to us.
