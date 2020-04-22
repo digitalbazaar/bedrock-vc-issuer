@@ -18,6 +18,18 @@ const api = create({
 
 describe('issue POST endpoint', function() {
   let agents;
+  let passportStub, authenticationStub;
+  before(() => {
+    passportStub = sinon.stub(brPassport, 'optionallyAuthenticated');
+    authenticationStub = sinon.stub(brPassport, 'ensureAuthenticated');
+    helpers.stubPassport(passportStub);
+    helpers.stubPassport(authenticationStub);
+  });
+  after(() => {
+    passportStub.restore();
+    authenticationStub.restore();
+  });
+
   beforeEach(async function() {
     // FIXME id should be a valid account id
     agents = await helpers.insertIssuerAgent({id: 'foo', token: 'test-token'});
@@ -51,7 +63,7 @@ describe.skip('API', () => {
       let passportStub;
       before(() => {
         passportStub = sinon.stub(brPassport, 'optionallyAuthenticated');
-        _stubPassport(passportStub);
+        helpers.stubPassport(passportStub);
       });
       after(() => {
         passportStub.restore();
@@ -100,7 +112,7 @@ describe.skip('API', () => {
       let passportStub;
       before(() => {
         passportStub = sinon.stub(brPassport, 'optionallyAuthenticated');
-        _stubPassport(passportStub);
+        helpers.stubPassport(passportStub);
       });
       after(() => {
         passportStub.restore();
@@ -187,15 +199,3 @@ describe.skip('API', () => {
     }); // end authenticated
   }); // end instances POST
 });
-
-function _stubPassport(passportStub) {
-  passportStub.callsFake((req, res, next) => {
-    req.user = {
-      account: {},
-      actor: {
-        id: 'theMockControllerId'
-      }
-    };
-    next();
-  });
-}
