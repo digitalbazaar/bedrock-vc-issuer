@@ -37,6 +37,7 @@
     "jsonld-signatures": "^5.0.0",
     "ocapld": "^2.0.0",
     "vc-js": "^0.5.0",
+    "vc-revocation-list": "github:digitalbazaar/vc-revocation-list#master",
     "webkms-client": "^2.0.1"
   },
   "peerDependencies": {
@@ -53,6 +54,7 @@
     "bedrock-security-context": "^3.0.0",
     "bedrock-server": "^2.3.2",
     "bedrock-validation": "^4.1.0",
+    "bedrock-vc-revocation-list-context": "^1.0.0",
     "bedrock-zcap-storage": "^2.0.0"
   },
   "devDependencies": {
