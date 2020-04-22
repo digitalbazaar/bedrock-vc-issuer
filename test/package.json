@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "apisauce": "^1.1.1",
+    "axios": "^0.19.2",
     "bedrock": "^3.1.0",
     "bedrock-account": "^2.2.0",
     "bedrock-credentials-context": "^1.0.0",
@@ -35,6 +36,7 @@
     "bedrock-vc-issuer": "file:..",
     "bedrock-vc-revocation-list-context": "^1.0.0",
     "bedrock-veres-one-context": "^10.0.0",
+    "bedrock-web-profile-manager": "^4.1.0",
     "bedrock-zcap-storage": "^2.0.0",
     "cross-env": "^7.0.2",
     "nyc": "^15.0.1",
