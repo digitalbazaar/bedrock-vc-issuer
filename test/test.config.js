@@ -19,3 +19,4 @@ config['https-agent'].rejectUnauthorized = false;
 config.kms.allowedHost = config.server.host;
 config['kms-http'].requireAuthentication = false;
 config.kmsModule = 'ssm-v1';
+config['https-agent'].rejectUnauthorized = false;
