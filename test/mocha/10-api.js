@@ -26,6 +26,8 @@ describe('issue POST endpoint', function() {
     helpers.stubPassport(authenticationStub);
   });
   after(() => {
+    // TODO just so you know sinon continues to call
+    // the fake function even if you call restore
     passportStub.restore();
     authenticationStub.restore();
   });
