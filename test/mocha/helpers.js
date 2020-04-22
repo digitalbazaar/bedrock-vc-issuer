@@ -1,5 +1,6 @@
-const bedrock = require('bedrock');
 const axios = require('axios');
+const bedrock = require('bedrock');
+const {httpsAgent} = require('bedrock-https-agent');
 const edvStorage = require('bedrock-edv-storage');
 const edvHelpers = require('bedrock-edv-storage/lib/helpers');
 const {profiles, profileAgents} = require('bedrock-profile');
@@ -8,10 +9,11 @@ const {config, util: {uuid}} = bedrock;
 
 const {kmsModule, server: {baseUri}} = config;
 const JWE_ALG = 'ECDH-ES+A256KW';
+const profileAgentEdvDocument = 'profile-agent-edv-document';
 
 async function keyResolver({id}) {
   const headers = {Accept: 'application/ld+json, application/json'};
-  const response = await axios.get(id, {headers});
+  const response = await axios.get(id, {headers, httpsAgent});
   return response.data;
 }
 
@@ -26,7 +28,6 @@ async function insertIssuerAgent({id, token}) {
   const {capabilityAgent, keystoreAgent} = await profileAgents.getAgents(
     {profileAgent, secrets});
   // creates an edv for the profile-agent-edv-document
-  const profileAgentEdvDocument = 'profile-agent-edv-document';
   // this is the userProfileEdv usually created in the wallet.
   const {edvId, hmac, keyAgreementKey} = await createProfileEdv({
     profileId,
@@ -36,7 +37,7 @@ async function insertIssuerAgent({id, token}) {
   const profileContent = {
     name: 'test-user',
     type: ['User', 'Person']
-  }
+  };
   const result = await initializeAccessManagement({
     edvId,
     profileId,
@@ -46,15 +47,6 @@ async function insertIssuerAgent({id, token}) {
     invocationSigner,
     profileAgentRecord
   });
-  // now that we have an edv for the test
-  // we need to delegate read only access to us.
-  const delegateEdvDocumentRequest = {
-    referenceId: profileAgentEdvDocument,
-    // the profile agent is only allowed to read its own doc
-    allowedAction: ['read'],
-    controller: profileId,
-    parentCapability: `${edvId}/zcaps/documents`
-  };
 
   // this is the profileAgent created for an issuer instance integration
   // this is the profileAgent used to issue a credential.
@@ -95,7 +87,7 @@ async function initializeAccessManagement({
   edvId,
   hmac,
   keyAgreementKey,
-  indexes: [],
+  indexes = [],
   invocationSigner,
   profileAgentRecord
 }) {
@@ -115,7 +107,7 @@ async function initializeAccessManagement({
   accessManagement.edvId = edvId;
   // TODO this can be accomplished with back end only code
   const client = new EdvClient(
-    {id: edvId, keyResolver, keyAgreementKey, hmac});
+    {id: edvId, keyResolver, httpsAgent, keyAgreementKey, hmac});
   for(const index of accessManagement.indexes) {
     client.ensureIndex(index);
   }
@@ -136,12 +128,31 @@ async function initializeAccessManagement({
     accessManagement,
     zcaps: profileZcaps
   };
+console.log('write document');
+// getting 400 unauthorized here probably need an auth stub
   await profileUserDoc.write({
     doc: {
       id: profileDocId,
       content: profile
     }
   });
+console.log('wrote document');
+  const documentsUrl = `${edvId}/documents`;
+  // now that we have an edv for the test
+  // we need to delegate read only access to us.
+  const delegateUserEdvDocumentRequest = {
+    id: `urn:zcap:${await edvHelpers.generateRandom()}`,
+    referenceId: profileAgentEdvDocument,
+    // the profile agent is only allowed to read its own doc
+    allowedAction: ['read'],
+    controller: profileId,
+    parentCapability: capability,
+    invocationTarget: {
+      id: `${documentsUrl}/${profileDocId}`,
+      type: 'urn:edv:document'
+    }
+  };
+console.log('check me', delegateUserEdvDocumentRequest);
 }
 
 exports.insertIssuerAgent = insertIssuerAgent;
