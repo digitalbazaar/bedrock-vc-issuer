@@ -1,20 +1,19 @@
-const sinon = require('sinon');
 const bedrock = require('bedrock');
-const brPassport = require('bedrock-passport');
+const axios = require('axios');
 const edvStorage = require('bedrock-edv-storage');
 const edvHelpers = require('bedrock-edv-storage/lib/helpers');
 const {profiles, profileAgents} = require('bedrock-profile');
-const {
-  AsymmetricKey,
-  CapabilityAgent,
-  KeystoreAgent,
-  KeyAgreementKey,
-  Hmac,
-  KmsClient
-} = require('webkms-client');
+const {EdvClient, EdvDocument} = require('edv-client');
 const {config, util: {uuid}} = bedrock;
 
 const {kmsModule, server: {baseUri}} = config;
+const JWE_ALG = 'ECDH-ES+A256KW';
+
+async function keyResolver({id}) {
+  const headers = {Accept: 'application/ld+json, application/json'};
+  const response = await axios.get(id, {headers});
+  return response.data;
+}
 
 async function insertIssuerAgent({id, token}) {
   // this is the profile associated with an issuer account
@@ -43,7 +42,9 @@ async function insertIssuerAgent({id, token}) {
     profileId,
     profileContent,
     hmac,
-    keyAgreementKey
+    keyAgreementKey,
+    invocationSigner,
+    profileAgentRecord
   });
   // now that we have an edv for the test
   // we need to delegate read only access to us.
@@ -94,7 +95,9 @@ async function initializeAccessManagement({
   edvId,
   hmac,
   keyAgreementKey,
-  indexes: []
+  indexes: [],
+  invocationSigner,
+  profileAgentRecord
 }) {
   // create access management info
   const accessManagement = {
@@ -107,8 +110,38 @@ async function initializeAccessManagement({
     ],
     zcaps: {}
   };
+  const profileZcaps = {...profileContent.zcaps};
   const capability = `${edvId}/zcaps/documents`;
   accessManagement.edvId = edvId;
+  // TODO this can be accomplished with back end only code
+  const client = new EdvClient(
+    {id: edvId, keyResolver, keyAgreementKey, hmac});
+  for(const index of accessManagement.indexes) {
+    client.ensureIndex(index);
+  }
+  const recipients = [{
+    header: {kid: keyAgreementKey.id, alg: JWE_ALG}
+  }];
+  const profileDocId = await edvHelpers.generateRandom();
+  // TODO this can be accomplished with back end only code
+  const profileUserDoc = new EdvDocument({
+    id: profileDocId, recipients, keyResolver, keyAgreementKey, hmac,
+    capability, invocationSigner, client
+  });
+  const type = ['User', 'Profile'];
+  const profile = {
+    ...profileContent,
+    id: profileId,
+    type,
+    accessManagement,
+    zcaps: profileZcaps
+  };
+  await profileUserDoc.write({
+    doc: {
+      id: profileDocId,
+      content: profile
+    }
+  });
 }
 
 exports.insertIssuerAgent = insertIssuerAgent;
