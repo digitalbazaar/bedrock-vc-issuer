@@ -107,6 +107,8 @@ async function initializeAccessManagement({
     ],
     zcaps: {}
   };
+  const capability = `${edvId}/zcaps/documents`;
+  accessManagement.edvId = edvId;
 }
 
 exports.insertIssuerAgent = insertIssuerAgent;
