@@ -17,6 +17,18 @@ async function keyResolver({id}) {
   return response.data;
 }
 
+function stubPassport(passportStub) {
+  passportStub.callsFake((req, res, next) => {
+    req.user = {
+      account: {},
+      actor: {
+        id: 'theMockControllerId'
+      }
+    };
+    next();
+  });
+}
+
 async function insertIssuerAgent({id, token}) {
   // this is the profile associated with an issuer account
   const {id: profileId} = await profiles.create({accountId: id});
@@ -152,7 +164,7 @@ console.log('wrote document');
       type: 'urn:edv:document'
     }
   };
-console.log('check me', delegateUserEdvDocumentRequest);
 }
 
 exports.insertIssuerAgent = insertIssuerAgent;
+exports.stubPassport = stubPassport;
