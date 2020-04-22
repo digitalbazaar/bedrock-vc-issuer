@@ -29,10 +29,21 @@ async function insertIssuerAgent({id, token}) {
   // creates an edv for the profile-agent-edv-document
   const profileAgentEdvDocument = 'profile-agent-edv-document';
   // this is the userProfileEdv usually created in the wallet.
-  const {edvId} = await createProfileEdv({
+  const {edvId, hmac, keyAgreementKey} = await createProfileEdv({
     profileId,
     referenceId: profileAgentEdvDocument,
     keystoreAgent
+  });
+  const profileContent = {
+    name: 'test-user',
+    type: ['User', 'Person']
+  }
+  const result = await initializeAccessManagement({
+    edvId,
+    profileId,
+    profileContent,
+    hmac,
+    keyAgreementKey
   });
   // now that we have an edv for the test
   // we need to delegate read only access to us.
@@ -79,6 +90,7 @@ async function createProfileEdv({profileId, referenceId, keystoreAgent}) {
 async function initializeAccessManagement({
   profileId,
   profileContent,
+  profileAgentContext = {},
   edvId,
   hmac,
   keyAgreementKey,
