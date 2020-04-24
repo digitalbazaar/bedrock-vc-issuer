@@ -66,7 +66,8 @@ const instancesUpdate = {
         'proof'
       ],
       properties: {
-        '@context': schemas.jsonldContext(constants.CREDENTIALS_CONTEXT_V1_URL),
+        // FIXME: Validate context
+        // '@context': schemas.jsonldContext(constants.CREDENTIALS_CONTEXT_V1_URL),
         type: verifiablePresentationType(),
         holder: {
           $id: '#/properties/presentation/properties/holder',
@@ -99,7 +100,8 @@ const login = {
       type: 'object',
       required: ['@context', 'type', 'holder', 'proof'],
       properties: {
-        '@context': schemas.jsonldContext(constants.CREDENTIALS_CONTEXT_V1_URL),
+        // FIXME: Validate context
+        // '@context': schemas.jsonldContext(constants.CREDENTIALS_CONTEXT_V1_URL),
         type: verifiablePresentationType(),
         holder: {type: 'string'},
         proof: authenticationProof()
