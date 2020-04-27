@@ -1,12 +1,17 @@
 const axios = require('axios');
 const bedrock = require('bedrock');
+const {CapabilityDelegation} = require('ocapld');
 const {httpsAgent} = require('bedrock-https-agent');
 const edvStorage = require('bedrock-edv-storage');
 const edvHelpers = require('bedrock-edv-storage/lib/helpers');
 const {profiles, profileAgents} = require('bedrock-profile');
 const {EdvClient, EdvDocument} = require('edv-client');
+const jsigs = require('jsonld-signatures');
 const {AsymmetricKey} = require('webkms-client');
+
 const {config, util: {uuid}} = bedrock;
+const {SECURITY_CONTEXT_V2_URL, sign, suites} = jsigs;
+const {Ed25519Signature2018} = suites;
 
 const {kmsModule, server: {baseUri}} = config;
 const JWE_ALG = 'ECDH-ES+A256KW';
@@ -27,6 +32,21 @@ function stubPassport(passportStub) {
       }
     };
     next();
+  });
+}
+
+async function delegateCapability({signer, request}) {
+  const zcap = {
+    '@context': SECURITY_CONTEXT_V2_URL,
+    id: `urn:zcap:${await edvHelpers.generateRandom()}`,
+    ...request
+  };
+  const verificationMethod = signer.id;
+  const capabilityChain = [zcap.parentCapability];
+  return sign(zcap, {
+    suite: new Ed25519Signature2018({signer, verificationMethod}),
+    purpose: new CapabilityDelegation({capabilityChain}),
+    compactProof: false
   });
 }
 
@@ -158,7 +178,6 @@ async function initializeAccessManagement({
   // now that we have an edv for the test
   // we need to delegate read only access to us.
   const delegateUserEdvDocumentRequest = {
-    id: `urn:zcap:${await edvHelpers.generateRandom()}`,
     referenceId: profileAgentEdvDocument,
     // the profile agent is only allowed to read its own doc
     allowedAction: ['read'],
