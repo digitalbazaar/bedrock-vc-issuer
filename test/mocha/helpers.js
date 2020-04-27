@@ -123,7 +123,7 @@ async function createProfileEdv({profileId, referenceId, keystoreAgent}) {
 async function initializeAccessManagement({
   profileId,
   profileContent,
-  profileAgentContext = {},
+  profileAgentContent = {},
   edvId,
   hmac,
   keyAgreementKey,
@@ -143,7 +143,10 @@ async function initializeAccessManagement({
     zcaps: {}
   };
   const {profileAgent} = profileAgentRecord;
-  const profileAgentId = profileAgent.id;
+  const {
+    id: profileAgentId,
+    zcaps: profileCapabilityInvocationKey
+  } = profileAgent;
   const profileZcaps = {...profileContent.zcaps};
   const capability = `${edvId}/zcaps/documents`;
   accessManagement.edvId = edvId;
@@ -162,11 +165,10 @@ async function initializeAccessManagement({
     id: profileDocId, recipients, keyResolver, keyAgreementKey, hmac,
     capability, invocationSigner, client
   });
-  const type = ['User', 'Profile'];
   const profile = {
     ...profileContent,
     id: profileId,
-    type,
+    type: ['User', 'Profile'],
     accessManagement,
     zcaps: profileZcaps
   };
@@ -231,6 +233,42 @@ async function initializeAccessManagement({
     {signer: invocationSigner, request: delegateUserHmacRequest});
   const userDocument = await delegateCapability(
     {signer: invocationSigner, request: delegateUserEdvRequest});
+  const userEdvZcaps = [userKak, userHmac, userDocument];
+  const agentDocId = await edvHelpers.generateRandom();
+  const agentDoc = new EdvDocument({
+    id: agentDocId,
+    recipients,
+    keyResolver,
+    keyAgreementKey,
+    hmac,
+    capability,
+    invocationSigner,
+    client
+  });
+  const profileAgentZcaps = {};
+  for(const zcap of userEdvZcaps) {
+    profileAgentZcaps[zcap.referenceId] = zcap;
+  }
+  const profileAgentDocument = {
+    name: 'root',
+    ...profileAgentContent,
+    id: profileAgentId,
+    type: ['User', 'Agent'],
+    zcaps: {
+      [profileCapabilityInvocationKey.referenceId]:
+        profileCapabilityInvocationKey,
+      [profileDocZcap.referenceId]: profileDocZcap,
+      ...profileAgentZcaps
+    },
+    authorizedDate: (new Date()).toISOString()
+  };
+  // TODO do this direct through bedrock-edv-storage
+  await agentDoc.write({
+    doc: {
+      id: agentDocId,
+      content: profileAgentDocument
+    }
+  });
 console.log({userDocument, userKak, userHmac});
 }
 
