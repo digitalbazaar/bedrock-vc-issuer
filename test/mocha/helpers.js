@@ -290,6 +290,7 @@ async function initializeAccessManagement({
   const delegateEdvKakRequest = {
     referenceId: 'user-edv-kak',
     controller: profileAgentId,
+    allowedAction: ['deriveSecret', 'sign'],
     invocationTarget: {
       id: keyAgreementKey.id,
       type: keyAgreementKey.type,
