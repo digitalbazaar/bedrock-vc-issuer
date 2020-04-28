@@ -50,23 +50,29 @@ async function delegateCapability({signer, request}) {
   });
 }
 
+async function getSigners({profileAgentRecord, keystoreAgent}) {
+  const {profileAgent} = profileAgentRecord;
+  const {profileCapabilityInvocationKey} = profileAgent.zcaps;
+  const agentSigner = await profileAgents.getSigner({profileAgentRecord});
+  const profileSigner = new AsymmetricKey({
+    capability: profileCapabilityInvocationKey,
+    invocationSigner: agentSigner,
+    kmsClient: keystoreAgent.kmsClient
+  });
+  return {agentSigner, profileSigner};
+}
+
 async function insertIssuerAgent({id, token}) {
   // this is the profile associated with an issuer account
   const {id: profileId} = await profiles.create({accountId: id});
   const profileAgentRecord = await profileAgents.getByProfile(
     {profileId, accountId: id, includeSecrets: true});
   const {profileAgent, secrets} = profileAgentRecord;
-  // we will need this to delegate and invoke
-  const {capabilityAgent, keystoreAgent} = await profileAgents.getAgents(
+  const {keystoreAgent} = await profileAgents.getAgents(
     {profileAgent, secrets});
-  const agentSigner = await profileAgents.getSigner({profileAgentRecord});
-  const {profileCapabilityInvocationKey} = profileAgent.zcaps;
+  // we will need this to delegate and invoke
   // the profile signer is authorized to sign with the profileAgent's key?
-  const profileSigner = new AsymmetricKey({
-    capability: profileCapabilityInvocationKey,
-    invocationSigner: agentSigner,
-    kmsClient: keystoreAgent.kmsClient
-  });
+  const {profileSigner} = await getSigners({profileAgentRecord, keystoreAgent});
   // creates an edv for the profile-agent-edv-document
   // this is the userProfileEdv usually created in the wallet.
   const {edvId, hmac, keyAgreementKey} = await createProfileEdv({
