@@ -60,8 +60,13 @@ async function delegateEdvZcaps({
   prefix,
   signer
 }) {
+  const references = {
+    doc: `${prefix}-edv-documents`,
+    hmac: `${prefix}-edv-hmac`,
+    kak: `${prefix}-edv-kak`
+  };
   const delegateUserEdvRequest = {
-    referenceId: `${prefix}-edv-documents`,
+    referenceId: references.doc,
     allowedAction: ['read', 'write', 'delegate'],
     controller,
     invocationTarget: {
@@ -71,7 +76,7 @@ async function delegateEdvZcaps({
     parentCapability: capability
   };
   const delegateUserKakRequest = {
-    referenceId: `${prefix}-edv-kak`,
+    referenceId: references.kak,
     allowedAction: ['deriveSecret', 'sign'],
     controller,
     invocationTarget: {
@@ -82,7 +87,7 @@ async function delegateEdvZcaps({
     parentCapability: keyAgreementKey.id
   };
   const delegateUserHmacRequest = {
-    referenceId: `${prefix}-edv-hmac`,
+    referenceId: references.hmac,
     allowedAction: 'sign',
     controller,
     invocationTarget: {
@@ -92,11 +97,14 @@ async function delegateEdvZcaps({
       parentCapability: hmac.id
     }
   };
-  return Promise.all([
-    delegateUserEdvRequest,
-    delegateUserKakRequest,
-    delegateUserHmacRequest
-  ].map(request => delegateCapability({signer, request})));
+  return {
+    [references.doc]: await delegateCapability(
+      {signer, request: delegateUserEdvRequest}),
+    [references.kak]: await delegateCapability(
+      {signer, request: delegateUserKakRequest}),
+    [references.hmac]: await delegateCapability(
+      {signer, request: delegateUserHmacRequest})
+  };
 }
 
 async function getSigners({profileAgentRecord, keystoreAgent}) {
@@ -286,10 +294,7 @@ async function initializeAccessManagement({
     invocationSigner,
     client
   });
-  const profileAgentZcaps = {};
-  for(const zcap of userEdvZcaps) {
-    profileAgentZcaps[zcap.referenceId] = zcap;
-  }
+  const profileAgentZcaps = {...userEdvZcaps};
   const profileAgentDocument = {
     name: 'root',
     ...profileAgentContent,
