@@ -152,10 +152,10 @@ async function insertIssuerAgent({id, token}) {
     signer: profileSigner,
     prefix: 'credential'
   });
-  profileAgent.zcaps = {...profileAgent.zcaps, ...credentialZcaps};
   const profileContent = {
     name: 'test-user',
-    type: ['User', 'Person']
+    type: ['User', 'Person'],
+    zcaps: credentialZcaps
   };
   const result = await initializeAccessManagement({
     edvId,
