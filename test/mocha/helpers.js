@@ -145,8 +145,9 @@ async function initializeAccessManagement({
   const {profileAgent} = profileAgentRecord;
   const {
     id: profileAgentId,
-    zcaps: profileCapabilityInvocationKey
+    zcaps: agentZcaps
   } = profileAgent;
+  const {profileCapabilityInvocationKey} = agentZcaps;
   const profileZcaps = {...profileContent.zcaps};
   const capability = `${edvId}/zcaps/documents`;
   accessManagement.edvId = edvId;
@@ -194,7 +195,6 @@ async function initializeAccessManagement({
   };
   const profileDocZcap = await delegateCapability(
     {signer: invocationSigner, request: delegateUserEdvDocumentRequest});
-  // line 276
   const delegateUserEdvRequest = {
     referenceId: 'user-edv-documents',
     allowedAction: ['read', 'write'],
@@ -269,7 +269,39 @@ async function initializeAccessManagement({
       content: profileAgentDocument
     }
   });
-console.log({userDocument, userKak, userHmac});
+  const delegateEdvDocumentRequest = {
+    referenceId: profileAgentEdvDocument,
+    allowedAction: ['read'],
+    controller: profileAgentId,
+    parentCapability: capability,
+    invocationTarget: {
+      id: `${documentsUrl}/${agentDocId}`,
+      type: 'urn:edv:document'
+    }
+  };
+  const userDocumentZcap = await delegateCapability(
+    {signer: invocationSigner, request: delegateEdvDocumentRequest});
+  const delegateEdvKakRequest = {
+    referenceId: 'user-edv-kak',
+    controller: profileAgentId,
+    invocationTarget: {
+      id: keyAgreementKey.id,
+      type: keyAgreementKey.type,
+      verificationMethod: keyAgreementKey.id
+    },
+    parentCapability: keyAgreementKey.id
+  };
+  const userKakZcap = await delegateCapability(
+    {signer: invocationSigner, request: delegateEdvKakRequest});
+  const agentRecordZcaps = {
+    ...agentZcaps,
+    userDocument: userDocumentZcap,
+    userKak: userKakZcap
+  };
+  profileAgent.sequence++;
+  profileAgent.zcaps = agentRecordZcaps;
+  await profileAgents.update({profileAgent});
+  return {profile, profileAgent};
 }
 
 exports.insertIssuerAgent = insertIssuerAgent;
