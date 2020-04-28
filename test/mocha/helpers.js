@@ -16,6 +16,7 @@ const {Ed25519Signature2018} = suites;
 const {kmsModule, server: {baseUri}} = config;
 const JWE_ALG = 'ECDH-ES+A256KW';
 const profileAgentEdvDocument = 'profile-agent-edv-document';
+const credentialsEdv = 'credentials-edv-document';
 
 async function keyResolver({id}) {
   const headers = {Accept: 'application/ld+json, application/json'};
@@ -50,6 +51,54 @@ async function delegateCapability({signer, request}) {
   });
 }
 
+async function delegateEdvZcaps({
+  controller,
+  documentsUrl,
+  keyAgreementKey,
+  hmac,
+  capability,
+  prefix,
+  signer
+}) {
+  const delegateUserEdvRequest = {
+    referenceId: `${prefix}-edv-documents`,
+    allowedAction: ['read', 'write', 'delegate'],
+    controller,
+    invocationTarget: {
+      invocationTarget: documentsUrl,
+      type: 'urn:edv:documents'
+    },
+    parentCapability: capability
+  };
+  const delegateUserKakRequest = {
+    referenceId: `${prefix}-edv-kak`,
+    allowedAction: ['deriveSecret', 'sign'],
+    controller,
+    invocationTarget: {
+      id: keyAgreementKey.id,
+      type: keyAgreementKey.type,
+      verificationMethod: keyAgreementKey.id
+    },
+    parentCapability: keyAgreementKey.id
+  };
+  const delegateUserHmacRequest = {
+    referenceId: `${prefix}-edv-hmac`,
+    allowedAction: 'sign',
+    controller,
+    invocationTarget: {
+      id: hmac.id,
+      type: hmac.type,
+      verificationMethod: hmac.id,
+      parentCapability: hmac.id
+    }
+  };
+  return Promise.all([
+    delegateUserEdvRequest,
+    delegateUserKakRequest,
+    delegateUserHmacRequest
+  ].map(request => delegateCapability({signer, request})));
+}
+
 async function getSigners({profileAgentRecord, keystoreAgent}) {
   const {profileAgent} = profileAgentRecord;
   const {profileCapabilityInvocationKey} = profileAgent.zcaps;
@@ -62,6 +111,7 @@ async function getSigners({profileAgentRecord, keystoreAgent}) {
   return {agentSigner, profileSigner};
 }
 
+// tests call on this to insert an issuerAgent
 async function insertIssuerAgent({id, token}) {
   // this is the profile associated with an issuer account
   const {id: profileId} = await profiles.create({accountId: id});
@@ -80,6 +130,21 @@ async function insertIssuerAgent({id, token}) {
     referenceId: profileAgentEdvDocument,
     keystoreAgent
   });
+  const credentialEdv = await createProfileEdv({
+    profileId,
+    referenceId: credentialsEdv,
+    keystoreAgent
+  });
+  const credentialZcaps = await delegateEdvZcaps({
+    documentsUrl: `${credentialEdv.edvId}/documents`,
+    capability: `${credentialEdv.edvId}/zcaps/documents`,
+    hmac: credentialEdv.hmac,
+    keyAgreementKey: credentialEdv.keyAgreementKey,
+    controller: profileAgent.id,
+    signer: profileSigner,
+    prefix: 'credential'
+  });
+  profileAgent.zcaps = {...profileAgent.zcaps, ...credentialZcaps};
   const profileContent = {
     name: 'test-user',
     type: ['User', 'Person']
@@ -201,45 +266,15 @@ async function initializeAccessManagement({
   };
   const profileDocZcap = await delegateCapability(
     {signer: invocationSigner, request: delegateUserEdvDocumentRequest});
-  const delegateUserEdvRequest = {
-    referenceId: 'user-edv-documents',
-    allowedAction: ['read', 'write'],
+  const userEdvZcaps = await delegateEdvZcaps({
+    signer: invocationSigner,
     controller: profileAgentId,
-    invocationTarget: {
-      invocationTarget: documentsUrl,
-      type: 'urn:edv:documents'
-    },
-    parentCapability: capability
-  };
-  const delegateUserKakRequest = {
-    referenceId: 'user-edv-kak',
-    allowedAction: ['deriveSecret', 'sign'],
-    controller: profileAgentId,
-    invocationTarget: {
-      id: keyAgreementKey.id,
-      type: keyAgreementKey.type,
-      verificationMethod: keyAgreementKey.id
-    },
-    parentCapability: keyAgreementKey.id
-  };
-  const delegateUserHmacRequest = {
-    referenceId: 'user-edv-hmac',
-    allowedAction: 'sign',
-    controller: profileAgentId,
-    invocationTarget: {
-      id: hmac.id,
-      type: hmac.type,
-      verificationMethod: hmac.id,
-      parentCapability: hmac.id
-    }
-  };
-  const userKak = await delegateCapability(
-    {signer: invocationSigner, request: delegateUserKakRequest});
-  const userHmac = await delegateCapability(
-    {signer: invocationSigner, request: delegateUserHmacRequest});
-  const userDocument = await delegateCapability(
-    {signer: invocationSigner, request: delegateUserEdvRequest});
-  const userEdvZcaps = [userKak, userHmac, userDocument];
+    documentsUrl,
+    hmac,
+    keyAgreementKey,
+    prefix: 'user',
+    capability
+  });
   const agentDocId = await edvHelpers.generateRandom();
   const agentDoc = new EdvDocument({
     id: agentDocId,
