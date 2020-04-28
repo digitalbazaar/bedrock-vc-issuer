@@ -1,28 +1,19 @@
-const axios = require('axios');
 const bedrock = require('bedrock');
-const {CapabilityDelegation} = require('ocapld');
 const {httpsAgent} = require('bedrock-https-agent');
 const edvStorage = require('bedrock-edv-storage');
 const edvHelpers = require('bedrock-edv-storage/lib/helpers');
 const {profiles, profileAgents} = require('bedrock-profile');
+const keyResolver = require('bedrock-profile/lib/keyResolver');
+const {delegateCapability} = require('bedrock-profile/lib/zcaps');
 const {EdvClient, EdvDocument} = require('edv-client');
-const jsigs = require('jsonld-signatures');
 const {AsymmetricKey} = require('webkms-client');
 
-const {config, util: {uuid}} = bedrock;
-const {SECURITY_CONTEXT_V2_URL, sign, suites} = jsigs;
-const {Ed25519Signature2018} = suites;
+const {config} = bedrock;
 
 const {kmsModule, server: {baseUri}} = config;
 const JWE_ALG = 'ECDH-ES+A256KW';
 const profileAgentEdvDocument = 'profile-agent-edv-document';
 const credentialsEdv = 'credentials-edv-document';
-
-async function keyResolver({id}) {
-  const headers = {Accept: 'application/ld+json, application/json'};
-  const response = await axios.get(id, {headers, httpsAgent});
-  return response.data;
-}
 
 function stubPassport(passportStub) {
   passportStub.callsFake((req, res, next) => {
@@ -36,24 +27,10 @@ function stubPassport(passportStub) {
   });
 }
 
-async function delegateCapability({signer, request}) {
-  const zcap = {
-    '@context': SECURITY_CONTEXT_V2_URL,
-    id: `urn:zcap:${await edvHelpers.generateRandom()}`,
-    ...request
-  };
-  const verificationMethod = signer.id;
-  const capabilityChain = [zcap.parentCapability];
-  return sign(zcap, {
-    suite: new Ed25519Signature2018({signer, verificationMethod}),
-    purpose: new CapabilityDelegation({capabilityChain}),
-    compactProof: false
-  });
-}
-
 async function delegateEdvZcaps({
   controller,
   documentsUrl,
+  edvClient,
   keyAgreementKey,
   hmac,
   capability,
@@ -99,11 +76,11 @@ async function delegateEdvZcaps({
   };
   return {
     [references.doc]: await delegateCapability(
-      {signer, request: delegateUserEdvRequest}),
+      {signer, request: delegateUserEdvRequest, edvClient}),
     [references.kak]: await delegateCapability(
-      {signer, request: delegateUserKakRequest}),
+      {signer, request: delegateUserKakRequest, edvClient}),
     [references.hmac]: await delegateCapability(
-      {signer, request: delegateUserHmacRequest})
+      {signer, request: delegateUserHmacRequest, edvClient})
   };
 }
 
@@ -147,15 +124,32 @@ async function insertIssuerAgent({id, token}) {
     documentsUrl: `${credentialEdv.edvId}/documents`,
     capability: `${credentialEdv.edvId}/zcaps/documents`,
     hmac: credentialEdv.hmac,
+    edvClient: {id: edvId},
     keyAgreementKey: credentialEdv.keyAgreementKey,
     controller: profileAgent.id,
     signer: profileSigner,
     prefix: 'credential'
   });
+  const profileZcaps = {
+    // FIXME this is the query not the actual zCap
+    // this is the key used to actually issue a credential
+    'key-assertionMethod': {
+      referenceId: 'key-assertionMethod',
+      revocationReferenceId: 'key-assertionMethod-revocations',
+      // string should match KMS ops
+      allowedAction: 'sign',
+      invoker: profileId,
+      delegator: profileId,
+      invocationTarget: {
+        type: 'Ed25519VerificationKey2018',
+        proofPurpose: 'assertionMethod'
+      }
+    }
+  };
   const profileContent = {
     name: 'test-user',
     type: ['User', 'Person'],
-    zcaps: credentialZcaps
+    zcaps: {...profileZcaps, ...credentialZcaps}
   };
   const result = await initializeAccessManagement({
     edvId,
@@ -272,13 +266,17 @@ async function initializeAccessManagement({
       type: 'urn:edv:document'
     }
   };
-  const profileDocZcap = await delegateCapability(
-    {signer: invocationSigner, request: delegateUserEdvDocumentRequest});
+  const profileDocZcap = await delegateCapability({
+    signer: invocationSigner,
+    edvClient: client,
+    request: delegateUserEdvDocumentRequest
+  });
   const userEdvZcaps = await delegateEdvZcaps({
     signer: invocationSigner,
     controller: profileAgentId,
     documentsUrl,
     hmac,
+    edvClient: client,
     keyAgreementKey,
     prefix: 'user',
     capability
@@ -325,8 +323,11 @@ async function initializeAccessManagement({
       type: 'urn:edv:document'
     }
   };
-  const userDocumentZcap = await delegateCapability(
-    {signer: invocationSigner, request: delegateEdvDocumentRequest});
+  const userDocumentZcap = await delegateCapability({
+    signer: invocationSigner,
+    edvClient: client,
+    request: delegateEdvDocumentRequest
+  });
   const delegateEdvKakRequest = {
     referenceId: 'user-edv-kak',
     controller: profileAgentId,
@@ -338,8 +339,11 @@ async function initializeAccessManagement({
     },
     parentCapability: keyAgreementKey.id
   };
-  const userKakZcap = await delegateCapability(
-    {signer: invocationSigner, request: delegateEdvKakRequest});
+  const userKakZcap = await delegateCapability({
+    signer: invocationSigner,
+    edvClient: client,
+    request: delegateEdvKakRequest
+  });
   const agentRecordZcaps = {
     ...agentZcaps,
     userDocument: userDocumentZcap,
