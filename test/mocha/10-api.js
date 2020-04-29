@@ -40,7 +40,7 @@ describe('issue POST endpoint', function() {
     const {integration: {secrets}} = agents;
     const credential = {};
     const {token} = secrets;
-    return api.post(
+    const result = await api.post(
       '/issue',
       {credential},
       {headers: {Authorization: `Bearer ${token}`}}
