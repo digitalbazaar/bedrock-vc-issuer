@@ -37,8 +37,8 @@
     "jsonld-signatures": "^5.0.0",
     "lru-cache": "^5.1.1",
     "ocapld": "^2.0.0",
-    "vc-js": "^0.5.0",
-    "vc-revocation-list": "github:digitalbazaar/vc-revocation-list#master",
+    "vc-js": "^0.6.0",
+    "vc-revocation-list": "^1.0.0",
     "webkms-client": "^2.0.1"
   },
   "peerDependencies": {
