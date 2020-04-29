@@ -105,8 +105,8 @@ async function delegateEdvZcaps({
       id: hmac.id,
       type: hmac.type,
       verificationMethod: hmac.id,
-      parentCapability: hmac.id
-    }
+    },
+    parentCapability: hmac.id
   };
   return {
     [references.doc]: await delegateCapability(
@@ -270,7 +270,8 @@ async function insertIssuerAgent({id, token}) {
     revocationReferenceId: 'key-assertionMethod-revocations',
     // string should match KMS ops
     allowedAction: 'sign',
-    invoker: issuerAgent.id,
+    controller: profileId,
+    parentCapability: profileZcaps['key-assertionMethod'],
     invocationTarget: {
       id: issuerKey.id,
       type: issuerKey.type,
