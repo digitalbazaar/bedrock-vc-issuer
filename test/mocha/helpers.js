@@ -99,7 +99,7 @@ async function delegateEdvZcaps({
   };
   const delegateUserHmacRequest = {
     referenceId: references.hmac,
-    allowedAction: 'sign',
+    allowedAction: ['deriveSecret', 'sign'],
     controller,
     invocationTarget: {
       id: hmac.id,
@@ -187,7 +187,7 @@ async function insertIssuerAgent({id, token}) {
     {profileAgent, secrets});
   // we will need this to delegate and invoke
   // the profile signer is authorized to sign with the profileAgent's key?
-  const {profileSigner} = await getSigners({profileAgentRecord, keystoreAgent});
+  const {profileSigner, agentSigner} = await getSigners({profileAgentRecord, keystoreAgent});
   // creates an edv for the profile-agent-edv-document
   // this is the userProfileEdv usually created in the wallet.
   const {edvId, hmac, keyAgreementKey} = await createProfileEdv({
