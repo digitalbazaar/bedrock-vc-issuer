@@ -5,8 +5,15 @@ const edvHelpers = require('bedrock-edv-storage/lib/helpers');
 const {profiles, profileAgents} = require('bedrock-profile');
 const keyResolver = require('bedrock-profile/lib/keyResolver');
 const {delegateCapability} = require('bedrock-profile/lib/zcaps');
+const kms = require('bedrock-profile/lib/kms');
+const {Ed25519KeyPair} = require('crypto-ld');
 const {EdvClient, EdvDocument} = require('edv-client');
-const {AsymmetricKey} = require('webkms-client');
+const {
+  AsymmetricKey,
+  CapabilityAgent,
+  KeystoreAgent,
+  KmsClient
+} = require('webkms-client');
 
 const {config} = bedrock;
 
@@ -25,6 +32,33 @@ function stubPassport(passportStub) {
     };
     next();
   });
+}
+// FIXME: this copied from bedrock-web-profile-manager-utils
+function deriveKeystoreId(id) {
+  const urlObj = new URL(id);
+  const paths = urlObj.pathname.split('/');
+  return urlObj.origin +
+    '/' +
+    paths[1] + // "kms"
+    '/' +
+    paths[2] + // "keystores"
+    '/' +
+    paths[3]; // "<keystore_id>"
+}
+
+async function createIssuerKey({signer, type}) {
+  const {capability: keystoreZcap} = signer;
+  const id = deriveKeystoreId(keystoreZcap.invocationTarget.id);
+  const keystore = await kms.getKeystore({id});
+  const capabilityAgent = new CapabilityAgent({handle: 'primary', signer});
+  const kmsClient = new KmsClient({keystore, httpsAgent});
+  const keystoreAgent = new KeystoreAgent(
+    {keystore, capabilityAgent, kmsClient});
+  const key = await keystoreAgent.generateKey({type, kmsModule});
+  const keyDescription = await key.getKeyDescription();
+  const fingerprint = Ed25519KeyPair.fingerprintFromPublicKey(keyDescription);
+  const verificationMethod = `did:key:${fingerprint}#${fingerprint}`;
+  return {key, kmsClient, verificationMethod};
 }
 
 async function delegateEdvZcaps({
@@ -130,21 +164,29 @@ async function insertIssuerAgent({id, token}) {
     signer: profileSigner,
     prefix: 'credential'
   });
-  const profileZcaps = {
-    // FIXME this is the query not the actual zCap
-    // this is the key used to actually issue a credential
-    'key-assertionMethod': {
-      referenceId: 'key-assertionMethod',
-      revocationReferenceId: 'key-assertionMethod-revocations',
-      // string should match KMS ops
-      allowedAction: 'sign',
-      invoker: profileId,
-      delegator: profileId,
-      invocationTarget: {
-        type: 'Ed25519VerificationKey2018',
-        proofPurpose: 'assertionMethod'
-      }
+  const {key: issuerKey, kmsClient, verificationMethod} = await createIssuerKey(
+    {signer: profileSigner, type: 'Ed25519VerificationKey2018'});
+  const issuerKeyRequest = {
+    referenceId: 'key-assertionMethod',
+    revocationReferenceId: 'key-assertionMethod-revocations',
+    // string should match KMS ops
+    allowedAction: 'sign',
+    invoker: profileId,
+    delegator: profileId,
+    invocationTarget: {
+      id: issuerKey.id,
+      type: issuerKey.type,
+      verificationMethod,
+      parentCapability: issuerKey.id
     }
+  };
+  const profileZcaps = {
+    // this is the key used to actually issue a credential
+    // this might be the wrong place to delegate this
+    'key-assertionMethod': await delegateCapability({
+      signer: profileSigner,
+      request: issuerKeyRequest,
+      kmsClient})
   };
   const profileContent = {
     name: 'test-user',
