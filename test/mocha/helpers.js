@@ -254,6 +254,44 @@ async function insertIssuerAgent({id, token}) {
   const integration = await profileAgents.create(
     {profileId, token});
   const {profileAgent: issuerAgent} = integration;
+  // delegate the credential zcaps to the issuer
+  const credentialIssuerZcaps = await delegateEdvZcaps({
+    documentsUrl: `${credentialEdv.edvId}/documents`,
+    capability: `${credentialEdv.edvId}/zcaps/documents`,
+    hmac: credentialEdv.hmac,
+    edvClient: {id: edvId},
+    keyAgreementKey: credentialEdv.keyAgreementKey,
+    controller: issuerAgent.id,
+    signer: profileSigner,
+    prefix: 'credential'
+  });
+  const assertionKeyRequest = {
+    referenceId: 'key-assertionMethod',
+    revocationReferenceId: 'key-assertionMethod-revocations',
+    // string should match KMS ops
+    allowedAction: 'sign',
+    invoker: issuerAgent.id,
+    invocationTarget: {
+      id: issuerKey.id,
+      type: issuerKey.type,
+      verificationMethod,
+      parentCapability: issuerKey.id
+    }
+  };
+  const issuerZcaps = {
+    // this is the key used to actually issue a credential
+    // this might be the wrong place to delegate this
+    'key-assertionMethod': await delegateCapability({
+      signer: profileSigner,
+      request: assertionKeyRequest,
+      kmsClient})
+  };
+  const issuerContent = {
+    name: 'test-issuer',
+    // FIXME what is the type of the issuerContent?
+    type: ['User', 'Person'],
+    zcaps: {...credentialIssuerZcaps, ...issuerZcaps}
+  };
   const issuerDocId = await edvHelpers.generateRandom();
   const capability = `${edvId}/zcaps/documents`;
   const documentsUrl = `${edvId}/documents`;
