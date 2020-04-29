@@ -286,6 +286,8 @@ async function insertIssuerAgent({id, token}) {
       request: assertionKeyRequest,
       kmsClient})
   };
+  const capability = `${edvId}/zcaps/documents`;
+  const documentsUrl = `${edvId}/documents`;
   const issuerContent = {
     name: 'test-issuer',
     // FIXME what is the type of the issuerContent?
@@ -293,8 +295,31 @@ async function insertIssuerAgent({id, token}) {
     zcaps: {...credentialIssuerZcaps, ...issuerZcaps}
   };
   const issuerDocId = await edvHelpers.generateRandom();
-  const capability = `${edvId}/zcaps/documents`;
-  const documentsUrl = `${edvId}/documents`;
+  const issuerDoc = new EdvDocument({
+    id: issuerDocId,
+    recipients: result.recipients,
+    keyResolver,
+    keyAgreementKey,
+    hmac,
+    capability,
+    invocationSigner: profileSigner,
+    client: result.client
+  });
+  const issuerDocument = {
+    name: 'root',
+    ...issuerContent,
+    id: issuerAgent.id,
+    type: ['User', 'Agent'],
+    zcaps: {...issuerAgent.zcaps, ...issuerContent.zcaps},
+    authorizedDate: (new Date()).toISOString()
+  };
+  await issuerDoc.write({
+    doc: {
+      id: issuerDocId,
+      content: issuerDocument
+    }
+  });
+
   // create a new document in the parent profile's user edv.
   // delegate access to the integration
   // puts all the keys it needs into the userDocument
@@ -499,7 +524,7 @@ async function initializeAccessManagement({
   profileAgent.sequence++;
   profileAgent.zcaps = agentRecordZcaps;
   await profileAgents.update({profileAgent});
-  return {profile, profileAgent, client};
+  return {profile, profileAgent, client, recipients};
 }
 
 exports.insertIssuerAgent = insertIssuerAgent;
