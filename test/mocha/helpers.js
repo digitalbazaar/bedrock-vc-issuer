@@ -118,6 +118,52 @@ async function delegateEdvZcaps({
   };
 }
 
+async function delegateEdvDocument({
+  profileAgentId,
+  capability,
+  client,
+  docId,
+  keyAgreementKey,
+  documentsUrl,
+  invocationSigner
+}) {
+  const delegateEdvDocumentRequest = {
+    referenceId: profileAgentEdvDocument,
+    allowedAction: ['read'],
+    controller: profileAgentId,
+    parentCapability: capability,
+    invocationTarget: {
+      id: `${documentsUrl}/${docId}`,
+      type: 'urn:edv:document'
+    }
+  };
+  const userDocumentZcap = await delegateCapability({
+    signer: invocationSigner,
+    edvClient: client,
+    request: delegateEdvDocumentRequest
+  });
+  const delegateEdvKakRequest = {
+    referenceId: 'user-edv-kak',
+    controller: profileAgentId,
+    allowedAction: ['deriveSecret', 'sign'],
+    invocationTarget: {
+      id: keyAgreementKey.id,
+      type: keyAgreementKey.type,
+      verificationMethod: keyAgreementKey.id
+    },
+    parentCapability: keyAgreementKey.id
+  };
+  const userKakZcap = await delegateCapability({
+    signer: invocationSigner,
+    edvClient: client,
+    request: delegateEdvKakRequest
+  });
+  return {
+    userKak: userKakZcap,
+    userDocument: userDocumentZcap
+  };
+}
+
 async function getSigners({profileAgentRecord, keystoreAgent}) {
   const {profileAgent} = profileAgentRecord;
   const {profileCapabilityInvocationKey} = profileAgent.zcaps;
@@ -205,7 +251,28 @@ async function insertIssuerAgent({id, token}) {
 
   // this is the profileAgent created for an issuer instance integration
   // it is used to issue a credential.
-  const integration = await profileAgents.create({profileId, token});
+  const integration = await profileAgents.create(
+    {profileId, token});
+  const {profileAgent: issuerAgent} = integration;
+  const issuerDocId = await edvHelpers.generateRandom();
+  const capability = `${edvId}/zcaps/documents`;
+  const documentsUrl = `${edvId}/documents`;
+  // create a new document in the parent profile's user edv.
+  // delegate access to the integration
+  // puts all the keys it needs into the userDocument
+  // remember to add a user Kak
+  const issuerCaps = await delegateEdvDocument({
+    profileAgentId: issuerAgent.id,
+    capability,
+    client: result.client,
+    docId: issuerDocId,
+    keyAgreementKey,
+    documentsUrl,
+    invocationSigner: profileSigner
+  });
+  issuerAgent.sequence++;
+  issuerAgent.zcaps = {...issuerAgent.zcaps, ...issuerCaps};
+  await profileAgents.update({profileAgent: issuerAgent});
   return {instance: {id: profileId}, integration};
 }
 
@@ -394,7 +461,7 @@ async function initializeAccessManagement({
   profileAgent.sequence++;
   profileAgent.zcaps = agentRecordZcaps;
   await profileAgents.update({profileAgent});
-  return {profile, profileAgent};
+  return {profile, profileAgent, client};
 }
 
 exports.insertIssuerAgent = insertIssuerAgent;
