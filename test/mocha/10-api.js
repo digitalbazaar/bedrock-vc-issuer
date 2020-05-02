@@ -38,7 +38,7 @@ describe('issue POST endpoint', function() {
   });
   it('should issue a credential', async function() {
     const {integration: {secrets}} = agents;
-    const credential = {};
+    const credential = helpers.cloneCredential();
     const {token} = secrets;
     const result = await api.post(
       '/issue',

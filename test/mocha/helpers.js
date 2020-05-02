@@ -8,6 +8,7 @@ const {delegateCapability} = require('bedrock-profile/lib/zcaps');
 const kms = require('bedrock-profile/lib/kms');
 const {Ed25519KeyPair} = require('crypto-ld');
 const {EdvClient, EdvDocument} = require('edv-client');
+const credential = require('./credential.json');
 const {
   AsymmetricKey,
   CapabilityAgent,
@@ -21,6 +22,11 @@ const {kmsModule, server: {baseUri}} = config;
 const JWE_ALG = 'ECDH-ES+A256KW';
 const profileAgentEdvDocument = 'profile-agent-edv-document';
 const credentialsEdv = 'credentials-edv-document';
+
+//ensure each test has a fresh credential
+function cloneCredential() {
+  return JSON.parse(JSON.stringify(credential));
+}
 
 function stubPassport(passportStub) {
   passportStub.callsFake((req, res, next) => {
@@ -528,5 +534,6 @@ async function initializeAccessManagement({
   return {profile, profileAgent, client, recipients};
 }
 
+exports.cloneCredential = cloneCredential;
 exports.insertIssuerAgent = insertIssuerAgent;
 exports.stubPassport = stubPassport;
