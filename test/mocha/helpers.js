@@ -13,6 +13,7 @@ const {
   AsymmetricKey,
   CapabilityAgent,
   KeystoreAgent,
+  KeyAgreementKey,
   KmsClient
 } = require('webkms-client');
 
@@ -29,8 +30,39 @@ function cloneCredential() {
   return JSON.parse(JSON.stringify(credential));
 }
 
-async function getAgent({profileId, accountId}) {
-
+async function getAgentContent({profileId, accountId}) {
+  const profileAgentRecord = await profileAgents.getByProfile(
+    {accountId, profileId, includeSecrets: true});
+  const agentSigner = await profileAgents.getSigner({profileAgentRecord});
+  const {profileAgent} = profileAgentRecord;
+  const {userDocument: capability, userKak} = profileAgent.zcaps;
+  const kmsClient = new KmsClient({httpsAgent});
+  const edvDocument = new EdvDocument({
+    capability,
+    client: new EdvClient({httpsAgent}),
+    keyAgreementKey: new KeyAgreementKey({
+      id: userKak.invocationTarget.id,
+      type: userKak.invocationTarget.type,
+      capability: userKak,
+      invocationSigner: agentSigner,
+      kmsClient
+    }),
+    invocationSigner: agentSigner
+  });
+  try {
+    const {content} = await edvDocument.read();
+  } catch(e) {
+    console.error(e);
+    console.log({userKak});
+    process.exit();
+  }
+  for(const zcap of Object.values(profileAgent.zcaps)) {
+    const {referenceId} = zcap;
+    if(!content.zcaps[referenceId]) {
+      content.zcaps[referenceId] = zcap;
+    }
+  }
+  return content;
 }
 
 // this is supposed to emulate accessManager's createUser function
@@ -54,9 +86,9 @@ async function createUser({
   const {zcaps = {}} = content;
   if(!zcaps['profile-edv-document']) {
 console.log('NO PROFILE EDV DOC SPECIFIED');
+     const agent = await getAgentContent(
+       {profileId: profile.id, accountId: profile.account});
     // needs a profileId and accountId
-    const {profileAgent: agent} = await profileAgents.getByProfile(
-      {accountId: profile.account, profileId: profile.id});
 console.log('agent', agent);
     const profileDocCapability = agent.zcaps['profile-edv-document'];
 console.log({profileDocCapability});
