@@ -33,10 +33,23 @@ function cloneCredential() {
 async function getAgentContent({profileId, accountId}) {
   const profileAgentRecord = await profileAgents.getByProfile(
     {accountId, profileId, includeSecrets: true});
-  const agentSigner = await profileAgents.getSigner({profileAgentRecord});
-  const {profileAgent} = profileAgentRecord;
-  const {userDocument: capability, userKak} = profileAgent.zcaps;
+  const {profileAgent, secrets} = profileAgentRecord;
+  const {keystoreAgent} = await profileAgents.getAgents(
+    {profileAgent, secrets});
+  const {profileSigner} = await getSigners(
+    {profileAgentRecord, keystoreAgent});
+  const ca = await CapabilityAgent.fromSecret(
+    {handle: 'primary', secret: secrets.seed});
+  const invoker = ca.id.split('#')[0];
+  const zcap = await profileAgents.delegateCapabilityInvocationKey(
+    {profileAgent, invoker, secrets});
   const kmsClient = new KmsClient({httpsAgent});
+  const agentSigner = new AsymmetricKey({
+    capability: zcap,
+    invocationSigner: ca.getSigner(),
+    kmsClient
+  });
+  const {userDocument: capability, userKak} = profileAgent.zcaps;
   const edvDocument = new EdvDocument({
     capability,
     client: new EdvClient({httpsAgent}),
@@ -44,16 +57,18 @@ async function getAgentContent({profileId, accountId}) {
       id: userKak.invocationTarget.id,
       type: userKak.invocationTarget.type,
       capability: userKak,
-      invocationSigner: agentSigner,
+      invocationSigner: profileSigner,
       kmsClient
     }),
     invocationSigner: agentSigner
   });
+  let content = null;
   try {
-    const {content} = await edvDocument.read();
+    ({content} = await edvDocument.read());
   } catch(e) {
-    console.error(e);
-    console.log({userKak});
+console.log('getAgentContent read doc failed');
+    //console.error(e.response);
+    //console.log({userKak});
     process.exit();
   }
   for(const zcap of Object.values(profileAgent.zcaps)) {
@@ -92,7 +107,6 @@ console.log('NO PROFILE EDV DOC SPECIFIED');
 console.log('agent', agent);
     const profileDocCapability = agent.zcaps['profile-edv-document'];
 console.log({profileDocCapability});
-process.exit();
   }
   
 }
