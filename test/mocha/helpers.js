@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) 2020 Digital Bazaar, Inc. All rights reserved.
+ */
+'use strict';
+
 const bedrock = require('bedrock');
 const {httpsAgent} = require('bedrock-https-agent');
 const edvStorage = require('bedrock-edv-storage');
