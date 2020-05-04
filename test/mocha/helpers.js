@@ -28,6 +28,31 @@ function cloneCredential() {
   return JSON.parse(JSON.stringify(credential));
 }
 
+// this is supposed to emulate accessManager's createUser function
+async function createUser({
+  content = {},
+  token,
+  profile,
+  invocationSigner
+}) {
+  const integration = await profileAgents.create(
+    {profileId: profile.id, token});
+  const {profileAgent} = integration;
+  const {accessManagement} = profile;
+  let edvParentCapability;
+  if(accessManagement.zcaps.write) {
+    edvParentCapability = profile.zcaps[accessManagement.zcaps.write];
+  } else {
+    // default capability to root zcap
+    edvParentCapability = `${accessManagement.edvId}/zcaps/documents`;
+  }
+  const {zcaps = {}} = content;
+  if(!zcaps['profile-edv-document']) {
+    // needs a profileId and accountId
+    const agent = await profileAgents.getByProfile(profile);
+  }
+}
+
 function stubPassport(passportStub) {
   passportStub.callsFake((req, res, next) => {
     req.user = {
@@ -124,9 +149,9 @@ async function delegateEdvZcaps({
   };
 }
 
-async function delegateEdvDocument({
+async function delegateAgentRecordZcaps({
   profileAgentId,
-  capability,
+  edvParentCapability,
   client,
   docId,
   keyAgreementKey,
@@ -137,7 +162,7 @@ async function delegateEdvDocument({
     referenceId: profileAgentEdvDocument,
     allowedAction: ['read'],
     controller: profileAgentId,
-    parentCapability: capability,
+    parentCapability: edvParentCapability,
     invocationTarget: {
       id: `${documentsUrl}/${docId}`,
       type: 'urn:edv:document'
@@ -331,9 +356,9 @@ async function insertIssuerAgent({id, token}) {
   // delegate access to the integration
   // puts all the keys it needs into the userDocument
   // remember to add a user Kak
-  const issuerCaps = await delegateEdvDocument({
+  const issuerCaps = await delegateAgentRecordZcaps({
     profileAgentId: issuerAgent.id,
-    capability,
+    edvParentCapability: capability,
     client: result.client,
     docId: issuerDocId,
     keyAgreementKey,
