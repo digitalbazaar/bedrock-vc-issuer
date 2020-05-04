@@ -21,11 +21,16 @@ const {config} = bedrock;
 const {kmsModule, server: {baseUri}} = config;
 const JWE_ALG = 'ECDH-ES+A256KW';
 const profileAgentEdvDocument = 'profile-agent-edv-document';
+const profileEdvDocument = 'profile-edv-document';
 const credentialsEdv = 'credentials-edv-document';
 
 //ensure each test has a fresh credential
 function cloneCredential() {
   return JSON.parse(JSON.stringify(credential));
+}
+
+async function getAgent({profileId, accountId}) {
+
 }
 
 // this is supposed to emulate accessManager's createUser function
@@ -48,9 +53,16 @@ async function createUser({
   }
   const {zcaps = {}} = content;
   if(!zcaps['profile-edv-document']) {
+console.log('NO PROFILE EDV DOC SPECIFIED');
     // needs a profileId and accountId
-    const agent = await profileAgents.getByProfile(profile);
+    const {profileAgent: agent} = await profileAgents.getByProfile(
+      {accountId: profile.account, profileId: profile.id});
+console.log('agent', agent);
+    const profileDocCapability = agent.zcaps['profile-edv-document'];
+console.log({profileDocCapability});
+process.exit();
   }
+  
 }
 
 function stubPassport(passportStub) {
@@ -279,9 +291,14 @@ async function insertIssuerAgent({id, token}) {
     invocationSigner: profileSigner,
     profileAgentRecord
   });
-
+  result.profile.account = id;
   // this is the profileAgent created for an issuer instance integration
   // it is used to issue a credential.
+  const _integration = await createUser({
+    token,
+    profile: result.profile,
+    invocationSigner: profileSigner
+  });
   const integration = await profileAgents.create(
     {profileId, token});
   const {profileAgent: issuerAgent} = integration;
@@ -460,10 +477,10 @@ async function initializeAccessManagement({
   // now that we have an edv for the test
   // we need to delegate read only access to us.
   const delegateUserEdvDocumentRequest = {
-    referenceId: profileAgentEdvDocument,
+    referenceId: profileEdvDocument,
     // the profile agent is only allowed to read its own doc
     allowedAction: ['read'],
-    controller: profileId,
+    controller: profileAgentId,
     parentCapability: capability,
     invocationTarget: {
       id: `${documentsUrl}/${profileDocId}`,
