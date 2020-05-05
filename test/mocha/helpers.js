@@ -90,35 +90,108 @@ console.log('getAgentContent read doc failed');
 
 // this is supposed to emulate accessManager's createUser function
 async function createUser({
-  content = {},
   token,
   profile,
-  invocationSigner
+  recipients,
+  client,
+  keyAgreementKey,
+  hmac,
+  profileZcaps,
+  invocationSigner,
+  profileId,
+  credentialEdv,
+  issuerKey,
+  verificationMethod,
+  edvId
 }) {
   const integration = await profileAgents.create(
     {profileId: profile.id, token});
-  const {profileAgent} = integration;
-  const {accessManagement} = profile;
-  let edvParentCapability;
-  if(accessManagement.zcaps.write) {
-    edvParentCapability = profile.zcaps[accessManagement.zcaps.write];
-  } else {
-    // default capability to root zcap
-    edvParentCapability = `${accessManagement.edvId}/zcaps/documents`;
-  }
-  const {zcaps = {}} = content;
-  if(!zcaps['profile-edv-document']) {
-console.log('NO PROFILE EDV DOC SPECIFIED');
-     const agent = await getAgentContent(
-       {profileId: profile.id, accountId: profile.account});
-    // needs a profileId and accountId
-console.log('agent', agent);
-    const profileDocCapability = agent.zcaps['profile-edv-document'];
-console.log({profileDocCapability});
-  }
-  
-}
+  const {profileAgent: issuerAgent} = integration;
+  // delegate the credential zcaps to the issuer
+  const credentialIssuerZcaps = await delegateEdvZcaps({
+    documentsUrl: `${credentialEdv.edvId}/documents`,
+    capability: `${credentialEdv.edvId}/zcaps/documents`,
+    hmac: credentialEdv.hmac,
+    edvClient: {id: edvId},
+    keyAgreementKey: credentialEdv.keyAgreementKey,
+    controller: issuerAgent.id,
+    signer: invocationSigner,
+    prefix: 'credential'
+  });
+  const assertionKeyRequest = {
+    referenceId: 'key-assertionMethod',
+    revocationReferenceId: 'key-assertionMethod-revocations',
+    // string should match KMS ops
+    allowedAction: 'sign',
+    controller: profileId,
+    parentCapability: profileZcaps['key-assertionMethod'],
+    invocationTarget: {
+      id: issuerKey.id,
+      type: issuerKey.type,
+      verificationMethod,
+      parentCapability: issuerKey.id
+    }
+  };
+  const issuerZcaps = {
+    // this is the key used to actually issue a credential
+    // this might be the wrong place to delegate this
+    'key-assertionMethod': await delegateCapability({
+      signer: invocationSigner,
+      request: assertionKeyRequest,
+      kmsClient: new KmsClient({httpsAgent})})
+  };
+  const capability = `${edvId}/zcaps/documents`;
+  const documentsUrl = `${edvId}/documents`;
+  const issuerContent = {
+    name: 'test-issuer',
+    // FIXME what is the type of the issuerContent?
+    type: ['User', 'Person'],
+    zcaps: {...credentialIssuerZcaps, ...issuerZcaps}
+  };
+  const issuerDocId = await edvHelpers.generateRandom();
+  const issuerDoc = new EdvDocument({
+    id: issuerDocId,
+    recipients,
+    keyResolver,
+    keyAgreementKey,
+    hmac,
+    capability,
+    invocationSigner,
+    client
+  });
+  const issuerDocument = {
+    name: 'root',
+    ...issuerContent,
+    id: issuerAgent.id,
+    type: ['User', 'Agent'],
+    zcaps: {...issuerAgent.zcaps, ...issuerContent.zcaps},
+    authorizedDate: (new Date()).toISOString()
+  };
+  await issuerDoc.write({
+    doc: {
+      id: issuerDocId,
+      content: issuerDocument
+    }
+  });
 
+  // create a new document in the parent profile's user edv.
+  // delegate access to the integration
+  // puts all the keys it needs into the userDocument
+  // remember to add a user Kak
+  const issuerCaps = await delegateAgentRecordZcaps({
+    profileAgentId: issuerAgent.id,
+    edvParentCapability: capability,
+    client,
+    docId: issuerDocId,
+    keyAgreementKey,
+    documentsUrl,
+    invocationSigner
+  });
+  issuerAgent.sequence++;
+  issuerAgent.zcaps = {...issuerAgent.zcaps, ...issuerCaps};
+  await profileAgents.update({profileAgent: issuerAgent});
+  return integration;
+}
 
 async function createIssuerKey({signer, type}) {
   const {capability} = signer;
@@ -327,105 +400,24 @@ async function insertIssuerAgent({id, token}) {
     profileContent,
     hmac,
     keyAgreementKey,
-    agentSigner,
+    invocationSigner: profileSigner,
     profileAgentRecord
   });
   result.profile.account = id;
   // this is the profileAgent created for an issuer instance integration
   // it is used to issue a credential.
-/**
-  const _integration = await createUser({
+  const integration = await createUser({
     token,
-    profile: result.profile,
-    invocationSigner: agentSigner
-  });
-*/
-  const integration = await profileAgents.create(
-    {profileId, token});
-  const {profileAgent: issuerAgent} = integration;
-  // delegate the credential zcaps to the issuer
-  const credentialIssuerZcaps = await delegateEdvZcaps({
-    documentsUrl: `${credentialEdv.edvId}/documents`,
-    capability: `${credentialEdv.edvId}/zcaps/documents`,
-    hmac: credentialEdv.hmac,
-    edvClient: {id: edvId},
-    keyAgreementKey: credentialEdv.keyAgreementKey,
-    controller: issuerAgent.id,
-    signer: agentSigner,
-    prefix: 'credential'
-  });
-  const assertionKeyRequest = {
-    referenceId: 'key-assertionMethod',
-    revocationReferenceId: 'key-assertionMethod-revocations',
-    // string should match KMS ops
-    allowedAction: 'sign',
-    controller: profileId,
-    parentCapability: profileZcaps['key-assertionMethod'],
-    invocationTarget: {
-      id: issuerKey.id,
-      type: issuerKey.type,
-      verificationMethod,
-      parentCapability: issuerKey.id
-    }
-  };
-  const issuerZcaps = {
-    // this is the key used to actually issue a credential
-    // this might be the wrong place to delegate this
-    'key-assertionMethod': await delegateCapability({
-      signer: agentSigner,
-      request: assertionKeyRequest,
-      kmsClient})
-  };
-  const capability = `${edvId}/zcaps/documents`;
-  const documentsUrl = `${edvId}/documents`;
-  const issuerContent = {
-    name: 'test-issuer',
-    // FIXME what is the type of the issuerContent?
-    type: ['User', 'Person'],
-    zcaps: {...credentialIssuerZcaps, ...issuerZcaps}
-  };
-  const issuerDocId = await edvHelpers.generateRandom();
-  const issuerDoc = new EdvDocument({
-    id: issuerDocId,
-    recipients: result.recipients,
-    keyResolver,
-    keyAgreementKey,
     hmac,
-    capability,
-    invocationSigner: profileSigner,
-    client: result.client
-  });
-  const issuerDocument = {
-    name: 'root',
-    ...issuerContent,
-    id: issuerAgent.id,
-    type: ['User', 'Agent'],
-    zcaps: {...issuerAgent.zcaps, ...issuerContent.zcaps},
-    authorizedDate: (new Date()).toISOString()
-  };
-  await issuerDoc.write({
-    doc: {
-      id: issuerDocId,
-      content: issuerDocument
-    }
-  });
-
-  // create a new document in the parent profile's user edv.
-  // delegate access to the integration
-  // puts all the keys it needs into the userDocument
-  // remember to add a user Kak
-  const issuerCaps = await delegateAgentRecordZcaps({
-    profileAgentId: issuerAgent.id,
-    edvParentCapability: capability,
-    client: result.client,
-    docId: issuerDocId,
     keyAgreementKey,
-    documentsUrl,
-    invocationSigner: profileSigner
+    profileZcaps,
+    credentialEdv,
+    issuerKey,
+    edvId,
+    verificationMethod,
+    invocationSigner: profileSigner,
+    ...result
   });
-  issuerAgent.sequence++;
-  issuerAgent.zcaps = {...issuerAgent.zcaps, ...issuerCaps};
-  await profileAgents.update({profileAgent: issuerAgent});
   return {instance: {id: profileId}, integration};
 }
 
@@ -463,7 +455,7 @@ async function initializeAccessManagement({
   hmac,
   keyAgreementKey,
   indexes = [],
-  agentSigner,
+  invocationSigner,
   profileAgentRecord
 }) {
   // create access management info
@@ -484,11 +476,6 @@ async function initializeAccessManagement({
     zcaps: agentZcaps
   } = profileAgent;
   const {profileCapabilityInvocationKey} = agentZcaps;
-  const invocationSigner = new AsymmetricKey({
-    capability: profileCapabilityInvocationKey,
-    invocationSigner: agentSigner,
-    kmsClient: new KmsClient({httpsAgent})
-  });
   const profileZcaps = {...profileContent.zcaps};
   const capability = `${edvId}/zcaps/documents`;
   accessManagement.edvId = edvId;
