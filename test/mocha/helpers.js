@@ -43,19 +43,19 @@ async function delegateSigner({profileAgentRecord}) {
   const zcap = await profileAgents.delegateCapabilityInvocationKey(
     {profileAgent, invoker, secrets});
   const kmsClient = new KmsClient({httpsAgent});
-  const agentSigner = new AsymmetricKey({
+  const rootSigner = new AsymmetricKey({
     capability: zcap,
     invocationSigner: ca.getSigner(),
     kmsClient
   });
-  return agentSigner;
+  return rootSigner;
 }
 
 async function getAgentContent({profileId, accountId}) {
   const profileAgentRecord = await profileAgents.getByProfile(
     {accountId, profileId, includeSecrets: true});
   const {profileAgent} = profileAgentRecord;
-  const {profileSigner} = await getSigners(
+  const {profileSigner, agentSigner} = await getSigners(
     {profileAgentRecord});
   const {userDocument: capability, userKak} = profileAgent.zcaps;
   const edvDocument = new EdvDocument({
@@ -65,10 +65,10 @@ async function getAgentContent({profileId, accountId}) {
       id: userKak.invocationTarget.id,
       type: userKak.invocationTarget.type,
       capability: userKak,
-      invocationSigner: profileSigner,
+      invocationSigner: agentSigner,
       kmsClient: new KmsClient({httpsAgent})
     }),
-    invocationSigner: profileSigner
+    invocationSigner: agentSigner
   });
   let content = null;
   try {
@@ -247,11 +247,13 @@ async function delegateAgentRecordZcaps({
 async function getSigners({profileAgentRecord}) {
   const {profileAgent} = profileAgentRecord;
   const {profileCapabilityInvocationKey} = profileAgent.zcaps;
-  const agentSigner = await profileAgents.getSigner({profileAgentRecord});
+  const agentSigner = await delegateSigner({profileAgentRecord});
   const profileSigner = new AsymmetricKey({
     capability: profileCapabilityInvocationKey,
     invocationSigner: agentSigner,
-    kmsClient: new KmsClient({httpsAgent})
+    kmsClient: new KmsClient({httpsAgent}),
+    kmsId: profileCapabilityInvocationKey.parentCapability,
+    type: profileCapabilityInvocationKey.invocationTarget.type
   });
   return {agentSigner, profileSigner};
 }
@@ -331,11 +333,13 @@ async function insertIssuerAgent({id, token}) {
   result.profile.account = id;
   // this is the profileAgent created for an issuer instance integration
   // it is used to issue a credential.
+/**
   const _integration = await createUser({
     token,
     profile: result.profile,
     invocationSigner: agentSigner
   });
+*/
   const integration = await profileAgents.create(
     {profileId, token});
   const {profileAgent: issuerAgent} = integration;
@@ -388,7 +392,7 @@ async function insertIssuerAgent({id, token}) {
     keyAgreementKey,
     hmac,
     capability,
-    invocationSigner: agentSigner,
+    invocationSigner: profileSigner,
     client: result.client
   });
   const issuerDocument = {
@@ -417,7 +421,7 @@ async function insertIssuerAgent({id, token}) {
     docId: issuerDocId,
     keyAgreementKey,
     documentsUrl,
-    invocationSigner: agentSigner
+    invocationSigner: profileSigner
   });
   issuerAgent.sequence++;
   issuerAgent.zcaps = {...issuerAgent.zcaps, ...issuerCaps};
