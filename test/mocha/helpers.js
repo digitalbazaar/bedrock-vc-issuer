@@ -35,14 +35,8 @@ function cloneCredential() {
   return JSON.parse(JSON.stringify(credential));
 }
 
-async function getAgentContent({profileId, accountId}) {
-  const profileAgentRecord = await profileAgents.getByProfile(
-    {accountId, profileId, includeSecrets: true});
+async function delegateSigner({profileAgentRecord}) {
   const {profileAgent, secrets} = profileAgentRecord;
-  const {keystoreAgent} = await profileAgents.getAgents(
-    {profileAgent, secrets});
-  const {profileSigner} = await getSigners(
-    {profileAgentRecord, keystoreAgent});
   const ca = await CapabilityAgent.fromSecret(
     {handle: 'primary', secret: secrets.seed});
   const invoker = ca.id.split('#')[0];
@@ -54,6 +48,15 @@ async function getAgentContent({profileId, accountId}) {
     invocationSigner: ca.getSigner(),
     kmsClient
   });
+  return agentSigner;
+}
+
+async function getAgentContent({profileId, accountId}) {
+  const profileAgentRecord = await profileAgents.getByProfile(
+    {accountId, profileId, includeSecrets: true});
+  const {profileAgent} = profileAgentRecord;
+  const {profileSigner} = await getSigners(
+    {profileAgentRecord});
   const {userDocument: capability, userKak} = profileAgent.zcaps;
   const edvDocument = new EdvDocument({
     capability,
@@ -63,9 +66,9 @@ async function getAgentContent({profileId, accountId}) {
       type: userKak.invocationTarget.type,
       capability: userKak,
       invocationSigner: profileSigner,
-      kmsClient
+      kmsClient: new KmsClient({httpsAgent})
     }),
-    invocationSigner: agentSigner
+    invocationSigner: profileSigner
   });
   let content = null;
   try {
@@ -116,34 +119,17 @@ console.log({profileDocCapability});
   
 }
 
-function stubPassport(passportStub) {
-  passportStub.callsFake((req, res, next) => {
-    req.user = {
-      account: {},
-      actor: {
-        id: 'theMockControllerId'
-      }
-    };
-    next();
-  });
-}
-// FIXME: this copied from bedrock-web-profile-manager-utils
-function deriveKeystoreId(id) {
-  const urlObj = new URL(id);
-  const paths = urlObj.pathname.split('/');
-  return urlObj.origin +
-    '/' +
-    paths[1] + // "kms"
-    '/' +
-    paths[2] + // "keystores"
-    '/' +
-    paths[3]; // "<keystore_id>"
-}
 
 async function createIssuerKey({signer, type}) {
-  const {capability: keystoreZcap} = signer;
-  const id = deriveKeystoreId(keystoreZcap.invocationTarget.id);
-  const keystore = await kms.getKeystore({id});
+  const {capability} = signer;
+  let keystore;
+  if(capability) {
+    const id = deriveKeystoreId(capability.invocationTarget.id);
+    keystore = await kms.getKeystore({id});
+  } else {
+    const id = signer.kmsClient.keystore;
+    keystore = await kms.getKeystore({id});
+  }
   const capabilityAgent = new CapabilityAgent({handle: 'primary', signer});
   const kmsClient = new KmsClient({keystore, httpsAgent});
   const keystoreAgent = new KeystoreAgent(
@@ -258,14 +244,14 @@ async function delegateAgentRecordZcaps({
   };
 }
 
-async function getSigners({profileAgentRecord, keystoreAgent}) {
+async function getSigners({profileAgentRecord}) {
   const {profileAgent} = profileAgentRecord;
   const {profileCapabilityInvocationKey} = profileAgent.zcaps;
   const agentSigner = await profileAgents.getSigner({profileAgentRecord});
   const profileSigner = new AsymmetricKey({
     capability: profileCapabilityInvocationKey,
     invocationSigner: agentSigner,
-    kmsClient: keystoreAgent.kmsClient
+    kmsClient: new KmsClient({httpsAgent})
   });
   return {agentSigner, profileSigner};
 }
@@ -281,7 +267,7 @@ async function insertIssuerAgent({id, token}) {
     {profileAgent, secrets});
   // we will need this to delegate and invoke
   // the profile signer is authorized to sign with the profileAgent's key?
-  const {profileSigner} = await getSigners({profileAgentRecord, keystoreAgent});
+  const {agentSigner, profileSigner} = await getSigners({profileAgentRecord});
   // creates an edv for the profile-agent-edv-document
   // this is the userProfileEdv usually created in the wallet.
   const {edvId, hmac, keyAgreementKey} = await createProfileEdv({
@@ -301,7 +287,7 @@ async function insertIssuerAgent({id, token}) {
     edvClient: {id: edvId},
     keyAgreementKey: credentialEdv.keyAgreementKey,
     controller: profileAgent.id,
-    signer: profileSigner,
+    signer: agentSigner,
     prefix: 'credential'
   });
   const {key: issuerKey, kmsClient, verificationMethod} = await createIssuerKey(
@@ -324,7 +310,7 @@ async function insertIssuerAgent({id, token}) {
     // this is the key used to actually issue a credential
     // this might be the wrong place to delegate this
     'key-assertionMethod': await delegateCapability({
-      signer: profileSigner,
+      signer: agentSigner,
       request: issuerKeyRequest,
       kmsClient})
   };
@@ -348,7 +334,7 @@ async function insertIssuerAgent({id, token}) {
   const _integration = await createUser({
     token,
     profile: result.profile,
-    invocationSigner: profileSigner
+    invocationSigner: agentSigner
   });
   const integration = await profileAgents.create(
     {profileId, token});
@@ -361,7 +347,7 @@ async function insertIssuerAgent({id, token}) {
     edvClient: {id: edvId},
     keyAgreementKey: credentialEdv.keyAgreementKey,
     controller: issuerAgent.id,
-    signer: profileSigner,
+    signer: agentSigner,
     prefix: 'credential'
   });
   const assertionKeyRequest = {
@@ -382,7 +368,7 @@ async function insertIssuerAgent({id, token}) {
     // this is the key used to actually issue a credential
     // this might be the wrong place to delegate this
     'key-assertionMethod': await delegateCapability({
-      signer: profileSigner,
+      signer: agentSigner,
       request: assertionKeyRequest,
       kmsClient})
   };
@@ -402,7 +388,7 @@ async function insertIssuerAgent({id, token}) {
     keyAgreementKey,
     hmac,
     capability,
-    invocationSigner: profileSigner,
+    invocationSigner: agentSigner,
     client: result.client
   });
   const issuerDocument = {
@@ -431,7 +417,7 @@ async function insertIssuerAgent({id, token}) {
     docId: issuerDocId,
     keyAgreementKey,
     documentsUrl,
-    invocationSigner: profileSigner
+    invocationSigner: agentSigner
   });
   issuerAgent.sequence++;
   issuerAgent.zcaps = {...issuerAgent.zcaps, ...issuerCaps};
@@ -625,6 +611,31 @@ async function initializeAccessManagement({
   profileAgent.zcaps = agentRecordZcaps;
   await profileAgents.update({profileAgent});
   return {profile, profileAgent, client, recipients};
+}
+
+function stubPassport(passportStub) {
+  passportStub.callsFake((req, res, next) => {
+    req.user = {
+      account: {},
+      actor: {
+        id: 'theMockControllerId'
+      }
+    };
+    next();
+  });
+}
+
+// FIXME: this copied from bedrock-web-profile-manager-utils
+function deriveKeystoreId(id) {
+  const urlObj = new URL(id);
+  const paths = urlObj.pathname.split('/');
+  return urlObj.origin +
+    '/' +
+    paths[1] + // "kms"
+    '/' +
+    paths[2] + // "keystores"
+    '/' +
+    paths[3]; // "<keystore_id>"
 }
 
 exports.cloneCredential = cloneCredential;
