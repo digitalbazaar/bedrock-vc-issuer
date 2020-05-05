@@ -325,7 +325,7 @@ async function insertIssuerAgent({id, token}) {
     profileContent,
     hmac,
     keyAgreementKey,
-    invocationSigner: profileSigner,
+    agentSigner,
     profileAgentRecord
   });
   result.profile.account = id;
@@ -459,7 +459,7 @@ async function initializeAccessManagement({
   hmac,
   keyAgreementKey,
   indexes = [],
-  invocationSigner,
+  agentSigner,
   profileAgentRecord
 }) {
   // create access management info
@@ -476,9 +476,15 @@ async function initializeAccessManagement({
   const {profileAgent} = profileAgentRecord;
   const {
     id: profileAgentId,
+    // FIXME ensure profileCapabilityInvocationKey is removed
     zcaps: agentZcaps
   } = profileAgent;
   const {profileCapabilityInvocationKey} = agentZcaps;
+  const invocationSigner = new AsymmetricKey({
+    capability: profileCapabilityInvocationKey,
+    invocationSigner: agentSigner,
+    kmsClient: new KmsClient({httpsAgent})
+  });
   const profileZcaps = {...profileContent.zcaps};
   const capability = `${edvId}/zcaps/documents`;
   accessManagement.edvId = edvId;
