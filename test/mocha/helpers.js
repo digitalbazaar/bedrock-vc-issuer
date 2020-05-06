@@ -122,7 +122,7 @@ async function createUser({
     documentsUrl: `${credentialEdv.edvId}/documents`,
     capability: `${credentialEdv.edvId}/zcaps/documents`,
     hmac: credentialEdv.hmac,
-    edvClient: {id: edvId},
+    edvClient: credentialEdv,
     keyAgreementKey: credentialEdv.keyAgreementKey,
     controller: issuerAgent.id,
     signer: invocationSigner,
