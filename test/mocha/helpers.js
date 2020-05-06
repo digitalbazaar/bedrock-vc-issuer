@@ -51,6 +51,16 @@ async function delegateSigner({profileAgentRecord}) {
   return rootSigner;
 }
 
+async function getProfileKeystoreAgent({profileSigner}) {
+  const {capability: zcap} = profileSigner;
+  const keystoreId = deriveKeystoreId(zcap.invocationTarget.id);
+  const keystore = await KmsClient.getKeystore({id: keystoreId, httpsAgent});
+  const capabilityAgent = new CapabilityAgent(
+    {handle: 'primary', signer: profileSigner});
+  const kmsClient = new KmsClient({httpsAgent});
+  return new KeystoreAgent({keystore, capabilityAgent, kmsClient});
+}
+
 async function getAgentContent({profileId, accountId}) {
   const profileAgentRecord = await profileAgents.getByProfile(
     {accountId, profileId, includeSecrets: true});
@@ -128,8 +138,7 @@ async function createUser({
     invocationTarget: {
       id: issuerKey.id,
       type: issuerKey.type,
-      verificationMethod,
-      parentCapability: issuerKey.id
+      verificationMethod
     }
   };
   const issuerZcaps = {
@@ -337,12 +346,11 @@ async function insertIssuerAgent({id, token}) {
   const {id: profileId} = await profiles.create({accountId: id});
   const profileAgentRecord = await profileAgents.getByProfile(
     {profileId, accountId: id, includeSecrets: true});
-  const {profileAgent, secrets} = profileAgentRecord;
-  const {keystoreAgent} = await profileAgents.getAgents(
-    {profileAgent, secrets});
+  const {profileAgent} = profileAgentRecord;
   // we will need this to delegate and invoke
   // the profile signer is authorized to sign with the profileAgent's key?
   const {agentSigner, profileSigner} = await getSigners({profileAgentRecord});
+  const keystoreAgent = await getProfileKeystoreAgent({profileSigner});
   // creates an edv for the profile-agent-edv-document
   // this is the userProfileEdv usually created in the wallet.
   const {edvId, hmac, keyAgreementKey} = await createProfileEdv({
