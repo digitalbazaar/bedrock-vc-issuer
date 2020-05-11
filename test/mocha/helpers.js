@@ -18,7 +18,6 @@ const {
   AsymmetricKey,
   CapabilityAgent,
   KeystoreAgent,
-  KeyAgreementKey,
   KmsClient
 } = require('webkms-client');
 
@@ -61,43 +60,6 @@ async function getProfileKeystoreAgent({profileSigner}) {
   return new KeystoreAgent({keystore, capabilityAgent, kmsClient});
 }
 
-async function getAgentContent({profileId, accountId}) {
-  const profileAgentRecord = await profileAgents.getByProfile(
-    {accountId, profileId, includeSecrets: true});
-  const {profileAgent} = profileAgentRecord;
-  const {profileSigner, agentSigner} = await getSigners(
-    {profileAgentRecord});
-  const {userDocument: capability, userKak} = profileAgent.zcaps;
-  const edvDocument = new EdvDocument({
-    capability,
-    client: new EdvClient({httpsAgent}),
-    keyAgreementKey: new KeyAgreementKey({
-      id: userKak.invocationTarget.id,
-      type: userKak.invocationTarget.type,
-      capability: userKak,
-      invocationSigner: agentSigner,
-      kmsClient: new KmsClient({httpsAgent})
-    }),
-    invocationSigner: agentSigner
-  });
-  let content = null;
-  try {
-    ({content} = await edvDocument.read());
-  } catch(e) {
-console.log('getAgentContent read doc failed');
-    //console.error(e.response);
-    //console.log({userKak});
-    process.exit();
-  }
-  for(const zcap of Object.values(profileAgent.zcaps)) {
-    const {referenceId} = zcap;
-    if(!content.zcaps[referenceId]) {
-      content.zcaps[referenceId] = zcap;
-    }
-  }
-  return content;
-}
-
 // this is supposed to emulate accessManager's createUser function
 async function createUser({
   token,
@@ -122,7 +84,7 @@ async function createUser({
     documentsUrl: `${credentialEdv.edvId}/documents`,
     capability: `${credentialEdv.edvId}/zcaps/documents`,
     hmac: credentialEdv.hmac,
-    edvClient: credentialEdv,
+    edvClient: credentialEdv.edvClient,
     keyAgreementKey: credentialEdv.keyAgreementKey,
     controller: issuerAgent.id,
     signer: invocationSigner,
@@ -450,7 +412,9 @@ async function createProfileEdv({profileId, referenceId, keystoreAgent}) {
     hmac: {id: hmac.id, type: hmac.type}
   };
   const result = await edvStorage.insertConfig({actor: null, config});
-  return {keyAgreementKey, hmac, config: result, edvId};
+  const edvClient = new EdvClient(
+    {httpsAgent, id: edvId, keyResolver, keyAgreementKey, hmac});
+  return {keyAgreementKey, hmac, config: result, edvId, edvClient};
 }
 
 // this will create the user edv and store
