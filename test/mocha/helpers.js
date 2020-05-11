@@ -70,7 +70,6 @@ async function createUser({
   hmac,
   profileZcaps,
   invocationSigner,
-  profileId,
   credentialEdv,
   issuerKey,
   verificationMethod,
@@ -95,7 +94,7 @@ async function createUser({
     revocationReferenceId: 'key-assertionMethod-revocations',
     // string should match KMS ops
     allowedAction: 'sign',
-    controller: profileId,
+    controller: issuerAgent.id,
     parentCapability: profileZcaps['key-assertionMethod'],
     invocationTarget: {
       id: issuerKey.id,
@@ -134,7 +133,7 @@ async function createUser({
     name: 'root',
     ...issuerContent,
     id: issuerAgent.id,
-    type: ['User', 'Agent'],
+    type: ['Application'],
     zcaps: {...issuerAgent.zcaps, ...issuerContent.zcaps},
     authorizedDate: (new Date()).toISOString()
   };
@@ -164,20 +163,18 @@ async function createUser({
   return integration;
 }
 
-async function createIssuerKey({signer, type}) {
-  const {capability} = signer;
+async function createIssuerKey({profileSigner, type}) {
+  const {capability} = profileSigner;
   let keystore;
   if(capability) {
     const id = deriveKeystoreId(capability.invocationTarget.id);
     keystore = await kms.getKeystore({id});
   } else {
-    const id = signer.kmsClient.keystore;
+    const id = profileSigner.kmsClient.keystore;
     keystore = await kms.getKeystore({id});
   }
-  const capabilityAgent = new CapabilityAgent({handle: 'primary', signer});
   const kmsClient = new KmsClient({keystore, httpsAgent});
-  const keystoreAgent = new KeystoreAgent(
-    {keystore, capabilityAgent, kmsClient});
+  const keystoreAgent = await getProfileKeystoreAgent({profileSigner});
   const key = await keystoreAgent.generateKey({type, kmsModule});
   const keyDescription = await key.getKeyDescription();
   const fingerprint = Ed25519KeyPair.fingerprintFromPublicKey(keyDescription);
@@ -336,7 +333,7 @@ async function insertIssuerAgent({id, token}) {
     prefix: 'credential'
   });
   const {key: issuerKey, kmsClient, verificationMethod} = await createIssuerKey(
-    {signer: profileSigner, type: 'Ed25519VerificationKey2018'});
+    {profileSigner, type: 'Ed25519VerificationKey2018'});
   const issuerKeyRequest = {
     referenceId: 'key-assertionMethod',
     revocationReferenceId: 'key-assertionMethod-revocations',
