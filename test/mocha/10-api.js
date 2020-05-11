@@ -13,7 +13,7 @@ const brPassport = require('bedrock-passport');
 const api = create({
   baseURL: `${config.server.baseUri}/vc-issuer`,
   httpsAgent,
-  timeout: 1000,
+  timeout: 10000,
 });
 
 describe('issue POST endpoint', function() {
