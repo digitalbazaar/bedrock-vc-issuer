@@ -9,7 +9,7 @@ const edvStorage = require('bedrock-edv-storage');
 const edvHelpers = require('bedrock-edv-storage/lib/helpers');
 const {profiles, profileAgents} = require('bedrock-profile');
 const keyResolver = require('bedrock-profile/lib/keyResolver');
-const {delegateCapability} = require('bedrock-profile/lib/zcaps');
+const {delegateCapability, delegate} = require('bedrock-profile/lib/zcaps');
 const kms = require('bedrock-profile/lib/kms');
 const {Ed25519KeyPair} = require('crypto-ld');
 const {EdvClient, EdvDocument} = require('edv-client');
@@ -90,8 +90,8 @@ async function createUser({
     prefix: 'credential'
   });
   const assertionKeyRequest = {
+    '@context': 'https://w3id.org/security/v2',
     referenceId: 'key-assertionMethod',
-    revocationReferenceId: 'key-assertionMethod-revocations',
     // string should match KMS ops
     allowedAction: 'sign',
     controller: issuerAgent.id,
@@ -105,10 +105,11 @@ async function createUser({
   const issuerZcaps = {
     // this is the key used to actually issue a credential
     // this might be the wrong place to delegate this
-    'key-assertionMethod': await delegateCapability({
+    'key-assertionMethod': await delegate({
       signer: invocationSigner,
-      request: assertionKeyRequest,
-      kmsClient: new KmsClient({httpsAgent})})
+      zcap: assertionKeyRequest,
+      capabilityChain: [issuerKey.id, profileZcaps['key-assertionMethod']]
+    })
   };
   const capability = `${edvId}/zcaps/documents`;
   const documentsUrl = `${edvId}/documents`;
