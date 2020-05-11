@@ -91,6 +91,7 @@ async function createUser({
   });
   const assertionKeyRequest = {
     '@context': 'https://w3id.org/security/v2',
+    id: `urn:zcaap:${await edvHelpers.generateRandom()}`,
     referenceId: 'key-assertionMethod',
     // string should match KMS ops
     allowedAction: 'sign',
