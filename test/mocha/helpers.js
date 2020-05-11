@@ -339,8 +339,8 @@ async function insertIssuerAgent({id, token}) {
     revocationReferenceId: 'key-assertionMethod-revocations',
     // string should match KMS ops
     allowedAction: 'sign',
-    invoker: profileId,
-    delegator: profileId,
+    controller: profileId,
+    parentCapability: issuerKey.id,
     invocationTarget: {
       id: issuerKey.id,
       type: issuerKey.type,
@@ -352,7 +352,7 @@ async function insertIssuerAgent({id, token}) {
     // this is the key used to actually issue a credential
     // this might be the wrong place to delegate this
     'key-assertionMethod': await delegateCapability({
-      signer: agentSigner,
+      signer: profileSigner,
       request: issuerKeyRequest,
       kmsClient})
   };
