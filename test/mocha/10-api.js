@@ -65,7 +65,7 @@ describe.skip('API', () => {
         result.data.type.should.equal('NotAllowedError');
       });
     }); // end unauthenticated
-    describe('authenticated', () => {
+    describe.skip('authenticated', () => {
       let passportStub;
       before(() => {
         passportStub = sinon.stub(brPassport, 'optionallyAuthenticated');
@@ -103,7 +103,7 @@ describe.skip('API', () => {
     }); // end authenticated
   }); // end instances GET
 
-  describe('instances POST endpoint', () => {
+  describe.skip('instances POST endpoint', () => {
     describe('unauthenticated', () => {
       it('returns NotAllowedError', async () => {
         const result = await api.post('/instances', {foo: 'bar'});
@@ -114,7 +114,7 @@ describe.skip('API', () => {
         result.data.type.should.equal('NotAllowedError');
       });
     }); // end unauthenticated
-    describe('authenticated', () => {
+    describe.skip('authenticated', () => {
       let passportStub;
       before(() => {
         passportStub = sinon.stub(brPassport, 'optionallyAuthenticated');
