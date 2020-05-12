@@ -18,22 +18,7 @@ const api = create({
 
 describe('issue POST endpoint', function() {
   let agents;
-  let passportStub, authenticationStub;
-  before(() => {
-    passportStub = sinon.stub(brPassport, 'optionallyAuthenticated');
-    authenticationStub = sinon.stub(brPassport, 'ensureAuthenticated');
-    helpers.stubPassport(passportStub);
-    helpers.stubPassport(authenticationStub);
-  });
-  after(() => {
-    // TODO just so you know sinon continues to call
-    // the fake function even if you call restore
-    passportStub.restore();
-    authenticationStub.restore();
-  });
-
   beforeEach(async function() {
-    // FIXME id should be a valid account id
     const accountId = 'urn:uuid:e9b57b37-2fea-43d6-82cb-f4a02c144e38';
     agents = await helpers.insertIssuerAgent(
       {id: accountId, token: 'test-token'});
