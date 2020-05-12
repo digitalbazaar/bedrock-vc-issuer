@@ -48,6 +48,22 @@ describe('issue POST endpoint', function() {
       {headers: {Authorization: `Bearer ${token}`}}
     );
     result.status.should.equal(200);
+    should.exist(result.data);
+    result.data.should.be.an('object');
+    should.exist(result.data.verifiableCredential);
+    const {verifiableCredential} = result.data;
+    verifiableCredential.should.be.an('object');
+    should.exist(verifiableCredential['@context']);
+    should.exist(verifiableCredential.id);
+    should.exist(verifiableCredential.type);
+    should.exist(verifiableCredential.issuer);
+    should.exist(verifiableCredential.issuanceDate);
+    should.exist(verifiableCredential.expirationDate);
+    should.exist(verifiableCredential.credentialSubject);
+    verifiableCredential.credentialSubject.should.be.an('object');
+    should.exist(verifiableCredential.credentialStatus);
+    should.exist(verifiableCredential.proof);
+    verifiableCredential.proof.should.be.an('object');
   });
 });
 
