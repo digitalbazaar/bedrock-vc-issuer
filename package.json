@@ -53,7 +53,7 @@
     "bedrock-jsonld-document-loader": "^1.0.1",
     "bedrock-passport": "5.x",
     "bedrock-permission": "^2.5.4",
-    "bedrock-profile": "digitalbazaar/bedrock-profile#support-v1",
+    "bedrock-profile": "^4.2.0",
     "bedrock-mongodb": "6.x",
     "bedrock-security-context": "^3.0.0",
     "bedrock-server": "^2.6.0",
