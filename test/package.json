@@ -32,6 +32,8 @@
     "bedrock-test": "^5.2.0",
     "bedrock-validation": "^4.3.0",
     "bedrock-ssm-mongodb": "^2.0.1",
+    "bedrock-test": "^5.1.0",
+    "bedrock-validation": "^4.2.0",
     "bedrock-vc-issuer": "file:..",
     "bedrock-vc-revocation-list-context": "^1.0.0",
     "bedrock-web-profile-manager": "^4.1.0",
