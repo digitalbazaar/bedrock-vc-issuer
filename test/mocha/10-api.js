@@ -47,7 +47,7 @@ describe('issue POST endpoint', function() {
       {credential},
       {headers: {Authorization: `Bearer ${token}`}}
     );
-console.log('RESULT', result);
+    result.status.should.equal(200);
   });
 });
 
