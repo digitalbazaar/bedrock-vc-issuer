@@ -96,7 +96,7 @@ async function createUser({
     // string should match KMS ops
     allowedAction: 'sign',
     controller: issuerAgent.id,
-    parentCapability: profileZcaps['key-assertionMethod'],
+    parentCapability: profileZcaps['key-assertionMethod'].id,
     invocationTarget: {
       id: issuerKey.id,
       type: issuerKey.type,
@@ -105,7 +105,6 @@ async function createUser({
   };
   const issuerZcaps = {
     // this is the key used to actually issue a credential
-    // this might be the wrong place to delegate this
     'key-assertionMethod': await delegate({
       signer: invocationSigner,
       zcap: assertionKeyRequest,
@@ -341,18 +340,17 @@ async function insertIssuerAgent({id, token}) {
     revocationReferenceId: 'key-assertionMethod-revocations',
     // string should match KMS ops
     allowedAction: 'sign',
-    controller: profileId,
+    invoker: profileId,
+    delegator: profileId,
     parentCapability: issuerKey.id,
     invocationTarget: {
       id: issuerKey.id,
       type: issuerKey.type,
       verificationMethod,
-      parentCapability: issuerKey.id
     }
   };
   const profileZcaps = {
     // this is the key used to actually issue a credential
-    // this might be the wrong place to delegate this
     'key-assertionMethod': await delegateCapability({
       signer: profileSigner,
       request: issuerKeyRequest,
