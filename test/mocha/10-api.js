@@ -16,45 +16,45 @@ const api = create({
   timeout: 10000,
 });
 
-describe('issue POST endpoint', function() {
-  let agents;
-  beforeEach(async function() {
-    const accountId = 'urn:uuid:e9b57b37-2fea-43d6-82cb-f4a02c144e38';
-    agents = await helpers.insertIssuerAgent(
-      {id: accountId, token: 'test-token'});
-  });
-  it('should issue a credential', async function() {
-    const {integration: {secrets}} = agents;
-    const credential = helpers.cloneCredential();
-    const {token} = secrets;
-    const result = await api.post(
-      '/issue',
-      {credential},
-      {headers: {Authorization: `Bearer ${token}`}}
-    );
-    result.status.should.equal(200);
-    should.exist(result.data);
-    result.data.should.be.an('object');
-    should.exist(result.data.verifiableCredential);
-    const {verifiableCredential} = result.data;
-    verifiableCredential.should.be.an('object');
-    should.exist(verifiableCredential['@context']);
-    should.exist(verifiableCredential.id);
-    should.exist(verifiableCredential.type);
-    should.exist(verifiableCredential.issuer);
-    should.exist(verifiableCredential.issuanceDate);
-    should.exist(verifiableCredential.expirationDate);
-    should.exist(verifiableCredential.credentialSubject);
-    verifiableCredential.credentialSubject.should.be.an('object');
-    should.exist(verifiableCredential.credentialStatus);
-    should.exist(verifiableCredential.proof);
-    verifiableCredential.proof.should.be.an('object');
-  });
-});
-
 // FIXME: tests need to be updated to use new endpoints
-describe.skip('API', () => {
-  describe('instances GET endpoint', () => {
+describe('API', function() {
+  describe('issue POST endpoint', function() {
+    let agents;
+    beforeEach(async function() {
+      const accountId = 'urn:uuid:e9b57b37-2fea-43d6-82cb-f4a02c144e38';
+      agents = await helpers.insertIssuerAgent(
+        {id: accountId, token: 'test-token'});
+    });
+    it('should issue a credential', async function() {
+      const {integration: {secrets}} = agents;
+      const credential = helpers.cloneCredential();
+      const {token} = secrets;
+      const result = await api.post(
+        '/issue',
+        {credential},
+        {headers: {Authorization: `Bearer ${token}`}}
+      );
+      result.status.should.equal(200);
+      should.exist(result.data);
+      result.data.should.be.an('object');
+      should.exist(result.data.verifiableCredential);
+      const {verifiableCredential} = result.data;
+      verifiableCredential.should.be.an('object');
+      should.exist(verifiableCredential['@context']);
+      should.exist(verifiableCredential.id);
+      should.exist(verifiableCredential.type);
+      should.exist(verifiableCredential.issuer);
+      should.exist(verifiableCredential.issuanceDate);
+      should.exist(verifiableCredential.expirationDate);
+      should.exist(verifiableCredential.credentialSubject);
+      verifiableCredential.credentialSubject.should.be.an('object');
+      should.exist(verifiableCredential.credentialStatus);
+      should.exist(verifiableCredential.proof);
+      verifiableCredential.proof.should.be.an('object');
+    });
+  });
+
+  describe.skip('instances GET endpoint', () => {
     describe('unauthenticated', () => {
       it('returns NotAllowedError', async () => {
         const result = await api.get('/instances');
