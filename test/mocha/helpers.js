@@ -340,8 +340,7 @@ async function insertIssuerAgent({id, token}) {
     revocationReferenceId: 'key-assertionMethod-revocations',
     // string should match KMS ops
     allowedAction: 'sign',
-    invoker: profileId,
-    delegator: profileId,
+    controller: profileId,
     parentCapability: issuerKey.id,
     invocationTarget: {
       id: issuerKey.id,
