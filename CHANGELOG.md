@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 3.1.0 - 2020-05-18
+
+### Changed
+- Add support for `did:v1` resolution.
+
 ## 3.0.0 - 2020-04-09
 
 ### Changed
