@@ -8,6 +8,7 @@ const {create} = require('apisauce');
 const {httpsAgent} = require('bedrock-https-agent');
 const helpers = require('./helpers.js');
 const sinon = require('sinon');
+const Runner = require('mocha/lib/runner');
 const brPassport = require('bedrock-passport');
 
 const api = create({
@@ -19,11 +20,15 @@ const api = create({
 // FIXME: tests need to be updated to use new endpoints
 describe('API', function() {
   describe('issue POST endpoint', function() {
-    let agents;
+    let agents, runnerStub;
     beforeEach(async function() {
       const accountId = 'urn:uuid:e9b57b37-2fea-43d6-82cb-f4a02c144e38';
       agents = await helpers.insertIssuerAgent(
         {id: accountId, token: 'test-token'});
+      // this gets around the bug in github actions where it
+      // throws on uncaughtEnd
+      runnerStub = sinon.stub(Runner.prototype, 'uncaughtEnd');
+      runnerStub.returns(true);
     });
     it('should issue a credential', async function() {
       const {integration: {secrets}} = agents;
