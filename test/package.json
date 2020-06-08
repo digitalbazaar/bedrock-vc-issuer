@@ -39,6 +39,7 @@
     "bedrock-web-profile-manager": "^4.1.0",
     "bedrock-zcap-storage": "digitalbazaar/bedrock-zcap-storage#mongo-version-3",
     "cross-env": "^7.0.2",
+    "mocha": "^7.2.0",
     "nyc": "^15.0.1",
     "sinon": "^9.0.2"
   },
