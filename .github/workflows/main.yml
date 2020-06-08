@@ -7,12 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mongodb:
-        image: mongo:3.6
+        image: mongo:4.2
         ports:
           - 27017:27017
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [10.x, 12.x, 14.x]
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mongodb:
-        image: mongo:3.6
+        image: mongo:4.2
         ports:
           - 27017:27017
     strategy:
