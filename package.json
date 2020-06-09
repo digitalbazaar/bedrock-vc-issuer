@@ -46,20 +46,20 @@
   },
   "peerDependencies": {
     "bedrock": "3.x",
-    "bedrock-account": "^2.3.0",
+    "bedrock-account": "^3.0.0",
     "bedrock-credentials-context": "^1.0.0",
     "bedrock-express": "3.x",
     "bedrock-https-agent": "^1.0.1",
     "bedrock-jsonld-document-loader": "^1.0.1",
     "bedrock-passport": "5.x",
-    "bedrock-permission": "^2.6.0",
-    "bedrock-profile": "^4.3.0",
+    "bedrock-permission": "^3.0.0",
+    "bedrock-profile": "^5.0.0",
     "bedrock-mongodb": "^7.0.0",
     "bedrock-security-context": "^3.0.0",
     "bedrock-server": "^2.6.0",
     "bedrock-validation": "^4.4.0",
     "bedrock-vc-revocation-list-context": "^1.0.0",
-    "bedrock-zcap-storage": "^2.1.0"
+    "bedrock-zcap-storage": "^3.0.0"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
