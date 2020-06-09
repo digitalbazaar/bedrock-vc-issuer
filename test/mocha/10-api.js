@@ -32,6 +32,13 @@ describe('API', function() {
         sinon.stub(Runner.prototype, '_uncaught').returns(true);
       }
     });
+    after(function(done) {
+      console.log('WAITING 2 SECONDS TO FINISH TEST.');
+      const timer = setTimeout(() => {
+        clearTimeout(timer);
+        done();
+      }, 2000);
+    });
     it('should issue a credential', async function() {
       const {integration: {secrets}} = agents;
       const credential = helpers.cloneCredential();
