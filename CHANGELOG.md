@@ -1,9 +1,9 @@
 # bedrock-vc-issuer ChangeLog
 
-## 3.2.0 -
+## 4.0.0 -
 
 ### Changed
-  - Use bedrock-mongodb ^7.0.0.
+  - **BREAKING**: Use bedrock-mongodb ^7.0.0.
   - Add a working test for the issuer.
   - Update mongodb calls to use mongo driver 3.5 api
 
