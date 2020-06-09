@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 4.0.0 -
+## 4.0.0 - 2020-06-09
 
 ### Changed
   - **BREAKING**: Use bedrock-mongodb ^7.0.0.
