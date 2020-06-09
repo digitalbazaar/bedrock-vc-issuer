@@ -33,7 +33,6 @@ describe('API', function() {
       }
     });
     after(function(done) {
-      console.log('WAITING 2 SECONDS TO FINISH TEST.');
       const timer = setTimeout(() => {
         clearTimeout(timer);
         done();
