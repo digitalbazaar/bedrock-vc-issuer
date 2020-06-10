@@ -25,6 +25,12 @@ describe('API', function() {
       agents = await helpers.insertIssuerAgent(
         {id: accountId, token: 'test-token'});
     });
+    after(function(done) {
+      const timer = setTimeout(() => {
+        clearTimeout(timer);
+        done();
+      }, 2000);
+    });
     it('should issue a credential', async function() {
       const {integration: {secrets}} = agents;
       const credential = helpers.cloneCredential();
