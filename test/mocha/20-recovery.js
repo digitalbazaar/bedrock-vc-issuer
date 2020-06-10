@@ -95,4 +95,38 @@ describe('Failure recovery', function() {
     const result2Hash = parseInt(result2CredentialStatusId.split('#')[1]);
     result2Hash.should.equal(result1Hash + 1);
   });
+
+  it('should error if credentialStatus.id does not exist', async () => {
+    const {integration: {secrets}} = agents;
+    const credential = helpers.cloneCredential();
+    credential.id = 'urn:someId1';
+    const {token} = secrets;
+
+    // Intentionally change the credentialStatus id when write is called
+    // the second time.
+    credentialStatusWriterStub = sinon.stub(
+      _CredentialStatusWriter.prototype, 'write').callsFake(({credential}) => {
+      credential.credentialStatus = {
+        id: 'https://localhost:18443/vc-issuer/instances/x',
+        type: 'RevocationList2020Status',
+        revocationListCredential:
+        'https://localhost:18443/vc-issuer/instances/' +
+        'did%3Akey%3Az6MkjgL7dynRMjVbePExF6rW3d6dsZDJWR3kVZQfqe45aiRH/' +
+        'rlc/eab553d4-d0de-4b8e-a76b-2444f4c030f7',
+        revocationListIndex: '0'
+      };
+    });
+    const result = await api.post(
+      '/issue',
+      {credential},
+      {headers: {Authorization: `Bearer ${token}`}}
+    );
+
+    result.status.should.equal(500);
+    should.exist(result.data);
+    result.data.should.be.an('object');
+    result.data.message.should.equal('An internal server error occurred.');
+    result.data.type.should.equal('bedrock.InternalServerError');
+    should.not.exist(result.data.verifiableCredential);
+  });
 });
