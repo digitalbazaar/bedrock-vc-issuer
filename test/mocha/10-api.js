@@ -58,6 +58,31 @@ describe('API', function() {
       should.exist(verifiableCredential.proof);
       verifiableCredential.proof.should.be.an('object');
     });
+    it('should not issue a duplicate credential', async function() {
+      const {integration: {secrets}} = agents;
+      const credential = helpers.cloneCredential();
+      credential.id = 'did:test:duplicate';
+      credential.credentialSubject.id = 'did:test:duplicate';
+      const {token} = secrets;
+      // the first issue request should succeed
+      const result = await api.post(
+        '/issue',
+        {credential},
+        {headers: {Authorization: `Bearer ${token}`}}
+      );
+      result.status.should.equal(200);
+      should.exist(result.data);
+      result.data.should.be.an('object');
+      should.exist(result.data.verifiableCredential);
+      // the duplicate request should result in an error
+      const duplicateResult = await api.post(
+        '/issue',
+        {credential},
+        {headers: {Authorization: `Bearer ${token}`}}
+      );
+      duplicateResult.status.should.equal(500);
+    });
+
   });
 
   describe.skip('instances GET endpoint', () => {
