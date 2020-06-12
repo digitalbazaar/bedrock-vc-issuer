@@ -8,7 +8,6 @@ const {create} = require('apisauce');
 const {httpsAgent} = require('bedrock-https-agent');
 const helpers = require('./helpers.js');
 const sinon = require('sinon');
-const Runner = require('mocha/lib/runner');
 const brPassport = require('bedrock-passport');
 
 const api = create({
@@ -21,22 +20,10 @@ const api = create({
 describe('API', function() {
   describe('issue POST endpoint', function() {
     let agents;
-    beforeEach(async function() {
+    before(async function() {
       const accountId = 'urn:uuid:e9b57b37-2fea-43d6-82cb-f4a02c144e38';
       agents = await helpers.insertIssuerAgent(
         {id: accountId, token: 'test-token'});
-      if(Runner.prototype.hasOwnProperty('uncaughtEnd')) {
-        sinon.stub(Runner.prototype, 'uncaughtEnd').returns(true);
-      }
-      if(Runner.prototype.hasOwnProperty('_uncaught')) {
-        sinon.stub(Runner.prototype, '_uncaught').returns(true);
-      }
-    });
-    after(function(done) {
-      const timer = setTimeout(() => {
-        clearTimeout(timer);
-        done();
-      }, 2000);
     });
     it('should issue a credential', async function() {
       const {integration: {secrets}} = agents;
