@@ -113,11 +113,10 @@ describe('Failure recovery', function() {
       {credential},
       {headers: {Authorization: `Bearer ${token}`}}
     );
-    result.status.should.equal(500);
+    result.status.should.equal(409);
     should.exist(result.data);
     result.data.should.be.an('object');
-    result.data.message.should.equal('An internal server error occurred.');
-    result.data.type.should.equal('bedrock.InternalServerError');
-    should.not.exist(result.data.verifiableCredential);
+    result.data.message.should.equal('Duplicate credential id.');
+    result.data.type.should.equal('DuplicateError');
   });
 });
