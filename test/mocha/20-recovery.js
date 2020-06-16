@@ -102,22 +102,27 @@ describe('Failure recovery', function() {
     credential.id = 'urn:someId3';
     const {token} = secrets;
 
-    await api.post(
+    const result1 = await api.post(
       '/issue',
       {credential},
       {headers: {Authorization: `Bearer ${token}`}}
     );
-
-    const result = await api.post(
+    // expect a duplicate error when the same credential is posted a second time
+    const result2 = await api.post(
       '/issue',
       {credential},
       {headers: {Authorization: `Bearer ${token}`}}
     );
-    result.status.should.equal(409);
-    should.exist(result.data);
-    result.data.should.be.an('object');
-    result.data.message.should.equal('Could not issue credential; duplicate ' +
+    result1.status.should.equal(200);
+    should.exist(result1.data);
+    result1.data.should.be.an('object');
+    should.exist(result1.data.verifiableCredential);
+    result2.status.should.equal(409);
+    should.exist(result2.data);
+    result2.data.should.be.an('object');
+    result2.data.message.should.equal('Could not issue credential; duplicate ' +
     'credential ID.');
-    result.data.type.should.equal('DuplicateError');
+    result2.data.type.should.equal('DuplicateError');
+    should.not.exist(result2.data.verifiableCredential);
   });
 });
