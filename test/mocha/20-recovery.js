@@ -107,16 +107,16 @@ describe('Failure recovery', function() {
       {credential},
       {headers: {Authorization: `Bearer ${token}`}}
     );
+    result1.status.should.equal(200);
+    should.exist(result1.data);
+    result1.data.should.be.an('object');
+    should.exist(result1.data.verifiableCredential);
     // expect a duplicate error when the same credential is posted a second time
     const result2 = await api.post(
       '/issue',
       {credential},
       {headers: {Authorization: `Bearer ${token}`}}
     );
-    result1.status.should.equal(200);
-    should.exist(result1.data);
-    result1.data.should.be.an('object');
-    should.exist(result1.data.verifiableCredential);
     result2.status.should.equal(409);
     should.exist(result2.data);
     result2.data.should.be.an('object');
