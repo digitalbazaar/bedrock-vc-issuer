@@ -116,7 +116,8 @@ describe('Failure recovery', function() {
     result.status.should.equal(409);
     should.exist(result.data);
     result.data.should.be.an('object');
-    result.data.message.should.equal('Duplicate credential id.');
+    result.data.message.should.equal('Could not issue credential; duplicate ' +
+    'credential ID.');
     result.data.type.should.equal('DuplicateError');
   });
 });
