@@ -15,7 +15,7 @@
     "bedrock-account": "^3.0.0",
     "bedrock-credentials-context": "^1.0.0",
     "bedrock-did-context": "^1.0.0",
-    "bedrock-edv-storage": "github:digitalbazaar/bedrock-edv-storage",
+    "bedrock-edv-storage": "^4.0.0",
     "bedrock-express": "^3.1.0",
     "bedrock-https-agent": "^1.0.1",
     "bedrock-identity": "^8.0.0",
