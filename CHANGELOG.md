@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 5.0.0 - 2020-06-24
+
+### Changed
+- **BREAKING**: Use edv-client@4. This is a breaking change here because of
+  changes in how edv-client serializes documents.
+
 ## 4.0.0 - 2020-06-09
 
 ### Changed
