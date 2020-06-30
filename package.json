@@ -62,7 +62,7 @@
     "bedrock-zcap-storage": "^3.0.0"
   },
   "devDependencies": {
-    "eslint": "^6.8.0",
+    "eslint": "^7.3.1",
     "eslint-config-digitalbazaar": "^2.4.0"
   },
   "directories": {
