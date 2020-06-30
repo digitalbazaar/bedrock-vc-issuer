@@ -6,4 +6,4 @@ module.exports = {
     assertNoError: true,
     should: true
   }
-}
+};
