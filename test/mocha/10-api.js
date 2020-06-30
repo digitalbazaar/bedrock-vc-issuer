@@ -3,7 +3,7 @@
  */
 'use strict';
 
-const {config} = require('bedrock');
+const {config, util: {delay}} = require('bedrock');
 const {create} = require('apisauce');
 const {httpsAgent} = require('bedrock-https-agent');
 const helpers = require('./helpers.js');
@@ -25,16 +25,13 @@ describe('API', function() {
       agents = await helpers.insertIssuerAgent(
         {id: accountId, token: 'test-token'});
     });
-    after(function(done) {
+    after(async function() {
       // this is necessary due to mocha throwing
       // on uncaught exceptions due to a lingering fire and forget
       // promise made in CredentialStatusWriter
       // FIXME remove this once we implement a better bedrock shutdown
       // method: https://github.com/digitalbazaar/bedrock/issues/60
-      const timer = setTimeout(() => {
-        clearTimeout(timer);
-        done();
-      }, 2000);
+      await delay(2000);
     });
     it('should issue a credential', async function() {
       const {integration: {secrets}} = agents;
