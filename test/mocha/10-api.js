@@ -80,7 +80,14 @@ describe('API', function() {
         {credential},
         {headers: {Authorization: `Bearer ${token}`}}
       );
-      duplicateResult.status.should.equal(500);
+      duplicateResult.status.should.equal(409);
+      const {data} = duplicateResult;
+      should.exist(data);
+      data.should.have.property('message');
+      data.message.should.contain(
+        'Could not issue credential; duplicate credential ID.');
+      data.should.have.property('type');
+      data.type.should.contain('DuplicateError');
     });
 
   });
