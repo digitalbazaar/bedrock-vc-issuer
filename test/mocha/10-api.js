@@ -26,6 +26,11 @@ describe('API', function() {
         {id: accountId, token: 'test-token'});
     });
     after(function(done) {
+      // this is necessary due to mocha throwing
+      // on uncaught exceptions due to a lingering fire and forget
+      // promise made in CredentialStatusWriter
+      // FIXME remove this once we implement a better bedrock shutdown
+      // method: https://github.com/digitalbazaar/bedrock/issues/60
       const timer = setTimeout(() => {
         clearTimeout(timer);
         done();
