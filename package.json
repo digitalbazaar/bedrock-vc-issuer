@@ -4,7 +4,7 @@
   "description": "Bedrock Verifiable Credential Issuer",
   "main": "./lib",
   "scripts": {
-    "lint": "eslint lib test"
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -43,22 +43,22 @@
     "webkms-client": "^2.1.0"
   },
   "peerDependencies": {
-    "bedrock": "3.x",
+    "bedrock": "^3.1.1",
     "bedrock-account": "^4.0.0",
     "bedrock-credentials-context": "^1.0.0",
     "bedrock-did-context": "^1.0.0",
-    "bedrock-express": "3.x",
+    "bedrock-express": "3.2.0",
     "bedrock-https-agent": "^1.0.1",
     "bedrock-jsonld-document-loader": "^1.0.1",
     "bedrock-passport": "5.x - 6.x",
     "bedrock-permission": "^3.0.0",
-    "bedrock-profile": "^6.0.0",
-    "bedrock-mongodb": "^7.0.0",
+    "bedrock-profile": "^6.1.0",
+    "bedrock-mongodb": "^7.1.0",
     "bedrock-security-context": "^3.0.0",
     "bedrock-server": "^2.6.0",
     "bedrock-validation": "^4.4.0",
     "bedrock-vc-revocation-list-context": "^1.0.0",
-    "bedrock-veres-one-context": "^10.0.0",
+    "bedrock-veres-one-context": "^10.0.1",
     "bedrock-zcap-storage": "^3.0.0"
   },
   "devDependencies": {
