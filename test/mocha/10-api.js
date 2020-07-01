@@ -96,13 +96,30 @@ describe('API', function() {
 
   });
 
-  describe('POST authenticate endpoint', () => {
+  describe('authenticate POST endpoint', function() {
+    let presentation = null;
+    beforeEach(function() {
+      presentation = helpers.cloneAuthPresentation();
+    });
+    it('should authenticate without an existing account', async function() {
+      const result = await api.post('/authenticate', {presentation});
+      should.exist(result);
+      result.status.should.equal(200);
+      result.data.should.be.an('object');
+      result.data.should.have.property('id');
+      result.data.id.should.be.a('string');
+      result.data.should.have.property('controller');
+      result.data.controller.should.be.a('string');
+      result.data.controller.should.contain(presentation.holder);
+      result.data.should.have.property('capabilityAgentSeed');
+      result.data.capabilityAgentSeed.should.be.a('string');
+    });
   }); // end authenticate POST
 
-  describe('GET rlc endpoint', () => {
+  describe('rlc GET endpoint', () => {
   }); // end rlc GET
 
-  describe('POST rlc endpoint', () => {
+  describe('rlc POST endpoint', () => {
     describe('unauthenticated', () => {
     }); // end unauthenticated
     describe('authenticated', () => {

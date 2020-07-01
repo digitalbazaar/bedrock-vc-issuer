@@ -1,0 +1,14 @@
+{
+  "@context": "https://www.w3.org/2018/credentials/v1",
+  "type": "VerifiablePresentation",
+  "holder": "did:key:foo",
+  "proof": {
+    "type": "Ed25519Signature2018",
+    "created": "2020-07-01T15:21:50Z",
+    "challenge": "test-challenge",
+    "jws": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..O2kogJxwS1ySgpUrlraKSzUPaYEhhw6Wl4wwzgW66Kfz2dNk5GX_4BNk_joBudZ0fYwGUvm70hKlRxnlEemVBg",
+    "proofPurpose": "authentication",
+    "verificationMethod": "did:key:foo#z6Mko4VcYWWidAyyfKw7hdZ2Y5io6WQxYfUjaT68aek2GRLF"
+  }
+}
+
