@@ -114,6 +114,32 @@ describe('API', function() {
       result.data.should.have.property('capabilityAgentSeed');
       result.data.capabilityAgentSeed.should.be.a('string');
     });
+    it('should not authenticate without a holder', async function() {
+      delete presentation.holder;
+      const result = await api.post('/authenticate', {presentation});
+      should.exist(result);
+      helpers.shouldBeAValidationError(result);
+    });
+    it('should not authenticate without a proof', async function() {
+      delete presentation.proof;
+      const result = await api.post('/authenticate', {presentation});
+      should.exist(result);
+      helpers.shouldBeAValidationError(result);
+    });
+    it('should not authenticate without a verificationMethod',
+      async function() {
+        delete presentation.proof.verificationMethod;
+        const result = await api.post('/authenticate', {presentation});
+        should.exist(result);
+        helpers.shouldBeAValidationError(result);
+      });
+    it('should not authenticate if the purpose is not authentication',
+      async function() {
+        presentation.proof.proofPurpose = 'test-failure';
+        const result = await api.post('/authenticate', {presentation});
+        should.exist(result);
+        helpers.shouldBeAValidationError(result);
+      });
   }); // end authenticate POST
 
   describe('rlc GET endpoint', () => {

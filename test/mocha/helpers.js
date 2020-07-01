@@ -610,6 +610,19 @@ function deriveKeystoreId(id) {
     paths[3]; // "<keystore_id>"
 }
 
+function shouldBeAValidationError(result) {
+  result.status.should.equal(400);
+  const {data = {}} = result;
+  data.should.have.property('message');
+  data.message.should.be.a('string');
+  data.should.have.property('type');
+  data.type.should.be.a('string');
+  data.type.should.contain('ValidationError');
+  data.should.have.property('details');
+  data.should.have.property('cause');
+}
+
+exports.shouldBeAValidationError = shouldBeAValidationError;
 exports.cloneAuthPresentation = cloneAuthPresentation;
 exports.cloneCredential = cloneCredential;
 exports.insertIssuerAgent = insertIssuerAgent;
