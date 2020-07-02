@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 5.2.0 - 2020-07-01
+
+### Changed
+- Update deps.
+- Update test deps.
+
 ## 5.1.0 - 2020-06-30
 
 ### Changed
