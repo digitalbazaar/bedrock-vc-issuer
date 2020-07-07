@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 5.2.1 - 2020-07-07
+
+### Fixed
+- Fix usage of the MongoDB projection API.
+
 ## 5.2.0 - 2020-07-01
 
 ### Changed
