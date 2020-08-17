@@ -4,6 +4,7 @@
 'use strict';
 
 const bedrock = require('bedrock');
+const brAccount = require('bedrock-account');
 const {httpsAgent} = require('bedrock-https-agent');
 const edvStorage = require('bedrock-edv-storage');
 const edvHelpers = require('bedrock-edv-storage/lib/helpers');
@@ -28,6 +29,10 @@ const JWE_ALG = 'ECDH-ES+A256KW';
 const profileAgentEdvDocument = 'profile-agent-edv-document';
 const profileEdvDocument = 'profile-edv-document';
 const credentialsEdv = 'credentials-edv-document';
+
+async function insertAccount({account = {}, meta = {}}) {
+  return brAccount.insert({actor: null, account, meta});
+}
 
 async function delegateSigner({profileAgentRecord}) {
   const {profileAgent, secrets} = profileAgentRecord;
@@ -613,3 +618,4 @@ function shouldBeAValidationError(result) {
 exports.shouldBeAValidationError = shouldBeAValidationError;
 exports.insertIssuerAgent = insertIssuerAgent;
 exports.stubPassport = stubPassport;
+exports.insertAccount = insertAccount;

@@ -109,11 +109,36 @@ describe('API', function() {
       result.data.should.be.an('object');
       result.data.should.have.property('id');
       result.data.id.should.be.a('string');
+      // NOTE: this might be a bug
+      result.data.should.not.have.property('email');
       result.data.should.have.property('controller');
       result.data.controller.should.be.a('string');
       result.data.controller.should.contain(presentation.holder);
       result.data.should.have.property('capabilityAgentSeed');
       result.data.capabilityAgentSeed.should.be.a('string');
+    });
+    it('should authenticate with an existing account', async function() {
+      const {account} = mockData.accounts.authenticate;
+      await helpers.insertAccount({account});
+      const withController = {
+        ...presentation,
+        holder: account.controller
+      };
+      const result = await api.post(
+        '/authenticate', {presentation: withController});
+      should.exist(result);
+      result.status.should.equal(200);
+      result.data.should.be.an('object');
+      result.data.should.have.property('id');
+      result.data.id.should.be.a('string');
+      // NOTE: this might be a bug
+      result.data.should.have.property('email');
+      result.data.email.should.be.a('string');
+      result.data.should.have.property('controller');
+      result.data.controller.should.be.a('string');
+      result.data.should.have.property('capabilityAgentSeed');
+      result.data.capabilityAgentSeed.should.be.a('string');
+      result.data.should.eql(account);
     });
     it('should not authenticate without a holder', async function() {
       delete presentation.holder;

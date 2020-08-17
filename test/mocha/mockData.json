@@ -25,5 +25,18 @@
     "credentialSubject": {
       "id": "did:test:simple"
     }
+  },
+  "accounts": {
+    "authenticate": {
+      "account": {
+        "email": "controller-auth-test@example.com",
+        "id": "urn:uuid:0a798c46-1426-42fc-9865-09d3b7480529",
+        "controller": "did:v1:test:nym:q6Mkq4uyWFYWP9rPrrKhJnbU7jBDBc2p8gXJHyQ26L6uS8uE",
+        "capabilityAgentSeed": "ZCYNgn9bM2rtBpKVjSD0PYW-ErmxIyAPOkmMf_K4X9h"
+      },
+      "meta": {
+
+      }
+    }
   }
 }
