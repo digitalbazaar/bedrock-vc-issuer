@@ -3,12 +3,13 @@
  */
 'use strict';
 
-const {config} = require('bedrock');
+const {config, util: {clone}} = require('bedrock');
 const {create} = require('apisauce');
 const {httpsAgent} = require('bedrock-https-agent');
 const helpers = require('./helpers.js');
 const sinon = require('sinon');
 const {_CredentialStatusWriter} = require('bedrock-vc-issuer');
+const mockData = require('./mockData.json');
 
 const api = create({
   baseURL: `${config.server.baseUri}/vc-issuer`,
@@ -49,7 +50,7 @@ describe('Failure recovery', function() {
   // the bookkeping is repaired
   it('should handle a crashed/partial issuance', async () => {
     const {integration: {secrets}} = agents;
-    let credential = helpers.cloneCredential();
+    let credential = clone(mockData.credential);
     credential.id = 'urn:someId1';
 
     const {token} = secrets;
@@ -61,7 +62,7 @@ describe('Failure recovery', function() {
     const result1CredentialStatusId = result1.data.verifiableCredential
       .credentialStatus.id;
 
-    credential = helpers.cloneCredential();
+    credential = clone(mockData.credential);
     credential.id = 'urn:someId2';
     const result2 = await api.post(
       '/issue',
@@ -98,7 +99,7 @@ describe('Failure recovery', function() {
 
   it('should error if duplicate credential id is posted', async () => {
     const {integration: {secrets}} = agents;
-    const credential = helpers.cloneCredential();
+    const credential = clone(mockData.credential);
     credential.id = 'urn:someId3';
     const {token} = secrets;
 

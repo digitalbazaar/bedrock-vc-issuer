@@ -3,12 +3,13 @@
  */
 'use strict';
 
-const {config, util: {delay}} = require('bedrock');
+const {config, util: {delay, clone}} = require('bedrock');
 const {create} = require('apisauce');
 const {httpsAgent} = require('bedrock-https-agent');
 const helpers = require('./helpers.js');
 const sinon = require('sinon');
 const brPassport = require('bedrock-passport');
+const mockData = require('./mockData.json');
 
 const api = create({
   baseURL: `${config.server.baseUri}/vc-issuer`,
@@ -37,7 +38,7 @@ describe('API', function() {
     });
     it('should issue a credential', async function() {
       const {integration: {secrets}} = agents;
-      const credential = helpers.cloneCredential();
+      const credential = clone(mockData.credential);
       const {token} = secrets;
       const result = await api.post(
         '/issue',
@@ -64,7 +65,7 @@ describe('API', function() {
     });
     it('should not issue a duplicate credential', async function() {
       const {integration: {secrets}} = agents;
-      const credential = helpers.cloneCredential();
+      const credential = clone(mockData.credential);
       credential.id = 'did:test:duplicate';
       credential.credentialSubject.id = 'did:test:duplicate';
       const {token} = secrets;
@@ -99,7 +100,7 @@ describe('API', function() {
   describe('authenticate POST endpoint', function() {
     let presentation = null;
     beforeEach(function() {
-      presentation = helpers.cloneAuthPresentation();
+      presentation = clone(mockData.authPresentation);
     });
     it('should authenticate without an existing account', async function() {
       const result = await api.post('/authenticate', {presentation});
