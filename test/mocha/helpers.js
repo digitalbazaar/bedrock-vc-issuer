@@ -578,13 +578,15 @@ async function initializeAccessManagement({
   return {profile, profileAgent, client, recipients};
 }
 
-function stubPassport(passportStub) {
+/**
+ * Stubs a sinon passport stub.
+*/
+const _actor = {id: 'theMockControllerId'};
+function stubPassport({passportStub, account = {}, actor = _actor}) {
   passportStub.callsFake((req, res, next) => {
     req.user = {
-      account: {},
-      actor: {
-        id: 'theMockControllerId'
-      }
+      account,
+      actor
     };
     next();
   });
