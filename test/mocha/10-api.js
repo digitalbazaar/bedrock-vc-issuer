@@ -109,7 +109,7 @@ describe('API', function() {
       result.data.should.be.an('object');
       result.data.should.have.property('id');
       result.data.id.should.be.a('string');
-      // NOTE: this might be a bug
+      // accounts created by this method should not have an email
       result.data.should.not.have.property('email');
       result.data.should.have.property('controller');
       result.data.controller.should.be.a('string');
@@ -131,7 +131,7 @@ describe('API', function() {
       result.data.should.be.an('object');
       result.data.should.have.property('id');
       result.data.id.should.be.a('string');
-      // NOTE: this might be a bug
+      // existing accounts should return properties in the account object
       result.data.should.have.property('email');
       result.data.email.should.be.a('string');
       result.data.should.have.property('controller');
