@@ -13,8 +13,6 @@ const {delegateCapability, delegate} = require('bedrock-profile/lib/zcaps');
 const kms = require('bedrock-profile/lib/kms');
 const {Ed25519KeyPair} = require('crypto-ld');
 const {EdvClient, EdvDocument} = require('edv-client');
-const credential = require('./credential.json');
-const authPresentation = require('./auth-presentation.json');
 
 const {
   AsymmetricKey,
@@ -23,23 +21,13 @@ const {
   KmsClient
 } = require('webkms-client');
 
-const {config, util} = bedrock;
+const {config} = bedrock;
 
 const {kmsModule, server: {baseUri}} = config;
 const JWE_ALG = 'ECDH-ES+A256KW';
 const profileAgentEdvDocument = 'profile-agent-edv-document';
 const profileEdvDocument = 'profile-edv-document';
 const credentialsEdv = 'credentials-edv-document';
-
-//ensure each test has a fresh credential
-function cloneCredential() {
-  return util.clone(credential);
-}
-
-//ensure each test has a fresh credential
-function cloneAuthPresentation() {
-  return util.clone(authPresentation);
-}
 
 async function delegateSigner({profileAgentRecord}) {
   const {profileAgent, secrets} = profileAgentRecord;
@@ -623,7 +611,5 @@ function shouldBeAValidationError(result) {
 }
 
 exports.shouldBeAValidationError = shouldBeAValidationError;
-exports.cloneAuthPresentation = cloneAuthPresentation;
-exports.cloneCredential = cloneCredential;
 exports.insertIssuerAgent = insertIssuerAgent;
 exports.stubPassport = stubPassport;
