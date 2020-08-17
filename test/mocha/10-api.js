@@ -17,8 +17,8 @@ const api = create({
   timeout: 10000,
 });
 
-// FIXME: tests need to be updated to use new endpoints
 describe('API', function() {
+
   describe('issue POST endpoint', function() {
     let agents;
     before(async function() {
@@ -168,21 +168,45 @@ describe('API', function() {
       });
   }); // end authenticate POST
 
-  describe('rlc GET endpoint', () => {
-  }); // end rlc GET
-
-  describe('rlc POST endpoint', () => {
-    describe('unauthenticated', () => {
-    }); // end unauthenticated
-    describe('authenticated', () => {
+  describe.skip('rlc POST endpoint', function() {
+    describe('authenticated', function() {
+      let agents;
       let passportStub;
-      before(() => {
+      const accountId = 'urn:uuid:c9b57b37-2fea-43d6-82cb-f4a02c144e39';
+      before(async function() {
+        agents = await helpers.insertIssuerAgent({
+          id: accountId,
+          token: 'test-token-8b57b37-2fea-43d6-82cb-f4a02c144e22'
+        });
         passportStub = sinon.stub(brPassport, 'optionallyAuthenticated');
-        helpers.stubPassport(passportStub);
+        helpers.stubPassport({passportStub, account: {id: accountId}});
       });
-      after(() => {
+      after(async function() {
         passportStub.restore();
+        // this is necessary due to mocha throwing
+        // on uncaught exceptions due to a lingering fire and forget
+        // promise made in CredentialStatusWriter
+        // FIXME remove this once we implement a better bedrock shutdown
+        // method: https://github.com/digitalbazaar/bedrock/issues/60
+        await delay(2000);
+      });
+      it('should publish revocation list', async function() {
+        const {integration} = agents;
+        const {secrets, profileAgent} = integration;
+        const instanceId = profileAgent.id;
+        const rlcId = 'bar';
+        const {token} = secrets;
+        const result = await api.post(
+          `/instances/${instanceId}/rlc/${rlcId}/publish`,
+          {profileAgent: instanceId},
+          {headers: {Authorization: `Bearer ${token}`}}
+        );
+        result.status.should.equal(200);
       });
     }); // end authenticated
   }); // end rlc POST
+
+  describe('rlc GET endpoint', () => {
+  }); // end rlc GET
+
 });
