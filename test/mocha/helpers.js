@@ -3,17 +3,18 @@
  */
 'use strict';
 
+const axios = require('axios');
 const bedrock = require('bedrock');
 const brAccount = require('bedrock-account');
-const {httpsAgent} = require('bedrock-https-agent');
+const brHttpsAgent = require('bedrock-https-agent');
+const {delegateCapability, delegate} = require('bedrock-profile/lib/zcaps');
 const edvStorage = require('bedrock-edv-storage');
 const edvHelpers = require('bedrock-edv-storage/lib/helpers');
-const {profiles, profileAgents} = require('bedrock-profile');
-const keyResolver = require('bedrock-profile/lib/keyResolver');
-const {delegateCapability, delegate} = require('bedrock-profile/lib/zcaps');
-const kms = require('bedrock-profile/lib/kms');
 const {Ed25519KeyPair} = require('crypto-ld');
 const {EdvClient, EdvDocument} = require('edv-client');
+const {httpsAgent} = require('bedrock-https-agent');
+const kms = require('bedrock-profile/lib/kms');
+const {profiles, profileAgents} = require('bedrock-profile');
 
 const {
   AsymmetricKey,
@@ -29,6 +30,16 @@ const JWE_ALG = 'ECDH-ES+A256KW';
 const profileAgentEdvDocument = 'profile-agent-edv-document';
 const profileEdvDocument = 'profile-edv-document';
 const credentialsEdv = 'credentials-edv-document';
+
+const keyResolver = async ({id} = {}) => {
+  const headers = {Accept: 'application/ld+json, application/json'};
+  const {httpsAgent} = brHttpsAgent;
+  const response = await axios.get(id, {
+    headers,
+    httpsAgent
+  });
+  return response.data;
+};
 
 async function insertAccount({account = {}, meta = {}}) {
   return brAccount.insert({actor: null, account, meta});
