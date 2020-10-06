@@ -34,7 +34,7 @@
     "did-io": "^0.8.2",
     "did-method-key": "^0.6.1",
     "did-veres-one": "^12.1.1",
-    "edv-client": "^4.0.1",
+    "edv-client": "^6.0.1",
     "jsonld-signatures": "^5.1.0",
     "lru-cache": "^5.1.1",
     "ocapld": "^2.0.0",
