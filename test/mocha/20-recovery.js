@@ -23,8 +23,12 @@ describe('Failure recovery', function() {
   let agents;
   before(async function() {
     const accountId = 'urn:uuid:43f47a1f-acaf-4dd1-8597-001a8b0637e3';
-    agents = await helpers.insertIssuerAgent(
-      {id: accountId, token: 'token-43f47a1f-acaf-4dd1-8597-001a8b0637e3', publicKmsBaseUrl, privateKmsBaseUrl});
+    agents = await helpers.insertIssuerAgent({
+      id: accountId,
+      token: 'token-43f47a1f-acaf-4dd1-8597-001a8b0637e3',
+      publicKmsBaseUrl,
+      privateKmsBaseUrl
+    });
   });
 
   // stub modules in order to simulate failure conditions
