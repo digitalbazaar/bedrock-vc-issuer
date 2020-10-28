@@ -1,5 +1,17 @@
 # bedrock-vc-issuer ChangeLog
 
+## 5.3.0 - 2020-11-TBD
+
+### Changed
+- Update deps.
+- Update test deps.
+- Update peerDependencies.
+- Use bitstring from @digitalbazaar/bitstring.
+
+### Fixed
+- Include privateKmsBaseUrl and publicKmsBaseUrl in test.
+- Add keyResolver in test.
+
 ## 5.2.1 - 2020-07-07
 
 ### Fixed
