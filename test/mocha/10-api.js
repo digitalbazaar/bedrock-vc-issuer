@@ -16,6 +16,8 @@ const api = create({
   httpsAgent,
   timeout: 10000,
 });
+const privateKmsBaseUrl = `${config.server.baseUri}/kms`;
+const publicKmsBaseUrl = `${config.server.baseUri}/kms`;
 
 describe('API', function() {
 
@@ -24,6 +26,8 @@ describe('API', function() {
     before(async function() {
       const accountId = 'urn:uuid:e9b57b37-2fea-43d6-82cb-f4a02c144e38';
       agents = await helpers.insertIssuerAgent({
+        privateKmsBaseUrl,
+        publicKmsBaseUrl,
         id: accountId,
         token: 'test-token-9b57b37-2fea-43d6-82cb-f4a02c144e38'
       });

@@ -84,10 +84,12 @@ async function createUser({
   credentialEdv,
   issuerKey,
   verificationMethod,
-  edvId
+  edvId,
+  privateKmsBaseUrl,
+  publicKmsBaseUrl
 }) {
   const integration = await profileAgents.create(
-    {profileId: profile.id, token});
+    {profileId: profile.id, token, privateKmsBaseUrl, publicKmsBaseUrl});
   const {profileAgent: issuerAgent} = integration;
   // delegate the credential zcaps to the issuer
   const credentialIssuerZcaps = await delegateEdvZcaps({
@@ -312,9 +314,12 @@ async function getSigners({profileAgentRecord}) {
 }
 
 // tests call on this to insert an issuerAgent
-async function insertIssuerAgent({id, token}) {
+async function insertIssuerAgent({
+  id, token, privateKmsBaseUrl, publicKmsBaseUrl
+}) {
   // this is the profile associated with an issuer account
-  const {id: profileId} = await profiles.create({accountId: id});
+  const {id: profileId} = await profiles.create({
+    accountId: id, privateKmsBaseUrl, publicKmsBaseUrl});
   const profileAgentRecord = await profileAgents.getByProfile(
     {profileId, accountId: id, includeSecrets: true});
   const {profileAgent} = profileAgentRecord;
@@ -391,6 +396,8 @@ async function insertIssuerAgent({id, token}) {
     credentialEdv,
     issuerKey,
     edvId,
+    publicKmsBaseUrl,
+    privateKmsBaseUrl,
     verificationMethod,
     invocationSigner: profileSigner,
     ...result
