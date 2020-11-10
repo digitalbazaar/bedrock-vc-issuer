@@ -25,9 +25,11 @@ describe('API', function() {
     let agents;
     before(async function() {
       const accountId = 'urn:uuid:e9b57b37-2fea-43d6-82cb-f4a02c144e38';
+      const didMethod = 'key';
       agents = await helpers.insertIssuerAgent({
         privateKmsBaseUrl,
         publicKmsBaseUrl,
+        didMethod,
         id: accountId,
         token: 'test-token-9b57b37-2fea-43d6-82cb-f4a02c144e38'
       });
@@ -177,9 +179,11 @@ describe('API', function() {
       let agents;
       let passportStub;
       const accountId = 'urn:uuid:c9b57b37-2fea-43d6-82cb-f4a02c144e39';
+      const didMethod = 'v1';
       before(async function() {
         agents = await helpers.insertIssuerAgent({
           id: accountId,
+          didMethod,
           token: 'test-token-8b57b37-2fea-43d6-82cb-f4a02c144e22'
         });
         passportStub = sinon.stub(brPassport, 'optionallyAuthenticated');
