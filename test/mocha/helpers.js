@@ -315,11 +315,11 @@ async function getSigners({profileAgentRecord}) {
 
 // tests call on this to insert an issuerAgent
 async function insertIssuerAgent({
-  id, token, privateKmsBaseUrl, publicKmsBaseUrl
+  id, token, didMethod, privateKmsBaseUrl, publicKmsBaseUrl
 }) {
   // this is the profile associated with an issuer account
   const {id: profileId} = await profiles.create({
-    accountId: id, privateKmsBaseUrl, publicKmsBaseUrl});
+    accountId: id, didMethod, privateKmsBaseUrl, publicKmsBaseUrl});
   const profileAgentRecord = await profileAgents.getByProfile(
     {profileId, accountId: id, includeSecrets: true});
   const {profileAgent} = profileAgentRecord;
