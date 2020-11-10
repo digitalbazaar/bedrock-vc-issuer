@@ -26,6 +26,7 @@ describe('Failure recovery', function() {
     agents = await helpers.insertIssuerAgent({
       id: accountId,
       token: 'token-43f47a1f-acaf-4dd1-8597-001a8b0637e3',
+      didMethod: 'key',
       publicKmsBaseUrl,
       privateKmsBaseUrl
     });
