@@ -21,12 +21,20 @@ const publicKmsBaseUrl = `${config.server.baseUri}/kms`;
 
 describe('Failure recovery', function() {
   let agents;
+  let agent2;
   before(async function() {
     const accountId = 'urn:uuid:43f47a1f-acaf-4dd1-8597-001a8b0637e3';
     agents = await helpers.insertIssuerAgent({
       id: accountId,
       token: 'token-43f47a1f-acaf-4dd1-8597-001a8b0637e3',
       didMethod: 'key',
+      publicKmsBaseUrl,
+      privateKmsBaseUrl
+    });
+    agent2 = await helpers.insertIssuerAgent({
+      id: accountId,
+      token: 'token-43f47a1f-acaf-4dd1-8597-001a8b0637e4',
+      didMethod: 'v1',
       publicKmsBaseUrl,
       privateKmsBaseUrl
     });
@@ -76,6 +84,57 @@ describe('Failure recovery', function() {
       {credential},
       {headers: {Authorization: `Bearer ${token}`}}
     );
+    result2.status.should.equal(200);
+    should.exist(result2.data);
+    result2.data.should.be.an('object');
+    should.exist(result2.data.verifiableCredential);
+    const {verifiableCredential} = result2.data;
+    verifiableCredential.should.be.an('object');
+    should.exist(verifiableCredential['@context']);
+    should.exist(verifiableCredential.id);
+    should.exist(verifiableCredential.type);
+    should.exist(verifiableCredential.issuer);
+    should.exist(verifiableCredential.issuanceDate);
+    should.exist(verifiableCredential.expirationDate);
+    should.exist(verifiableCredential.credentialSubject);
+    verifiableCredential.credentialSubject.should.be.an('object');
+    should.exist(verifiableCredential.credentialStatus);
+    should.exist(verifiableCredential.proof);
+    verifiableCredential.proof.should.be.an('object');
+    const result2CredentialStatusId = result2.data.verifiableCredential
+      .credentialStatus.id;
+
+    // this test ensures that the two credentials are not issued with the same
+    // revocation list index / hash fragment
+    result2CredentialStatusId.should.not.equal(result1CredentialStatusId);
+    const result1Hash = parseInt(result1CredentialStatusId.split('#')[1]);
+    const result2Hash = parseInt(result2CredentialStatusId.split('#')[1]);
+    result2Hash.should.equal(result1Hash + 1);
+  });
+
+  it('should handle a crashed/partial issuance using agent2 ' +
+    'created using didMethod v1', async () => {
+    const {integration: {secrets}} = agent2;
+    let credential = clone(mockData.credential);
+    credential.id = 'urn:someId1';
+
+    const {token} = secrets;
+    const result1 = await api.post(
+      '/issue',
+      {credential},
+      {headers: {Authorization: `Bearer ${token}`}}
+    );
+    const result1CredentialStatusId = result1.data.verifiableCredential
+      .credentialStatus.id;
+
+    credential = clone(mockData.credential);
+    credential.id = 'urn:someId2';
+    const result2 = await api.post(
+      '/issue',
+      {credential},
+      {headers: {Authorization: `Bearer ${token}`}}
+    );
+    console.log(result2.data);
     result2.status.should.equal(200);
     should.exist(result2.data);
     result2.data.should.be.an('object');
