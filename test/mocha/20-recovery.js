@@ -134,7 +134,6 @@ describe('Failure recovery', function() {
       {credential},
       {headers: {Authorization: `Bearer ${token}`}}
     );
-    console.log(result2.data);
     result2.status.should.equal(200);
     should.exist(result2.data);
     result2.data.should.be.an('object');
