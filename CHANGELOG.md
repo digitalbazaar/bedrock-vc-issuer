@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 5.3.0 - 2020-11-TBD
+## 5.3.0 - 2020-12-17
 
 ### Changed
 - Update deps.
