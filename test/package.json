@@ -13,7 +13,7 @@
     "apisauce": "^1.1.1",
     "axios": "^0.19.2",
     "bedrock": "^3.3.0",
-    "bedrock-account": "^4.2.0",
+    "bedrock-account": "^5.0.0",
     "bedrock-credentials-context": "^1.0.0",
     "bedrock-did-context": "^1.0.0",
     "bedrock-edv-storage": "^5.1.0",
