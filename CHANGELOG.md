@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 5.4.0 - 2021-01-TBD
+
+### Changed
+- Update bedrock-account@5.0.
+
 ## 5.3.0 - 2020-12-17
 
 ### Changed
