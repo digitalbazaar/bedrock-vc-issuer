@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "bedrock": "^3.3.0",
-    "bedrock-account": "^4.2.0",
+    "bedrock-account": "^5.0.0",
     "bedrock-credentials-context": "^1.0.0",
     "bedrock-did-context": "^1.0.0",
     "bedrock-express": "^3.2.0",
