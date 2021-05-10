@@ -34,11 +34,10 @@
     "crypto-ld": "^3.9.0",
     "did-io": "^0.8.3",
     "did-method-key": "^0.7.0",
-    "did-veres-one": "^12.1.1",
+    "did-veres-one": "^13.0.0",
     "edv-client": "^6.0.1",
     "jsonld-signatures": "^5.1.0",
     "lru-cache": "^5.1.1",
-    "ocapld": "^2.0.0",
     "vc-js": "^0.6.4",
     "vc-revocation-list": "^2.0.0",
     "webkms-client": "^2.3.0"
