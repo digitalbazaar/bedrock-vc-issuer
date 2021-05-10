@@ -5,6 +5,7 @@ on: [push]
 jobs:
   test-node:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       mongodb:
         image: mongo:4.2
@@ -12,7 +13,7 @@ jobs:
           - 27017:27017
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x]
+        node-version: [12.x, 14.x]
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
@@ -26,10 +27,9 @@ jobs:
       run: |
         cd test
         npm test
-      env:
-        CI: true
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       matrix:
         node-version: [14.x]
@@ -45,6 +45,7 @@ jobs:
   coverage:
     needs: [test-node]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       mongodb:
         image: mongo:4.2
@@ -66,8 +67,6 @@ jobs:
       run: |
         cd test
         npm run coverage-ci
-      env:
-        CI: true
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
