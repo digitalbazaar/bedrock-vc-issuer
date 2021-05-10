@@ -3,7 +3,6 @@
  */
 'use strict';
 
-const axios = require('axios');
 const bedrock = require('bedrock');
 const brAccount = require('bedrock-account');
 const brHttpsAgent = require('bedrock-https-agent');
@@ -13,6 +12,7 @@ const edvHelpers = require('bedrock-edv-storage/lib/helpers');
 const {Ed25519KeyPair} = require('crypto-ld');
 const {EdvClient, EdvDocument} = require('edv-client');
 const {httpsAgent} = require('bedrock-https-agent');
+const {httpClient} = require('@digitalbazaar/http-client');
 const kms = require('bedrock-profile/lib/kms');
 const {profiles, profileAgents} = require('bedrock-profile');
 
@@ -32,11 +32,9 @@ const profileEdvDocument = 'profile-edv-document';
 const credentialsEdv = 'credentials-edv-document';
 
 const keyResolver = async ({id} = {}) => {
-  const headers = {Accept: 'application/ld+json, application/json'};
   const {httpsAgent} = brHttpsAgent;
-  const response = await axios.get(id, {
-    headers,
-    httpsAgent
+  const response = await httpClient.get(id, {
+    agent: httpsAgent
   });
   return response.data;
 };
