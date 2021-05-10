@@ -26,9 +26,9 @@
   "homepage": "https://github.com/digitalbazaar/bedrock-vc-issuer",
   "dependencies": {
     "@digitalbazaar/bitstring": "^1.2.0",
+    "@digitalbazaar/http-client": "^1.1.0",
     "assert-plus": "^1.0.0",
     "auth-header": "^1.0.0",
-    "axios": "^0.19.2",
     "bs58": "^4.0.1",
     "cors": "^2.8.5",
     "crypto-ld": "^3.9.0",
