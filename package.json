@@ -43,32 +43,32 @@
     "webkms-client": "^2.3.0"
   },
   "peerDependencies": {
-    "bedrock": "^3.3.0",
+    "bedrock": "^4.1.1",
     "bedrock-account": "^5.0.0",
     "bedrock-credentials-context": "^1.0.0",
-    "bedrock-did-context": "^1.0.0",
-    "bedrock-express": "^3.2.0",
+    "bedrock-did-context": "^2.0.0",
+    "bedrock-express": "^4.0.0",
     "bedrock-https-agent": "^2.0.0",
     "bedrock-jsonld-document-loader": "^1.0.1",
-    "bedrock-passport": "^6.0.0",
+    "bedrock-passport": "^6.1.0",
     "bedrock-permission": "^3.2.0",
-    "bedrock-profile": "^8.0.0",
-    "bedrock-mongodb": "^8.0.2",
-    "bedrock-security-context": "^3.0.0",
+    "bedrock-profile": "digitalbazaar/bedrock-profile#support-for-multiple-signature-suite",
+    "bedrock-mongodb": "^8.2.0",
+    "bedrock-security-context": "^4.1.0",
     "bedrock-server": "^2.7.0",
-    "bedrock-validation": "^4.4.0",
+    "bedrock-validation": "^5.0.0",
     "bedrock-vc-revocation-list-context": "^1.0.0",
-    "bedrock-veres-one-context": "^10.0.1",
+    "bedrock-veres-one-context": "^11.0.0",
     "bedrock-zcap-storage": "^3.2.0"
   },
   "devDependencies": {
-    "eslint": "^7.12.1",
-    "eslint-config-digitalbazaar": "^2.6.1"
+    "eslint": "^7.26.0",
+    "eslint-config-digitalbazaar": "^2.8.0"
   },
   "directories": {
     "lib": "./lib"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=14"
   }
 }
