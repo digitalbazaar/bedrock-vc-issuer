@@ -16,7 +16,7 @@ const proof = () => ({
     'created',
     'proofPurpose',
     'verificationMethod',
-    'jws'
+    'proofValue'
   ],
   properties: {
     type: {type: 'string'},
@@ -30,7 +30,7 @@ const proof = () => ({
     verificationMethod: {type: 'string'},
     created: schemas.w3cDateTime(),
     challenge: {type: 'string'},
-    jws: {type: 'string'}
+    proofValue: {type: 'string'}
   }
 });
 
@@ -106,7 +106,7 @@ const delegationZCap = () => ({
     },
     parentCapability: {type: 'string'},
     proof: capabilityDelegationProof(),
-    jws: {type: 'string'}
+    proofValue: {type: 'string'}
   }
 });
 
