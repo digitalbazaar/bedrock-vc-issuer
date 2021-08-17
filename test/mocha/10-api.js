@@ -4,21 +4,17 @@
 'use strict';
 
 const {config, util: {delay, clone}} = require('bedrock');
-const {create} = require('apisauce');
 const {httpsAgent} = require('bedrock-https-agent');
+const {httpClient} = require('@digitalbazaar/http-client');
 const helpers = require('./helpers.js');
 const sinon = require('sinon');
 const brPassport = require('bedrock-passport');
 const mockData = require('./mockData.json');
 
-const api = create({
-  baseURL: `${config.server.baseUri}/vc-issuer`,
-  httpsAgent,
-  timeout: 10000,
-});
 const privateKmsBaseUrl = `${config.server.baseUri}/kms`;
 const publicKmsBaseUrl = `${config.server.baseUri}/kms`;
-
+const baseURL = `${config.server.baseUri}/vc-issuer`;
+const timeout = 10000;
 describe('API', function() {
 
   describe('issue POST endpoint', function() {
@@ -46,11 +42,12 @@ describe('API', function() {
       const {integration: {secrets}} = agents;
       const credential = clone(mockData.credential);
       const {token} = secrets;
-      const result = await api.post(
-        '/issue',
-        {credential},
-        {headers: {Authorization: `Bearer ${token}`}}
-      );
+      const result = await httpClient.post(`${baseURL}/issue`, {
+        headers: {Authorization: `Bearer ${token}`},
+        json: {credential},
+        agent: httpsAgent,
+        timeout
+      });
       result.status.should.equal(200);
       should.exist(result.data);
       result.data.should.be.an('object');
@@ -76,24 +73,32 @@ describe('API', function() {
       credential.credentialSubject.id = 'did:test:duplicate';
       const {token} = secrets;
       // the first issue request should succeed
-      const result = await api.post(
-        '/issue',
-        {credential},
-        {headers: {Authorization: `Bearer ${token}`}}
-      );
+      const result = await httpClient.post(`${baseURL}/issue`, {
+        headers: {Authorization: `Bearer ${token}`},
+        json: {credential},
+        agent: httpsAgent,
+        timeout
+      });
       result.status.should.equal(200);
       should.exist(result.data);
       result.data.should.be.an('object');
       should.exist(result.data.verifiableCredential);
-      // the duplicate request should result in an error
-      const duplicateResult = await api.post(
-        '/issue',
-        {credential},
-        {headers: {Authorization: `Bearer ${token}`}}
-      );
-      duplicateResult.status.should.equal(409);
-      const {data} = duplicateResult;
-      should.exist(data);
+      let err;
+      let duplicateResult;
+      try {
+        duplicateResult = await httpClient.post(`${baseURL}/issue`, {
+          headers: {Authorization: `Bearer ${token}`},
+          json: {credential},
+          agent: httpsAgent,
+          timeout
+        });
+      } catch(e) {
+        err = e;
+      }
+      should.not.exist(duplicateResult);
+      should.exist(err);
+      err.status.should.equal(409);
+      const {data} = err;
       data.should.have.property('message');
       data.message.should.contain(
         'Could not issue credential; duplicate credential ID.');
@@ -109,7 +114,11 @@ describe('API', function() {
       presentation = clone(mockData.authPresentation);
     });
     it('should authenticate without an existing account', async function() {
-      const result = await api.post('/authenticate', {presentation});
+      const result = await httpClient.post(`${baseURL}/authenticate`, {
+        json: {presentation},
+        agent: httpsAgent,
+        timeout
+      });
       should.exist(result);
       result.status.should.equal(200);
       result.data.should.be.an('object');
@@ -130,8 +139,11 @@ describe('API', function() {
         ...presentation,
         holder: account.controller
       };
-      const result = await api.post(
-        '/authenticate', {presentation: withController});
+      const result = await httpClient.post(`${baseURL}/authenticate`, {
+        json: {presentation: withController},
+        agent: httpsAgent,
+        timeout
+      });
       should.exist(result);
       result.status.should.equal(200);
       result.data.should.be.an('object');
@@ -148,29 +160,69 @@ describe('API', function() {
     });
     it('should not authenticate without a holder', async function() {
       delete presentation.holder;
-      const result = await api.post('/authenticate', {presentation});
-      should.exist(result);
-      helpers.shouldBeAValidationError(result);
+      let result;
+      let err;
+      try {
+        result = await httpClient.post(`${baseURL}/authenticate`, {
+          json: {presentation},
+          agent: httpsAgent,
+          timeout
+        });
+      } catch(e) {
+        err = e;
+      }
+      should.not.exist(result);
+      helpers.shouldBeAValidationError(err);
     });
     it('should not authenticate without a proof', async function() {
       delete presentation.proof;
-      const result = await api.post('/authenticate', {presentation});
-      should.exist(result);
-      helpers.shouldBeAValidationError(result);
+      let result;
+      let err;
+      try {
+        result = await httpClient.post(`${baseURL}/authenticate`, {
+          json: {presentation},
+          agent: httpsAgent,
+          timeout
+        });
+      } catch(e) {
+        err = e;
+      }
+      should.not.exist(result);
+      helpers.shouldBeAValidationError(err);
     });
     it('should not authenticate without a verificationMethod',
       async function() {
         delete presentation.proof.verificationMethod;
-        const result = await api.post('/authenticate', {presentation});
-        should.exist(result);
-        helpers.shouldBeAValidationError(result);
+        let result;
+        let err;
+        try {
+          result = await httpClient.post(`${baseURL}/authenticate`, {
+            json: {presentation},
+            agent: httpsAgent,
+            timeout
+          });
+        } catch(e) {
+          err = e;
+        }
+        should.not.exist(result);
+        helpers.shouldBeAValidationError(err);
       });
     it('should not authenticate if the purpose is not authentication',
       async function() {
         presentation.proof.proofPurpose = 'test-failure';
-        const result = await api.post('/authenticate', {presentation});
-        should.exist(result);
-        helpers.shouldBeAValidationError(result);
+        let result;
+        let err;
+        try {
+          result = await httpClient.post(`${baseURL}/authenticate`, {
+            json: {presentation},
+            agent: httpsAgent,
+            timeout
+          });
+        } catch(e) {
+          err = e;
+        }
+        should.not.exist(result);
+        helpers.shouldBeAValidationError(err);
       });
   }); // end authenticate POST
 
@@ -204,11 +256,13 @@ describe('API', function() {
         const instanceId = profileAgent.id;
         const rlcId = 'bar';
         const {token} = secrets;
-        const result = await api.post(
-          `/instances/${instanceId}/rlc/${rlcId}/publish`,
-          {profileAgent: instanceId},
-          {headers: {Authorization: `Bearer ${token}`}}
-        );
+        const result = await httpClient.post(
+          `${baseURL}/instances/${instanceId}/rlc/${rlcId}/publish`, {
+            json: {profileAgent: instanceId},
+            headers: {Authorization: `Bearer ${token}`},
+            agent: httpsAgent,
+            timeout
+          });
         result.status.should.equal(200);
       });
     }); // end authenticated
