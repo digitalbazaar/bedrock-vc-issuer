@@ -4,21 +4,18 @@
 'use strict';
 
 const {config} = require('bedrock');
-const {create} = require('apisauce');
 const {httpsAgent} = require('bedrock-https-agent');
+const {httpClient} = require('@digitalbazaar/http-client');
 const helpers = require('./helpers.js');
 
-const api = create({
-  baseURL: `${config.server.baseUri}/vc-issuer`,
-  httpsAgent,
-  timeout: 10000,
-});
 const privateKmsBaseUrl = `${config.server.baseUri}/kms`;
 const publicKmsBaseUrl = `${config.server.baseUri}/kms`;
 
 // NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential');
+const baseURL = `${config.server.baseUri}/vc-issuer`;
+const timeout = 10000;
 
 describe('Interop Credentials API', () => {
   let agents;
@@ -38,11 +35,12 @@ describe('Interop Credentials API', () => {
     let result;
     const {token} = secrets;
     try {
-      result = await api.post(
-        '/issue',
-        {credential: mockCredential},
-        {headers: {Authorization: `Bearer ${token}`}}
-      );
+      result = await httpClient.post(`${baseURL}/issue`, {
+        headers: {Authorization: `Bearer ${token}`},
+        json: {credential: mockCredential},
+        agent: httpsAgent,
+        timeout
+      });
     } catch(e) {
       error = e;
     }

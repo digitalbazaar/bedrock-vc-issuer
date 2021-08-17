@@ -621,9 +621,9 @@ function deriveKeystoreId(id) {
     paths[3]; // "<keystore_id>"
 }
 
-function shouldBeAValidationError(result) {
-  result.status.should.equal(400);
-  const {data = {}} = result;
+function shouldBeAValidationError(err) {
+  err.status.should.equal(400);
+  const {data = {}} = err;
   data.should.have.property('message');
   data.message.should.be.a('string');
   data.should.have.property('type');
