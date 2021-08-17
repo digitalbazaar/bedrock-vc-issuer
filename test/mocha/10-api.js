@@ -114,12 +114,19 @@ describe('API', function() {
       presentation = clone(mockData.authPresentation);
     });
     it('should authenticate without an existing account', async function() {
-      const result = await httpClient.post(`${baseURL}/authenticate`, {
-        json: {presentation},
-        agent: httpsAgent,
-        timeout
-      });
+      let result;
+      let err;
+      try {
+        result = await httpClient.post(`${baseURL}/authenticate`, {
+          json: {presentation},
+          agent: httpsAgent,
+          timeout
+        });
+      } catch(e) {
+        err = e;
+      }
       should.exist(result);
+      should.not.exist(err);
       result.status.should.equal(200);
       result.data.should.be.an('object');
       result.data.should.have.property('id');
@@ -139,12 +146,20 @@ describe('API', function() {
         ...presentation,
         holder: account.controller
       };
-      const result = await httpClient.post(`${baseURL}/authenticate`, {
-        json: {presentation: withController},
-        agent: httpsAgent,
-        timeout
-      });
+      let result;
+      let err;
+      try {
+        result = await httpClient.post(`${baseURL}/authenticate`, {
+          json: {presentation: withController},
+          agent: httpsAgent,
+          timeout
+        });
+      } catch(e) {
+        err = e;
+      }
+
       should.exist(result);
+      should.not.exist(err);
       result.status.should.equal(200);
       result.data.should.be.an('object');
       result.data.should.have.property('id');
