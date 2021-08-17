@@ -11,7 +11,7 @@ const helpers = require('./helpers.js');
 const api = create({
   baseURL: `${config.server.baseUri}/vc-issuer`,
   httpsAgent,
-  timeout: 1000,
+  timeout: 10000,
 });
 const privateKmsBaseUrl = `${config.server.baseUri}/kms`;
 const publicKmsBaseUrl = `${config.server.baseUri}/kms`;

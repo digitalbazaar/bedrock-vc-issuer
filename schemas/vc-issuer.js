@@ -3,15 +3,15 @@
  */
 'use strict';
 
-const {config} = require('bedrock');
-const {schemas} = require('bedrock-validation');
+// const {config} = require('bedrock');
+// const {schemas} = require('bedrock-validation');
 const {
   authenticationProof,
   verifiablePresentationType,
   delegationZCap
 } = require('./subs/vc-common');
 
-const {constants} = config;
+// const {constants} = config;
 
 const instancesQuery = {
   title: 'Instances Query',
@@ -67,6 +67,7 @@ const instancesUpdate = {
       ],
       properties: {
         // FIXME: Validate context
+        // eslint-disable-next-line max-len
         // '@context': schemas.jsonldContext(constants.CREDENTIALS_CONTEXT_V1_URL),
         type: verifiablePresentationType(),
         holder: {
@@ -101,6 +102,7 @@ const login = {
       required: ['@context', 'type', 'holder', 'proof'],
       properties: {
         // FIXME: Validate context
+        // eslint-disable-next-line max-len
         // '@context': schemas.jsonldContext(constants.CREDENTIALS_CONTEXT_V1_URL),
         type: verifiablePresentationType(),
         holder: {type: 'string'},
