@@ -50,7 +50,7 @@
     "bedrock-jsonld-document-loader": "^1.0.1",
     "bedrock-passport": "^6.1.0",
     "bedrock-permission": "^3.2.0",
-    "bedrock-profile": "digitalbazaar/bedrock-profile#support-for-multiple-signature-suite",
+    "bedrock-profile": "^10.0.0",
     "bedrock-mongodb": "^8.2.0",
     "bedrock-security-context": "^4.1.0",
     "bedrock-server": "^2.7.0",
