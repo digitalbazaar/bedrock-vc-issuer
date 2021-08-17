@@ -12,7 +12,7 @@
   "dependencies": {
     "@digitalbazaar/http-client": "^1.1.0",
     "apisauce": "^1.1.1",
-    "bedrock": "^3.3.0",
+    "bedrock": "^4.1.1",
     "bedrock-account": "^5.0.0",
     "bedrock-credentials-context": "^1.0.0",
     "bedrock-did-context": "^1.0.0",
