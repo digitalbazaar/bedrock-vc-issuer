@@ -9,19 +9,28 @@ const brHttpsAgent = require('bedrock-https-agent');
 const {delegateCapability, delegate} = require('bedrock-profile/lib/zcaps');
 const edvStorage = require('bedrock-edv-storage');
 const edvHelpers = require('bedrock-edv-storage/lib/helpers');
-const {Ed25519KeyPair} = require('crypto-ld');
+const {Ed25519VerificationKey2018} =
+  require('@digitalbazaar/ed25519-verification-key-2018');
+const {Ed25519VerificationKey2020} =
+  require('@digitalbazaar/ed25519-verification-key-2020');
 const {EdvClient, EdvDocument} = require('edv-client');
 const {httpsAgent} = require('bedrock-https-agent');
 const {httpClient} = require('@digitalbazaar/http-client');
 const kms = require('bedrock-profile/lib/kms');
 const {profiles, profileAgents} = require('bedrock-profile');
 
+const SUPPORTED_KEY_PAIRS = new Map();
+SUPPORTED_KEY_PAIRS.set(
+  'Ed25519VerificationKey2018', Ed25519VerificationKey2018);
+SUPPORTED_KEY_PAIRS.set(
+  'Ed25519VerificationKey2020', Ed25519VerificationKey2020);
+
 const {
   AsymmetricKey,
   CapabilityAgent,
   KeystoreAgent,
   KmsClient
-} = require('webkms-client');
+} = require('@digitalbazaar/webkms-client');
 
 const {config} = bedrock;
 
@@ -81,7 +90,7 @@ async function createUser({
   invocationSigner,
   credentialEdv,
   issuerKey,
-  verificationMethod,
+  publicAlias,
   edvId,
   privateKmsBaseUrl,
   publicKmsBaseUrl
@@ -111,7 +120,7 @@ async function createUser({
     invocationTarget: {
       id: issuerKey.id,
       type: issuerKey.type,
-      verificationMethod
+      publicAlias
     }
   };
   const issuerZcaps = {
@@ -188,10 +197,12 @@ async function createIssuerKey({profileSigner, type}) {
   const kmsClient = new KmsClient({keystore, httpsAgent});
   const keystoreAgent = await getProfileKeystoreAgent({profileSigner});
   const key = await keystoreAgent.generateKey({type, kmsModule});
+  const KeyPair = SUPPORTED_KEY_PAIRS.get(type);
   const keyDescription = await key.getKeyDescription();
-  const fingerprint = Ed25519KeyPair.fingerprintFromPublicKey(keyDescription);
-  const verificationMethod = `did:key:${fingerprint}#${fingerprint}`;
-  return {key, kmsClient, verificationMethod};
+  const keyPair = await KeyPair.from(keyDescription);
+  const fingerprint = keyPair.fingerprint();
+  const publicAlias = `did:key:${fingerprint}#${fingerprint}`;
+  return {key, kmsClient, publicAlias};
 }
 
 async function delegateEdvZcaps({
@@ -226,7 +237,7 @@ async function delegateEdvZcaps({
     invocationTarget: {
       id: keyAgreementKey.id,
       type: keyAgreementKey.type,
-      verificationMethod: keyAgreementKey.id
+      publicAlias: keyAgreementKey.id
     },
     parentCapability: keyAgreementKey.id
   };
@@ -237,7 +248,7 @@ async function delegateEdvZcaps({
     invocationTarget: {
       id: hmac.id,
       type: hmac.type,
-      verificationMethod: hmac.id,
+      publicAlias: hmac.id,
     },
     parentCapability: hmac.id
   };
@@ -282,7 +293,7 @@ async function delegateAgentRecordZcaps({
     invocationTarget: {
       id: keyAgreementKey.id,
       type: keyAgreementKey.type,
-      verificationMethod: keyAgreementKey.id
+      publicAlias: keyAgreementKey.id
     },
     parentCapability: keyAgreementKey.id
   };
@@ -318,6 +329,7 @@ async function insertIssuerAgent({
   // this is the profile associated with an issuer account
   const {id: profileId} = await profiles.create({
     accountId: id, didMethod, privateKmsBaseUrl, publicKmsBaseUrl});
+  console.log(profileId, '<><><><><>profileId');
   const profileAgentRecord = await profileAgents.getByProfile(
     {profileId, accountId: id, includeSecrets: true});
   const {profileAgent} = profileAgentRecord;
@@ -347,7 +359,7 @@ async function insertIssuerAgent({
     signer: agentSigner,
     prefix: 'credential'
   });
-  const {key: issuerKey, kmsClient, verificationMethod} = await createIssuerKey(
+  const {key: issuerKey, kmsClient, publicAlias} = await createIssuerKey(
     {profileSigner, type: 'Ed25519VerificationKey2018'});
   const issuerKeyRequest = {
     referenceId: 'key-assertionMethod',
@@ -359,7 +371,7 @@ async function insertIssuerAgent({
     invocationTarget: {
       id: issuerKey.id,
       type: issuerKey.type,
-      verificationMethod,
+      publicAlias,
     }
   };
   const profileZcaps = {
@@ -396,7 +408,7 @@ async function insertIssuerAgent({
     edvId,
     publicKmsBaseUrl,
     privateKmsBaseUrl,
-    verificationMethod,
+    publicAlias,
     invocationSigner: profileSigner,
     ...result
   });
@@ -574,7 +586,7 @@ async function initializeAccessManagement({
     invocationTarget: {
       id: keyAgreementKey.id,
       type: keyAgreementKey.type,
-      verificationMethod: keyAgreementKey.id
+      publicAlias: keyAgreementKey.id
     },
     parentCapability: keyAgreementKey.id
   };
