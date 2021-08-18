@@ -4,20 +4,17 @@
 'use strict';
 
 const {config, util: {clone}} = require('bedrock');
-const {create} = require('apisauce');
 const {httpsAgent} = require('bedrock-https-agent');
+const {httpClient} = require('@digitalbazaar/http-client');
 const helpers = require('./helpers.js');
 const sinon = require('sinon');
 const {_CredentialStatusWriter} = require('bedrock-vc-issuer');
 const mockData = require('./mockData.json');
 
-const api = create({
-  baseURL: `${config.server.baseUri}/vc-issuer`,
-  httpsAgent,
-  timeout: 10000,
-});
 const privateKmsBaseUrl = `${config.server.baseUri}/kms`;
 const publicKmsBaseUrl = `${config.server.baseUri}/kms`;
+const baseURL = `${config.server.baseUri}/vc-issuer`;
+const timeout = 10000;
 
 describe('Failure recovery', function() {
   let agents;
@@ -69,21 +66,23 @@ describe('Failure recovery', function() {
     credential.id = 'urn:someId1';
 
     const {token} = secrets;
-    const result1 = await api.post(
-      '/issue',
-      {credential},
-      {headers: {Authorization: `Bearer ${token}`}}
-    );
+    const result1 = await httpClient.post(`${baseURL}/issue`, {
+      json: {credential},
+      headers: {Authorization: `Bearer ${token}`},
+      agent: httpsAgent,
+      timeout
+    });
     const result1CredentialStatusId = result1.data.verifiableCredential
       .credentialStatus.id;
 
     credential = clone(mockData.credential);
     credential.id = 'urn:someId2';
-    const result2 = await api.post(
-      '/issue',
-      {credential},
-      {headers: {Authorization: `Bearer ${token}`}}
-    );
+    const result2 = await httpClient.post(`${baseURL}/issue`, {
+      json: {credential},
+      headers: {Authorization: `Bearer ${token}`},
+      agent: httpsAgent,
+      timeout
+    });
     result2.status.should.equal(200);
     should.exist(result2.data);
     result2.data.should.be.an('object');
@@ -119,21 +118,23 @@ describe('Failure recovery', function() {
     credential.id = 'urn:someId1';
 
     const {token} = secrets;
-    const result1 = await api.post(
-      '/issue',
-      {credential},
-      {headers: {Authorization: `Bearer ${token}`}}
-    );
+    const result1 = await httpClient.post(`${baseURL}/issue`, {
+      json: {credential},
+      headers: {Authorization: `Bearer ${token}`},
+      agent: httpsAgent,
+      timeout
+    });
     const result1CredentialStatusId = result1.data.verifiableCredential
       .credentialStatus.id;
 
     credential = clone(mockData.credential);
     credential.id = 'urn:someId2';
-    const result2 = await api.post(
-      '/issue',
-      {credential},
-      {headers: {Authorization: `Bearer ${token}`}}
-    );
+    const result2 = await httpClient.post(`${baseURL}/issue`, {
+      json: {credential},
+      headers: {Authorization: `Bearer ${token}`},
+      agent: httpsAgent,
+      timeout
+    });
     result2.status.should.equal(200);
     should.exist(result2.data);
     result2.data.should.be.an('object');
@@ -168,27 +169,34 @@ describe('Failure recovery', function() {
     credential.id = 'urn:someId3';
     const {token} = secrets;
 
-    const result1 = await api.post(
-      '/issue',
-      {credential},
-      {headers: {Authorization: `Bearer ${token}`}}
-    );
+    const result1 = await httpClient.post(`${baseURL}/issue`, {
+      json: {credential},
+      headers: {Authorization: `Bearer ${token}`},
+      agent: httpsAgent,
+      timeout
+    });
     result1.status.should.equal(200);
     should.exist(result1.data);
     result1.data.should.be.an('object');
     should.exist(result1.data.verifiableCredential);
     // expect a duplicate error when the same credential is posted a second time
-    const result2 = await api.post(
-      '/issue',
-      {credential},
-      {headers: {Authorization: `Bearer ${token}`}}
-    );
-    result2.status.should.equal(409);
-    should.exist(result2.data);
-    result2.data.should.be.an('object');
-    result2.data.message.should.equal('Could not issue credential; duplicate ' +
+    let result2;
+    let err;
+    try {
+      result2 = await httpClient.post(`${baseURL}/issue`, {
+        json: {credential},
+        headers: {Authorization: `Bearer ${token}`},
+        agent: httpsAgent,
+        timeout
+      });
+    } catch(e) {
+      err = e;
+    }
+    should.not.exist(result2);
+    should.exist(err);
+    err.status.should.equal(409);
+    err.message.should.equal('Could not issue credential; duplicate ' +
     'credential ID.');
-    result2.data.type.should.equal('DuplicateError');
-    should.not.exist(result2.data.verifiableCredential);
+    err.data.type.should.equal('DuplicateError');
   });
 });

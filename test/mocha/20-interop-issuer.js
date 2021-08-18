@@ -45,8 +45,7 @@ describe('Interop Credentials API', () => {
       error = e;
     }
     should.not.exist(error);
-    // apisauce API does not throw it puts errors in `result.problem`
-    should.not.exist(result.problem);
+    should.exist(result);
     const {proof} = result.data.verifiableCredential;
     should.exist(proof);
   });
