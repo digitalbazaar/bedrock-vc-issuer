@@ -10,8 +10,7 @@
     "coverage-report": "nyc report"
   },
   "dependencies": {
-    "@digitalbazaar/http-client": "^1.1.0",
-    "apisauce": "^1.1.1",
+    "@digitalbazaar/http-client": "^1.2.0",
     "bedrock": "^4.1.1",
     "bedrock-account": "^5.0.0",
     "bedrock-credentials-context": "^1.0.0",
