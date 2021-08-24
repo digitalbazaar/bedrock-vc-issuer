@@ -18,6 +18,8 @@ const {httpsAgent} = require('bedrock-https-agent');
 const {httpClient} = require('@digitalbazaar/http-client');
 const kms = require('bedrock-profile/lib/kms');
 const {profiles, profileAgents} = require('bedrock-profile');
+const {constants: {SECURITY_CONTEXT_V2_URL}} = require('security-context');
+const {CONTEXT_URL: ZCAP_CONTEXT_URL} = require('zcap-context');
 
 const SUPPORTED_KEY_PAIRS = new Map();
 SUPPORTED_KEY_PAIRS.set(
@@ -54,8 +56,11 @@ async function insertAccount({account = {}, meta = {}}) {
 
 async function delegateSigner({profileAgentRecord}) {
   const {profileAgent, secrets} = profileAgentRecord;
-  const ca = await CapabilityAgent.fromSecret(
-    {handle: 'primary', secret: secrets.seed});
+  const ca = await CapabilityAgent.fromSecret({
+    handle: 'primary',
+    secret: secrets.seed,
+    keyType: 'Ed25519VerificationKey2020'
+  });
   const invoker = ca.id.split('#')[0];
   const zcap = await profileAgents.delegateCapabilityInvocationKey(
     {profileAgent, invoker, secrets});
@@ -110,7 +115,7 @@ async function createUser({
     prefix: 'credential'
   });
   const assertionKeyRequest = {
-    '@context': 'https://w3id.org/security/v2',
+    '@context': [SECURITY_CONTEXT_V2_URL, ZCAP_CONTEXT_URL],
     id: `urn:zcap:${await edvHelpers.generateRandom()}`,
     referenceId: 'key-assertionMethod',
     // string should match KMS ops
@@ -329,7 +334,6 @@ async function insertIssuerAgent({
   // this is the profile associated with an issuer account
   const {id: profileId} = await profiles.create({
     accountId: id, didMethod, privateKmsBaseUrl, publicKmsBaseUrl});
-  console.log(profileId, '<><><><><>profileId');
   const profileAgentRecord = await profileAgents.getByProfile(
     {profileId, accountId: id, includeSecrets: true});
   const {profileAgent} = profileAgentRecord;
@@ -360,7 +364,8 @@ async function insertIssuerAgent({
     prefix: 'credential'
   });
   const {key: issuerKey, kmsClient, publicAlias} = await createIssuerKey(
-    {profileSigner, type: 'Ed25519VerificationKey2018'});
+    {profileSigner, type: 'Ed25519VerificationKey2020'});
+
   const issuerKeyRequest = {
     referenceId: 'key-assertionMethod',
     revocationReferenceId: 'key-assertionMethod-revocations',
