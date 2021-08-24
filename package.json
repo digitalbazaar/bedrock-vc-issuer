@@ -49,7 +49,7 @@
     "bedrock-did-context": "^2.0.0",
     "bedrock-express": "^4.0.0",
     "bedrock-https-agent": "^2.1.0",
-    "bedrock-jsonld-document-loader": "^1.1.0",
+    "bedrock-jsonld-document-loader": "digitalbazaar/bedrock-jsonld-document-loader#web-mode",
     "bedrock-passport": "^6.1.0",
     "bedrock-permission": "^3.2.0",
     "bedrock-profile": "^10.0.4",
