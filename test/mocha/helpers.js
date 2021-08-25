@@ -18,7 +18,6 @@ const {httpsAgent} = require('bedrock-https-agent');
 const {httpClient} = require('@digitalbazaar/http-client');
 const kms = require('bedrock-profile/lib/kms');
 const {profiles, profileAgents} = require('bedrock-profile');
-const {constants: {SECURITY_CONTEXT_V2_URL}} = require('security-context');
 const {CONTEXT_URL: ZCAP_CONTEXT_URL} = require('zcap-context');
 
 const SUPPORTED_KEY_PAIRS = new Map();
@@ -115,7 +114,7 @@ async function createUser({
     prefix: 'credential'
   });
   const assertionKeyRequest = {
-    '@context': [SECURITY_CONTEXT_V2_URL, ZCAP_CONTEXT_URL],
+    '@context': ZCAP_CONTEXT_URL,
     id: `urn:zcap:${await edvHelpers.generateRandom()}`,
     referenceId: 'key-assertionMethod',
     // string should match KMS ops
