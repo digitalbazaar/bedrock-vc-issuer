@@ -43,7 +43,6 @@
     "cross-env": "^7.0.2",
     "edv-client": "^9.1.0",
     "nyc": "^15.1.0",
-    "security-context": "^4.0.0",
     "sinon": "^9.0.2",
     "zcap-context": "^1.2.1"
   },
