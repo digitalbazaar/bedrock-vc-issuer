@@ -100,8 +100,8 @@ const delegationZCap = () => ({
         id: {type: 'string'},
         type: {type: 'string'},
         // verificationMethod is only required for target type
-        // Ed25519VerificationKey2018
-        verificationMethod: {type: 'string'},
+        // Ed25519VerificationKey2018 or Ed25519VerificationKey2020
+        publicAlias: {type: 'string'},
       }
     },
     parentCapability: {type: 'string'},
