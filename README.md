@@ -1,4 +1,4 @@
-# Bedrock Verifiable Credentials issuer software _(bedrock-vc-issuer)_
+# Bedrock Verifiable Credentials Issuer API module _(bedrock-vc-issuer)_
 
 [![Build Status](https://img.shields.io/github/workflow/status/digitalbazaar/bedrock-vc-issuer/Node.js%20CI)](https://github.com/digitalbazaar/bedrock-vc-issuer/actions?query=workflow%3A%22Node.js+CI%22)
 [![NPM Version](https://img.shields.io/npm/v/bedrock-vc-issuer.svg)](https://npm.im/bedrock-vc-issuer)
@@ -53,6 +53,9 @@ In `lib/index.js` (or `main.js`, as appropriate):
 ```js
 require('bedrock-vc-issuer');
 ```
+
+Note: The use of [`bedrock-web-vc-issuer`](https://github.com/digitalbazaar/bedrock-web-vc-issuer) client is recommended,
+to create instances.
 
 ### Issuer HTTP API
 
