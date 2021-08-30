@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 6.0.0 - 2021-08-30
+
+### Changed
+- **BREAKING**: Update to use latest Ed25519 key and signature suites, latest `did-io`.
+
 ## 5.4.0 - 2021-01-12
 
 ### Changed
