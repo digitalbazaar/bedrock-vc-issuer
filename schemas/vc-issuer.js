@@ -3,15 +3,11 @@
  */
 'use strict';
 
-// const {config} = require('bedrock');
-// const {schemas} = require('bedrock-validation');
 const {
   authenticationProof,
   verifiablePresentationType,
   delegationZCap
 } = require('./subs/vc-common');
-
-// const {constants} = config;
 
 const instancesQuery = {
   title: 'Instances Query',
