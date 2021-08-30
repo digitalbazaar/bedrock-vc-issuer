@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 6.0.1 - 2021-08-TBD
+
+### Fixed
+- Revert back to appending the revocation list context to the credential.
+
 ## 6.0.0 - 2021-08-30
 
 ### Changed
