@@ -22,7 +22,7 @@
     "bedrock-edv-storage": "^9.0.4",
     "bedrock-express": "^4.0.0",
     "bedrock-https-agent": "^2.1.0",
-    "bedrock-jsonld-document-loader": "digitalbazaar/bedrock-jsonld-document-loader#web-mode",
+    "bedrock-jsonld-document-loader": "^1.2.0",
     "bedrock-kms": "^6.0.0",
     "bedrock-kms-http": "^5.0.0",
     "bedrock-ledger-context": "^20.0.1",
