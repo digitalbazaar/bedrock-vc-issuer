@@ -135,7 +135,9 @@ Example request:
 }
 ```
 
-`HTTP 200 OK`
+```
+HTTP 200 OK
+```
 
 #### Publish RLC - `POST /vc-issuer/instances/:instanceId/rlc/:rlcId/publish`
 Uses either `bedrock-passport` authentication, or an `Authorization` header bearer token.
