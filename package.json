@@ -28,6 +28,7 @@
     "@digitalbazaar/bitstring": "^1.2.0",
     "@digitalbazaar/ed25519-signature-2018": "^2.0.1",
     "@digitalbazaar/ed25519-signature-2020": "^3.0.0",
+    "@digitalbazaar/ed25519-verification-key-2020": "^3.1.0",
     "@digitalbazaar/http-client": "^1.2.0",
     "@digitalbazaar/vc": "^1.0.0",
     "@digitalbazaar/webkms-client": "^6.0.1",
@@ -35,6 +36,7 @@
     "auth-header": "^1.0.0",
     "base64url-universal": "^1.1.0",
     "cors": "^2.8.5",
+    "crypto-ld": "^6.0.0",
     "edv-client": "^9.1.0",
     "lru-cache": "^5.1.1",
     "vc-revocation-list": "^3.0.0"
