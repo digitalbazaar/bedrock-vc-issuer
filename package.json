@@ -36,6 +36,7 @@
     "base64url-universal": "^1.1.0",
     "cors": "^2.8.5",
     "edv-client": "^9.1.0",
+    "esm": "^3.2.25",
     "lru-cache": "^5.1.1",
     "vc-revocation-list": "^3.0.0"
   },
