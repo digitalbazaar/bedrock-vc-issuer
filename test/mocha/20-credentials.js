@@ -50,9 +50,8 @@ describe('issue APIs', () => {
     // get service agent to delegate to
     const serviceAgentUrl =
       `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
-    const {data: serviceAgent} = await httpClient.get(serviceAgentUrl, {
-      agent
-    });
+    const {data: serviceAgent} = await httpClient.get(
+      serviceAgentUrl, {agent});
 
     // delegate edv, hmac, and key agreement key zcaps to service agent
     const {id: edvId} = edvConfig;
@@ -100,7 +99,7 @@ describe('issue APIs', () => {
     issuerId = issuerConfig.id;
     rootZcap = `urn:zcap:root:${encodeURIComponent(issuerId)}`;
   });
-  describe.only('/credentials/issue', () => {
+  describe('/credentials/issue', () => {
     it('issues a valid credential w/no "credentialStatus"', async () => {
       const credential = clone(mockCredential);
       let error;
@@ -166,11 +165,51 @@ describe('issue APIs', () => {
     });
   });
 
-  describe.skip('/credentials/status', () => {
+  describe('/credentials/status', () => {
     it('updates a credential status', async () => {
-      // FIXME: first issue VC
+      // first issue VC
+      const credential = clone(mockCredential);
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      const {data: {verifiableCredential}} = await zcapClient.write({
+        url: `${issuerId}/credentials/issue`,
+        capability: rootZcap,
+        json: {credential}
+      });
 
-      // FIXME: then revoke VC
+      // get VC status
+      const statusInfo = await helpers.getCredentialStatus(
+        {verifiableCredential});
+      let {status} = statusInfo;
+      status.should.equal(false);
+
+      // then revoke VC
+      let error;
+      try {
+        await zcapClient.write({
+          url: `${issuerId}/credentials/status`,
+          capability: rootZcap,
+          json: {
+            credentialId: verifiableCredential.id,
+            credentialStatus: {
+              type: 'RevocationList2020Status'
+            }
+          }
+        });
+      } catch(e) {
+        error = e;
+      }
+      assertNoError(error);
+
+      // force publication of new SLC
+      await zcapClient.write({
+        url: `${statusInfo.statusListCredential}/publish`,
+        capability: rootZcap,
+        json: {}
+      });
+
+      // check status of VC has changed
+      ({status} = await helpers.getCredentialStatus({verifiableCredential}));
+      status.should.equal(true);
     });
   });
 });
