@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 7.0.1 - 2022-02-xx
+
+### Changed
+- Use `@digitalbazaar/vc-status-list-context` and updated bedrock-vc-status-list-context.
+  These dependencies have no changes other than moved package locations.
+
 ## 7.0.0 - 2022-02-20
 
 ### Changed
