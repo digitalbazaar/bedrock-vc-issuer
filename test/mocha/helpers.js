@@ -4,6 +4,7 @@
 'use strict';
 
 const bedrock = require('bedrock');
+const {decodeList} = require('@digitalbazaar/vc-status-list');
 const {didIo} = require('bedrock-did-io');
 const {Ed25519Signature2020} = require('@digitalbazaar/ed25519-signature-2020');
 const {EdvClient} = require('@digitalbazaar/edv-client');
@@ -203,6 +204,23 @@ exports.delegate = async ({
   return zcapClient.delegate({
     capability, controller, expires, invocationTarget, allowedActions
   });
+};
+
+exports.getCredentialStatus = async ({verifiableCredential}) => {
+  // get SLC for the VC
+  const {credentialStatus} = verifiableCredential;
+  // FIXME: support `statusListCredential` as well
+  const {revocationListCredential} = credentialStatus;
+  const {data: slc} = await httpClient.get(
+    revocationListCredential, {agent: httpsAgent});
+
+  const {encodedList} = slc.credentialSubject;
+  const list = await decodeList({encodedList});
+  // FIXME: support `statusListIndex` as well
+  const statusListIndex = parseInt(
+    credentialStatus.revocationListIndex, 10);
+  const status = list.getStatus(statusListIndex);
+  return {status, statusListCredential: revocationListCredential};
 };
 
 exports.revokeDelegatedCapability = async ({
