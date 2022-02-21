@@ -50,7 +50,7 @@ exports.createConfig = async ({
   if(!meterId) {
     // create a meter for the keystore
     ({id: meterId} = await exports.createMeter({
-      capabilityAgent, serviceType: 'vc-verifier'
+      capabilityAgent, serviceType: 'vc-issuer'
     }));
   }
 
@@ -68,7 +68,7 @@ exports.createConfig = async ({
   }
 
   const zcapClient = exports.createZcapClient({capabilityAgent});
-  const url = `${mockData.baseUrl}/verifiers`;
+  const url = `${mockData.baseUrl}/issuers`;
   const response = await zcapClient.write({url, json: config});
   return response.data;
 };
@@ -77,18 +77,6 @@ exports.getConfig = async ({id, capabilityAgent}) => {
   const zcapClient = exports.createZcapClient({capabilityAgent});
   const {data} = await zcapClient.read({url: id});
   return data;
-};
-
-exports.createChallenge = async ({
-  capabilityAgent, capability, verifierId
-}) => {
-  const zcapClient = exports.createZcapClient({capabilityAgent});
-  return zcapClient.write({
-    url: `${verifierId}/challenges`,
-    capability: capability ||
-      `urn:zcap:root:${encodeURIComponent(verifierId)}`,
-    json: {}
-  });
 };
 
 exports.createEdv = async ({
