@@ -43,9 +43,8 @@ describe('provision API', () => {
     // get service agent to delegate to
     const serviceAgentUrl =
       `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
-    const {data: serviceAgent} = await httpClient.get(serviceAgentUrl, {
-      agent
-    });
+    const {data: serviceAgent} = await httpClient.get(
+      serviceAgentUrl, {agent});
 
     // delegate edv, hmac, and key agreement key zcaps to service agent
     const {id: edvId} = edvConfig;
