@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 7.0.1 - 2022-02-xx
+## 7.0.1 - 2022-02-21
 
 ### Changed
 - Use `@digitalbazaar/vc-status-list-context` and updated bedrock-vc-status-list-context.
