@@ -15,7 +15,7 @@ const mockData = require('./mock.data');
 const {baseUrl} = mockData;
 const serviceType = 'vc-issuer';
 
-describe.only('provision API', () => {
+describe('provision API', () => {
   let capabilityAgent;
   const zcaps = {};
   beforeEach(async () => {
@@ -30,7 +30,7 @@ describe.only('provision API', () => {
     // generate key for signing VCs (make it a did:key DID for simplicity)
     const assertionMethodKey = await keystoreAgent.generateKey({
       type: 'asymmetric',
-      publicKeyAlias: 'did:key:{publicKeyMultibase}#{publicKeyMultibase}'
+      publicAliasTemplate: 'did:key:{publicKeyMultibase}#{publicKeyMultibase}'
     });
 
     // create EDV for storage (creating hmac and kak in the process)
