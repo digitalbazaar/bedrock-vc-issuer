@@ -17,7 +17,9 @@ export const issueOptions = {
   additionalProperties: false,
   properties: {
     suiteName: {
-      type: 'string'
+      type: 'string',
+      // supported default suites in this version
+      enum: ['Ed25519Signature2020', 'Ed25519Signature2018']
     }
   }
 };
@@ -29,10 +31,14 @@ export const statusListConfig = {
   additionalProperties: false,
   properties: {
     suiteName: {
-      type: 'string'
+      type: 'string',
+      // supported suites in this version
+      enum: ['Ed25519Signature2020', 'Ed25519Signature2018']
     },
     statusType: {
-      type: 'string'
+      type: 'string',
+      // supported status types in this version
+      enum: ['revoked']
     }
   }
 };
