@@ -54,6 +54,7 @@
     "did-veres-one": "14.0.0-beta.4",
     "express": "^4.17.2",
     "nyc": "^15.1.0",
+    "sinon": "^9.2.4",
     "vc-revocation-list-context": "^1.0.0",
     "vc-status-list-context": "^1.0.0",
     "veres-one-context": "^12.0.0"

@@ -8,8 +8,11 @@ const bedrock = require('bedrock');
 const {CapabilityAgent} = require('@digitalbazaar/webkms-client');
 const helpers = require('./helpers');
 const {httpClient} = require('@digitalbazaar/http-client');
+const {issuer} = require('bedrock-vc-issuer');
 const mockData = require('./mock.data');
+const sinon = require('sinon');
 const {util: {clone}} = bedrock;
+const {_CredentialStatusWriter} = issuer;
 
 const {baseUrl} = mockData;
 const serviceType = 'vc-issuer';
@@ -120,8 +123,17 @@ describe('issue APIs', () => {
       should.exist(result.data);
       should.exist(result.data.verifiableCredential);
       const {verifiableCredential} = result.data;
-      const {proof} = verifiableCredential;
-      should.exist(proof);
+      verifiableCredential.should.be.an('object');
+      should.exist(verifiableCredential['@context']);
+      should.exist(verifiableCredential.id);
+      should.exist(verifiableCredential.type);
+      should.exist(verifiableCredential.issuer);
+      should.exist(verifiableCredential.issuanceDate);
+      should.exist(verifiableCredential.credentialSubject);
+      verifiableCredential.credentialSubject.should.be.an('object');
+      should.not.exist(verifiableCredential.credentialStatus);
+      should.exist(verifiableCredential.proof);
+      verifiableCredential.proof.should.be.an('object');
     });
     it('fails to issue a valid credential', async () => {
       let error;
@@ -160,8 +172,55 @@ describe('issue APIs', () => {
       should.exist(result.data);
       should.exist(result.data.verifiableCredential);
       const {verifiableCredential} = result.data;
+      verifiableCredential.should.be.an('object');
+      should.exist(verifiableCredential['@context']);
+      should.exist(verifiableCredential.id);
+      should.exist(verifiableCredential.type);
+      should.exist(verifiableCredential.issuer);
+      should.exist(verifiableCredential.issuanceDate);
+      should.exist(verifiableCredential.credentialSubject);
+      verifiableCredential.credentialSubject.should.be.an('object');
+      should.exist(verifiableCredential.credentialStatus);
+      should.exist(verifiableCredential.proof);
+      verifiableCredential.proof.should.be.an('object');
+    });
+    it('fails when trying to issue a duplicate credential', async () => {
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+
+      // issue VC (should succeed)
+      let credential = clone(mockCredential);
+      let error;
+      let result;
+      try {
+        result = await zcapClient.write({
+          url: `${issuerId}/credentials/issue`,
+          capability: rootZcap,
+          json: {credential}
+        });
+      } catch(e) {
+        error = e;
+      }
+      assertNoError(error);
+      should.exist(result.data);
+      should.exist(result.data.verifiableCredential);
+      const {verifiableCredential} = result.data;
       const {proof} = verifiableCredential;
       should.exist(proof);
+
+      // issue VC with the same ID again (should fail)
+      credential = clone(mockCredential);
+      result = undefined;
+      try {
+        result = await zcapClient.write({
+          url: `${issuerId}/credentials/issue`,
+          capability: rootZcap,
+          json: {credential}
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      error.data.type.should.equal('DuplicateError');
     });
   });
 
@@ -210,6 +269,102 @@ describe('issue APIs', () => {
       // check status of VC has changed
       ({status} = await helpers.getCredentialStatus({verifiableCredential}));
       status.should.equal(true);
+    });
+  });
+
+  describe('/credential/issue crash recovery', () => {
+    // stub modules in order to simulate failure conditions
+    let credentialStatusWriterStub;
+    let mathRandomStub;
+    before(async () => {
+      // make Math.random always return 0
+      // this will ensure that the same shard is selected every time
+      // see _chooseRandom helper in ListManager.js
+      mathRandomStub = sinon.stub(Math, 'random').callsFake(() => 0);
+      // make credentialStatusWriter.finish a noop
+      // making this a noop is simulating a failure where the revocation list
+      // bookkeeping was not completed after an issuance
+      credentialStatusWriterStub = sinon.stub(
+        _CredentialStatusWriter.prototype, 'finish').callsFake(async () => {});
+    });
+    after(async () => {
+      mathRandomStub.restore();
+      credentialStatusWriterStub.restore();
+    });
+
+    it('successfully recovers from a simulated crash', async () => {
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+
+      // first issue a VC that is partially completed enough to return the
+      // VC, however, the revocation list index bookkeeping is not updated
+      // The earlier failure is detected by the second issue of a VC and
+      // the bookkeeping is repaired
+      const credential1 = clone(mockCredential);
+      credential1.id = 'urn:id1';
+      const {data: {verifiableCredential: vc1}} = await zcapClient.write({
+        url: `${issuerId}/credentials/issue`,
+        capability: rootZcap,
+        json: {credential: credential1}
+      });
+
+      const vc1StatusId = vc1.credentialStatus.id;
+
+      // now issue second VC (should succeed and process the
+      const credential2 = clone(mockCredential);
+      credential2.id = 'urn:id2';
+      const {data: {verifiableCredential: vc2}} = await zcapClient.write({
+        url: `${issuerId}/credentials/issue`,
+        capability: rootZcap,
+        json: {credential: credential2}
+      });
+
+      const vc2StatusId = vc2.credentialStatus.id;
+
+      // this test ensures that the two credentials are not issued with the
+      // same status list index / hash fragment
+      vc1StatusId.should.not.equal(vc2StatusId);
+      const vc1StatusHash = parseInt(vc1StatusId.split('#')[1]);
+      const vc2StatusHash = parseInt(vc2StatusId.split('#')[1]);
+      vc1StatusHash.should.not.equal(vc2StatusHash);
+    });
+    // ensure duplicate VCs are still properly detected when bookkeeping fails
+    it('fails when trying to issue a duplicate credential', async () => {
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+
+      // issue VC (should succeed)
+      let credential = clone(mockCredential);
+      let error;
+      let result;
+      try {
+        result = await zcapClient.write({
+          url: `${issuerId}/credentials/issue`,
+          capability: rootZcap,
+          json: {credential}
+        });
+      } catch(e) {
+        error = e;
+      }
+      assertNoError(error);
+      should.exist(result.data);
+      should.exist(result.data.verifiableCredential);
+      const {verifiableCredential} = result.data;
+      const {proof} = verifiableCredential;
+      should.exist(proof);
+
+      // issue VC with the same ID again (should fail)
+      credential = clone(mockCredential);
+      result = undefined;
+      try {
+        result = await zcapClient.write({
+          url: `${issuerId}/credentials/issue`,
+          capability: rootZcap,
+          json: {credential}
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      error.data.type.should.equal('DuplicateError');
     });
   });
 });
