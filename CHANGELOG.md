@@ -1,5 +1,12 @@
 # bedrock-vc-issuer ChangeLog
 
+## 7.0.0 - 2022-02-xx
+
+### Changed
+- **BREAKING**: Complete refactor to run on top of `bedrock-service*` modules. While
+  this version has similar functionality, its APIs and implementation are a clean
+  break from previous versions.
+
 ## 6.0.1 - 2021-08-30
 
 ### Fixed
