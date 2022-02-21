@@ -14,7 +14,7 @@ mock.productIdMap = new Map([
   ['edv', 'urn:uuid:dbd15f08-ff67-11eb-893b-10bf48838a41'],
   ['urn:uuid:dbd15f08-ff67-11eb-893b-10bf48838a41', 'edv'],
   // vc-issuer service
-  ['vc-verifier', 'urn:uuid:66aad4d0-8ac1-11ec-856f-10bf48838a41'],
+  ['vc-issuer', 'urn:uuid:66aad4d0-8ac1-11ec-856f-10bf48838a41'],
   ['urn:uuid:66aad4d0-8ac1-11ec-856f-10bf48838a41', 'vc-issuer'],
   // webkms service
   ['webkms', 'urn:uuid:80a82316-e8c2-11eb-9570-10bf48838a41'],
