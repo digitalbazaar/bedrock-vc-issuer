@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 7.0.0 - 2022-02-xx
+## 7.0.0 - 2022-02-20
 
 ### Changed
 - **BREAKING**: Complete refactor to run on top of `bedrock-service*` modules. While
