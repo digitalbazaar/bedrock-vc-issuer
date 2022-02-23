@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 7.1.0 - 2022-02-xx
+## 7.1.0 - 2022-02-23
 
 ### Added
 - Add default (dev mode) `app-identity` entry for `vc-issuer` service.
