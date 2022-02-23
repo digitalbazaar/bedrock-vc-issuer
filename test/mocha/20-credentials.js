@@ -83,8 +83,6 @@ describe('issue APIs', () => {
       delegator: capabilityAgent
     });
 
-    // FIXME: include `statusListOptions` or create a second issuer with it
-
     // create issuer instance w/ no status list options
     const noStatusListIssuerConfig = await helpers.createConfig(
       {capabilityAgent, zcaps});
