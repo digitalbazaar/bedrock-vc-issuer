@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 8.0.0 - 2022-03-xx
+## 8.0.0 - 2022-03-01
 
 ### Changed
 - **BREAKING**: Move zcap revocations to `/zcaps/revocations` to better
