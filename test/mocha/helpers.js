@@ -226,7 +226,7 @@ exports.getCredentialStatus = async ({verifiableCredential}) => {
 exports.revokeDelegatedCapability = async ({
   serviceObjectId, capabilityToRevoke, invocationSigner
 }) => {
-  const url = `${serviceObjectId}/revocations/` +
+  const url = `${serviceObjectId}/zcaps/revocations/` +
     encodeURIComponent(capabilityToRevoke.id);
   const zcapClient = exports.createZcapClient({invocationSigner});
   return zcapClient.write({url, json: capabilityToRevoke});
