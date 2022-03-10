@@ -1,6 +1,6 @@
 {
   "name": "bedrock-vc-issuer",
-  "version": "9.0.1-0",
+  "version": "9.0.1",
   "description": "Bedrock Verifiable Credential Issuer",
   "main": "./lib",
   "scripts": {
