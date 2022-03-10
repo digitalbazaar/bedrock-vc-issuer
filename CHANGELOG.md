@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 9.0.1 - 2022-03-xx
+## 9.0.1 - 2022-03-10
 
 ### Fixed
 - Fix linting error.
