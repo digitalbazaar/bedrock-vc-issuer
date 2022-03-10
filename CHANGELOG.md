@@ -1,6 +1,9 @@
 # bedrock-vc-issuer ChangeLog
 
-## 9.0.0 - 2022-03-xx
+## 9.0.0 - 2022-03-10
+
+### Changed
+- **BREAKING**: Disable loading contexts from the Web by default.
 
 ### Removed
 - **BREAKING**: Remove side-tracking of credential statuses in VC EDV doc
