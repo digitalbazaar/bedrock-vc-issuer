@@ -6,9 +6,9 @@
 - **BREAKING**: Disable loading contexts from the Web by default.
 
 ### Removed
-- **BREAKING**: Remove side-tracking of credential statuses in VC EDV doc
-  meta data. This side-tracking can get out of sync with the status list
-  and it is an unnecessary complexity.
+- **BREAKING**: Remove side-tracking of credential statuses in VC EDV
+  document meta data. This side-tracking can get out of sync with the
+  status list and it is an unnecessary complexity.
 
 ## 8.0.0 - 2022-03-01
 
