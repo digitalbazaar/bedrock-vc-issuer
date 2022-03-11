@@ -1,5 +1,13 @@
 # bedrock-vc-issuer ChangeLog
 
+## 10.0.0 - 2022-03-xx
+
+### Changed
+- **BREAKING**: Update peer dependencies:
+  - `bedrock-service-core@3`
+  - `bedrock-service-context-store@3`
+  - `bedrock-did-io@6.1`.
+
 ## 9.0.1 - 2022-03-10
 
 ### Fixed
