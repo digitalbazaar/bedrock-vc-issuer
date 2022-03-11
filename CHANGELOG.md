@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 10.0.0 - 2022-03-xx
+## 10.0.0 - 2022-03-11
 
 ### Changed
 - **BREAKING**: Update peer dependencies:
