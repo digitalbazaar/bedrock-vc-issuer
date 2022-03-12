@@ -27,7 +27,7 @@ export const issueOptions = {
 export const statusListConfig = {
   title: 'Status List Configuration',
   type: 'object',
-  required: ['suiteName', 'statusType'],
+  required: ['suiteName', 'statusPurpose'],
   additionalProperties: false,
   properties: {
     suiteName: {
@@ -35,10 +35,10 @@ export const statusListConfig = {
       // supported suites in this version
       enum: ['Ed25519Signature2020', 'Ed25519Signature2018']
     },
-    statusType: {
+    statusPurpose: {
       type: 'string',
       // supported status types in this version
-      enum: ['revoked']
+      enum: ['revocation']
     }
   }
 };

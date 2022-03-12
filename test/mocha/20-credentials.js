@@ -92,7 +92,7 @@ describe('issue APIs', () => {
 
     // create issuer instance w/ no status list options
     const statusListOptions = [{
-      statusType: 'revoked',
+      statusPurpose: 'revocation',
       suiteName: 'Ed25519Signature2020'
     }];
     const issuerConfig = await helpers.createConfig(
