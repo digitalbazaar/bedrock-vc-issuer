@@ -1,5 +1,16 @@
 # bedrock-vc-issuer ChangeLog
 
+## 11.0.0 - 2022-03-xx
+
+### Changed
+- **BREAKING**: Use `statusPurpose` instead of `statusType` for
+  all param names and data models.
+- **BREAKING**: Parameterize list manager document ID using
+  `statusPurpose`. Previous versions with issuer instances that
+  used revocation options will not be compatible with this version.
+- Update dependencies:
+  - `@digitalbazaar/vc-status-list@2.1`.
+
 ## 10.0.0 - 2022-03-11
 
 ### Changed
