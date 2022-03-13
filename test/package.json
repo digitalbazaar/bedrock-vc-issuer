@@ -10,13 +10,12 @@
     "coverage-report": "nyc report"
   },
   "dependencies": {
-    "@digitalbazaar/did-method-key": "^2.0.0",
     "@digitalbazaar/ed25519-signature-2020": "^3.0.0",
-    "@digitalbazaar/ed25519-verification-key-2020": "^3.2.0",
+    "@digitalbazaar/edv-client": "^13.0.0",
     "@digitalbazaar/ezcap": "^2.0.2",
     "@digitalbazaar/http-client": "^2.0.1",
-    "@digitalbazaar/vc": "^2.1.0",
     "@digitalbazaar/vc-status-list": "^2.0.0",
+    "@digitalbazaar/webkms-client": "^10.0.0",
     "bedrock": "^4.4.3",
     "bedrock-app-identity": "^1.2.0",
     "bedrock-credentials-context": "^1.0.0",
@@ -46,17 +45,10 @@
     "bedrock-vc-revocation-list-context": "^1.0.0",
     "bedrock-vc-status-list-context": "^1.0.1",
     "bedrock-veres-one-context": "^12.0.0",
-    "bedrock-views": "^7.1.0",
     "bedrock-zcap-storage": "^5.1.0",
     "cross-env": "^7.0.3",
-    "crypto-ld": "^6.0.0",
-    "did-context": "^3.1.1",
-    "did-veres-one": "14.0.0-beta.4",
-    "express": "^4.17.2",
     "nyc": "^15.1.0",
-    "sinon": "^9.2.4",
-    "vc-revocation-list-context": "^1.0.0",
-    "veres-one-context": "^12.0.0"
+    "sinon": "^9.2.4"
   },
   "nyc": {
     "excludeNodeModules": false,
