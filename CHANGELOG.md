@@ -1,5 +1,19 @@
 # bedrock-vc-issuer ChangeLog
 
+## 11.1.0 - 2022-03-TBD
+
+### Removed
+- Remove unused dependency `@digitalbazaar/edv-client@13.0`.
+- Remove unused dependencies from test.
+
+### Added
+- Add missing dependency `body-parser@1.19.2`.
+- Add missing dependencies `@digitalbazaar/webkms-client@10.0` and
+  `@digitalbazaar/edv-client@13.0` in test.
+
+### Changed
+- Update `coverage-ci` script to not output to `coverage.lcov`.
+
 ## 11.0.0 - 2022-03-12
 
 ### Changed
