@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 12.0.0 - 2022-03-xx
+## 12.0.0 - 2022-03-17
 
 ### Changed
 - **BREAKING**: Do not store issued VCs or check for duplicate
