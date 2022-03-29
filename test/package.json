@@ -37,7 +37,7 @@
     "bedrock-server": "^3.1.0",
     "bedrock-service-agent": "^2.0.0",
     "bedrock-service-context-store": "^3.0.0",
-    "bedrock-service-core": "^3.0.0",
+    "bedrock-service-core": "^3.1.1",
     "bedrock-ssm-mongodb": "^7.1.0",
     "bedrock-test": "^6.0.0",
     "bedrock-validation": "^5.5.0",
