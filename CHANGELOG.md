@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 13.0.0 - 2022-04-xx
+## 13.0.0 - 2022-04-06
 
 ### Changed
 - **BREAKING**: Rename package to `@bedrock/vc-issuer`.
