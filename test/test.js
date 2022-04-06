@@ -3,16 +3,16 @@
  */
 import * as bedrock from '@bedrock/core';
 import '@bedrock/ssm-mongodb';
-import '@bedrock/bedrock-vc-issuer';
-import {getServiceIdentities} from '@bedrock/app-identity';
+import '@bedrock/kms';
 import '@bedrock/https-agent';
 import '@bedrock/meter';
 import '@bedrock/meter-usage-reporter';
+import {getServiceIdentities} from '@bedrock/app-identity';
 import {handlers} from '@bedrock/meter-http';
 import '@bedrock/server';
-import '@bedrock/kms';
 import '@bedrock/kms-http';
 import '@bedrock/edv-storage';
+import '@bedrock/vc-issuer';
 import {mockData} from './mocha/mock.data.js';
 
 bedrock.events.on('bedrock.init', async () => {
@@ -36,5 +36,5 @@ bedrock.events.on('bedrock.init', async () => {
   handlers.setUseHandler({handler: ({meter} = {}) => ({meter})});
 });
 
-import '@bedrock-test';
+import '@bedrock/test';
 bedrock.start();
