@@ -11,9 +11,9 @@
     "coverage-report": "nyc report"
   },
   "dependencies": {
-    "@bedrock/core": "^5.0.0",
     "@bedrock/app-identity": "^2.0.0",
-    "@bedrock/credentials-context": "^2.2.0",
+    "@bedrock/core": "^5.0.0",
+    "@bedrock/credentials-context": "^2.0.0",
     "@bedrock/did-context": "^3.0.0",
     "@bedrock/did-io": "^7.0.0",
     "@bedrock/edv-storage": "^14.0.0",
@@ -38,7 +38,7 @@
     "@bedrock/validation": "^6.0.0",
     "@bedrock/vc-issuer": "file:..",
     "@bedrock/vc-revocation-list-context": "^2.0.0",
-    "@bedrock/vc-status-list-context": "^2.2.0",
+    "@bedrock/vc-status-list-context": "^2.0.0",
     "@bedrock/veres-one-context": "^13.0.0",
     "@bedrock/zcap-storage": "^6.0.0",
     "@digitalbazaar/ed25519-signature-2020": "^3.0.0",
