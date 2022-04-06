@@ -1,25 +1,24 @@
 /*
  * Copyright (c) 2019-2022 Digital Bazaar, Inc. All rights reserved.
  */
-'use strict';
-
-const bedrock = require('bedrock');
+import * as bedrock from '@bedrock/core';
+import {httpsAgent} from '@bedrock/https-agent';
+import {createRequire} from 'module';
+import {didIo} from '@bedrock/did-io';
+import {getAppIdentity} from '@bedrock/app-identity';
+import {mockData} from './mock.data.js';
+const require = createRequire(import.meta.url);
 const {decodeList} = require('@digitalbazaar/vc-status-list');
-const {didIo} = require('bedrock-did-io');
 const {Ed25519Signature2020} = require('@digitalbazaar/ed25519-signature-2020');
 const {EdvClient} = require('@digitalbazaar/edv-client');
 const {httpClient} = require('@digitalbazaar/http-client');
 const {KeystoreAgent, KmsClient} = require('@digitalbazaar/webkms-client');
-const {getAppIdentity} = require('bedrock-app-identity');
-const {httpsAgent} = require('bedrock-https-agent');
 const {ZcapClient} = require('@digitalbazaar/ezcap');
-
-const mockData = require('./mock.data');
 
 const edvBaseUrl = `${mockData.baseUrl}/edvs`;
 const kmsBaseUrl = `${mockData.baseUrl}/kms`;
 
-exports.createMeter = async ({capabilityAgent, serviceType} = {}) => {
+export async function createMeter({capabilityAgent, serviceType} = {}) {
   // create signer using the application's capability invocation key
   const {keys: {capabilityInvocationKey}} = getAppIdentity();
 
@@ -43,14 +42,14 @@ exports.createMeter = async ({capabilityAgent, serviceType} = {}) => {
   // return full meter ID
   const {id} = meter;
   return {id: `${meterService}/${id}`};
-};
+}
 
-exports.createConfig = async ({
+export async function createConfig({
   capabilityAgent, ipAllowList, meterId, zcaps, statusListOptions
-} = {}) => {
+} = {}) {
   if(!meterId) {
     // create a meter for the keystore
-    ({id: meterId} = await exports.createMeter({
+    ({id: meterId} = await createMeter({
       capabilityAgent, serviceType: 'vc-issuer'
     }));
   }
@@ -74,24 +73,24 @@ exports.createConfig = async ({
     config.statusListOptions = statusListOptions;
   }
 
-  const zcapClient = exports.createZcapClient({capabilityAgent});
+  const zcapClient = createZcapClient({capabilityAgent});
   const url = `${mockData.baseUrl}/issuers`;
   const response = await zcapClient.write({url, json: config});
   return response.data;
 };
 
-exports.getConfig = async ({id, capabilityAgent}) => {
-  const zcapClient = exports.createZcapClient({capabilityAgent});
+export async function getConfig({id, capabilityAgent}) {
+  const zcapClient = createZcapClient({capabilityAgent});
   const {data} = await zcapClient.read({url: id});
   return data;
-};
+}
 
-exports.createEdv = async ({
+export async function createEdv({
   capabilityAgent, keystoreAgent, keyAgreementKey, hmac, meterId
-}) => {
+}) {
   if(!meterId) {
     // create a meter for the keystore
-    ({id: meterId} = await exports.createMeter({
+    ({id: meterId} = await createMeter({
       capabilityAgent, serviceType: 'edv'
     }));
   }
@@ -131,13 +130,13 @@ exports.createEdv = async ({
   return {edvClient, edvConfig, hmac, keyAgreementKey};
 };
 
-exports.createKeystore = async ({
+export async function createKeystore({
   capabilityAgent, ipAllowList, meterId,
   kmsModule = 'ssm-v1'
-}) => {
+}) {
   if(!meterId) {
     // create a meter for the keystore
-    ({id: meterId} = await exports.createMeter(
+    ({id: meterId} = await createMeter(
       {capabilityAgent, serviceType: 'webkms'}));
   }
 
@@ -160,11 +159,11 @@ exports.createKeystore = async ({
   });
 };
 
-exports.createKeystoreAgent = async ({capabilityAgent, ipAllowList}) => {
+export async function createKeystoreAgent({capabilityAgent, ipAllowList}) {
   let err;
   let keystore;
   try {
-    keystore = await exports.createKeystore({capabilityAgent, ipAllowList});
+    keystore = await createKeystore({capabilityAgent, ipAllowList});
   } catch(e) {
     err = e;
   }
@@ -180,11 +179,11 @@ exports.createKeystoreAgent = async ({capabilityAgent, ipAllowList}) => {
   });
 
   return keystoreAgent;
-};
+}
 
-exports.createZcapClient = ({
+export function createZcapClient({
   capabilityAgent, delegationSigner, invocationSigner
-}) => {
+}) {
   const signer = capabilityAgent && capabilityAgent.getSigner();
   return new ZcapClient({
     agent: httpsAgent,
@@ -192,21 +191,21 @@ exports.createZcapClient = ({
     delegationSigner: delegationSigner || signer,
     SuiteClass: Ed25519Signature2020
   });
-};
+}
 
-exports.delegate = async ({
+export async function delegate({
   capability, controller, invocationTarget, expires, allowedActions,
   delegator
-}) => {
-  const zcapClient = exports.createZcapClient({capabilityAgent: delegator});
+}) {
+  const zcapClient = createZcapClient({capabilityAgent: delegator});
   expires = expires || (capability && capability.expires) ||
     new Date(Date.now() + 5000).toISOString().slice(0, -5) + 'Z';
   return zcapClient.delegate({
     capability, controller, expires, invocationTarget, allowedActions
   });
-};
+}
 
-exports.getCredentialStatus = async ({verifiableCredential}) => {
+export async function getCredentialStatus({verifiableCredential}) {
   // get SLC for the VC
   const {credentialStatus} = verifiableCredential;
   // FIXME: support `statusListCredential` as well
@@ -221,16 +220,16 @@ exports.getCredentialStatus = async ({verifiableCredential}) => {
     credentialStatus.revocationListIndex, 10);
   const status = list.getStatus(statusListIndex);
   return {status, statusListCredential: revocationListCredential};
-};
+}
 
-exports.revokeDelegatedCapability = async ({
+export async function revokeDelegatedCapability({
   serviceObjectId, capabilityToRevoke, invocationSigner
-}) => {
+}) {
   const url = `${serviceObjectId}/zcaps/revocations/` +
     encodeURIComponent(capabilityToRevoke.id);
-  const zcapClient = exports.createZcapClient({invocationSigner});
+  const zcapClient = createZcapClient({invocationSigner});
   return zcapClient.write({url, json: capabilityToRevoke});
-};
+}
 
 async function keyResolver({id}) {
   // support DID-based keys only

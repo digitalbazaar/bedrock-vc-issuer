@@ -26,14 +26,14 @@ TBD
 
 ## Install
 
-- Node.js 12+ is required.
+- Node.js 14+ is required.
 
 ### NPM
 
 To install via NPM:
 
 ```
-npm install --save bedrock-vc-issuer
+npm install --save @bedrock/vc-issuer
 ```
 
 ### Development
@@ -48,10 +48,10 @@ npm install
 
 ## Usage
 
-In `lib/index.js` (or `main.js`, as appropriate):
+In `lib/index.js`:
 
 ```js
-require('bedrock-vc-issuer');
+import '@bedrock/vc-issuer';
 ```
 
 Note: The use of [`bedrock-web-vc-issuer`](https://github.com/digitalbazaar/bedrock-web-vc-issuer) client is recommended,

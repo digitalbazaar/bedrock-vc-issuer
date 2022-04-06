@@ -1,16 +1,17 @@
 /*!
  * Copyright (c) 2020-2022 Digital Bazaar, Inc. All rights reserved.
  */
-'use strict';
-
-const {agent} = require('bedrock-https-agent');
-const bedrock = require('bedrock');
+import * as bedrock from '@bedrock/core';
+import * as helpers from './helpers.js';
+import {agent} from '@bedrock/https-agent';
+import {createRequire} from 'module';
+import {issuer} from '@bedrock/vc-issuer';
+import {mockData} from './mock.data.js';
+import sinon from 'sinon';
+const require = createRequire(import.meta.url);
 const {CapabilityAgent} = require('@digitalbazaar/webkms-client');
-const helpers = require('./helpers');
 const {httpClient} = require('@digitalbazaar/http-client');
-const {issuer} = require('bedrock-vc-issuer');
-const mockData = require('./mock.data');
-const sinon = require('sinon');
+
 const {util: {clone}} = bedrock;
 const {_CredentialStatusWriter} = issuer;
 

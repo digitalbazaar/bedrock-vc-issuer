@@ -1,11 +1,19 @@
 /*!
  * Copyright (c) 2020-2022 Digital Bazaar, Inc. All rights reserved.
  */
-'use strict';
+import {config} from '@bedrock/core';
+import {fileURLToPath} from 'url';
+import path from 'path';
+import '@bedrock/app-identity';
+import '@bedrock/https-agent';
+import '@bedrock/mongodb';
+import '@bedrock/service-agent';
+import '@bedrock/vc-issuer';
 
-const {config} = require('bedrock');
-const path = require('path');
-require('bedrock-vc-issuer');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+config.mocha.options.fullTrace = true;
+config.mocha.tests.push(path.join(__dirname, 'mocha'));
 
 // MongoDB
 config.mongodb.name = 'bedrock_vc_issuer_test';
@@ -15,9 +23,6 @@ config.mongodb.dropCollections.collections = [];
 config.mongodb.dropCollections = {};
 config.mongodb.dropCollections.onInit = true;
 config.mongodb.dropCollections.collections = [];
-
-config.mocha.options.fullTrace = true;
-config.mocha.tests.push(path.join(__dirname, 'mocha'));
 
 // allow self-signed certs in test framework
 config['https-agent'].rejectUnauthorized = false;
