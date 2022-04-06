@@ -77,7 +77,7 @@ export async function createConfig({
   const url = `${mockData.baseUrl}/issuers`;
   const response = await zcapClient.write({url, json: config});
   return response.data;
-};
+}
 
 export async function getConfig({id, capabilityAgent}) {
   const zcapClient = createZcapClient({capabilityAgent});
@@ -128,7 +128,7 @@ export async function createEdv({
   });
 
   return {edvClient, edvConfig, hmac, keyAgreementKey};
-};
+}
 
 export async function createKeystore({
   capabilityAgent, ipAllowList, meterId,
@@ -157,7 +157,7 @@ export async function createKeystore({
     invocationSigner: capabilityAgent.getSigner(),
     httpsAgent
   });
-};
+}
 
 export async function createKeystoreAgent({capabilityAgent, ipAllowList}) {
   let err;
