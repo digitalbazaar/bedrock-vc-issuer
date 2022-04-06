@@ -6,9 +6,9 @@
   "scripts": {
     "test": "node --preserve-symlinks test.js test",
     "debug": "node --preserve-symlinks test.js test --log-level debug",
-    "coverage": "cross-env NODE_ENV=test ESM_OPTIONS='{cache:false}' nyc --reporter=lcov --reporter=text-summary npm test",
-    "coverage-ci": "cross-env NODE_ENV=test ESM_OPTIONS='{cache:false}' nyc --reporter=lcovonly npm test",
-    "coverage-report": "nyc report"
+    "coverage": "cross-env NODE_ENV=test c8 --reporter=lcov --reporter=text-summary npm test",
+    "coverage-ci": "cross-env NODE_ENV=test c8 --reporter=lcovonly npm test",
+    "coverage-report": "c8 report"
   },
   "dependencies": {
     "@bedrock/app-identity": "^2.0.0",
