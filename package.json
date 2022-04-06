@@ -1,8 +1,9 @@
 {
-  "name": "bedrock-vc-issuer",
+  "name": "@bedrock/vc-issuer",
   "version": "12.0.1-0",
+  "type": "module",
   "description": "Bedrock Verifiable Credential Issuer",
-  "main": "./lib",
+  "main": "./lib/index.js",
   "scripts": {
     "lint": "eslint ."
   },
@@ -36,34 +37,33 @@
     "bnid": "^2.1.0",
     "body-parser": "^1.19.2",
     "cors": "^2.8.5",
-    "esm": "^3.2.25",
     "lru-cache": "^6.0.0",
     "vc-revocation-list": "^3.0.0"
   },
   "peerDependencies": {
-    "bedrock": "^4.4.3",
-    "bedrock-credentials-context": "^1.0.0",
-    "bedrock-did-context": "^2.0.0",
-    "bedrock-did-io": "^6.1.0",
-    "bedrock-express": "^6.3.0",
-    "bedrock-https-agent": "^2.2.0",
-    "bedrock-jsonld-document-loader": "^1.2.2",
-    "bedrock-mongodb": "^8.4.1",
-    "bedrock-security-context": "^5.0.0",
-    "bedrock-service-agent": "^2.0.0",
-    "bedrock-service-context-store": "^3.0.0",
-    "bedrock-service-core": "^3.0.0",
-    "bedrock-vc-status-list-context": "^1.0.1",
-    "bedrock-vc-revocation-list-context": "^1.0.0",
-    "bedrock-veres-one-context": "^12.0.0",
-    "bedrock-validation": "^5.5.0"
+    "@bedrock/core": "^5.0.0",
+    "@bedrock/credentials-context": "^2.0.0",
+    "@bedrock/did-context": "^3.0.0",
+    "@bedrock/did-io": "^7.0.0",
+    "@bedrock/express": "^7.0.0",
+    "@bedrock/https-agent": "^3.0.0",
+    "@bedrock/jsonld-document-loader": "^2.0.0",
+    "@bedrock/mongodb": "^9.0.0",
+    "@bedrock/security-context": "^6.0.0",
+    "@bedrock/service-agent": "^3.0.0",
+    "@bedrock/service-context-store": "^4.0.0",
+    "@bedrock/service-core": "^4.0.0",
+    "@bedrock/vc-status-list-context": "^2.0.0",
+    "@bedrock/vc-revocation-list-context": "^2.0.0",
+    "@bedrock/veres-one-context": "^13.0.0",
+    "@bedrock/validation": "^6.0.0"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
     "eslint-config-digitalbazaar": "^2.8.0",
     "eslint-plugin-jsdoc": "^28.6.1",
     "jsdoc": "^3.6.4",
-    "jsdoc-to-markdown": "^6.0.1"
+    "jsdoc-to-markdown": "^7.1.1"
   },
   "directories": {
     "lib": "./lib"

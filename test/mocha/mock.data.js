@@ -1,15 +1,12 @@
 /*!
 * Copyright (c) 2019-2022 Digital Bazaar, Inc. All rights reserved.
 */
-'use strict';
+import {config} from '@bedrock/core';
 
-const {config} = require('bedrock');
-
-const mock = {};
-module.exports = mock;
+export const mockData = {};
 
 // mock product IDs and reverse lookup for service products
-mock.productIdMap = new Map([
+mockData.productIdMap = new Map([
   // edv service
   ['edv', 'urn:uuid:dbd15f08-ff67-11eb-893b-10bf48838a41'],
   ['urn:uuid:dbd15f08-ff67-11eb-893b-10bf48838a41', 'edv'],
@@ -21,4 +18,4 @@ mock.productIdMap = new Map([
   ['urn:uuid:80a82316-e8c2-11eb-9570-10bf48838a41', 'webkms']
 ]);
 
-mock.baseUrl = config.server.baseUri;
+mockData.baseUrl = config.server.baseUri;

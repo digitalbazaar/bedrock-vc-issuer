@@ -1,16 +1,16 @@
 /*!
  * Copyright (c) 2019-2022 Digital Bazaar, Inc. All rights reserved.
  */
-'use strict';
-
-const {agent} = require('bedrock-https-agent');
-const bedrock = require('bedrock');
+import * as bedrock from '@bedrock/core';
+import * as helpers from './helpers.js';
+import {agent} from '@bedrock/https-agent';
+import {createContextDocumentLoader} from '@bedrock/service-context-store';
+import {createRequire} from 'module';
+import {documentStores} from '@bedrock/service-agent';
+import {mockData} from './mock.data.js';
+const require = createRequire(import.meta.url);
 const {CapabilityAgent} = require('@digitalbazaar/webkms-client');
-const {createContextDocumentLoader} = require('bedrock-service-context-store');
-const {documentStores} = require('bedrock-service-agent');
-const helpers = require('./helpers');
 const {httpClient} = require('@digitalbazaar/http-client');
-const mockData = require('./mock.data');
 
 const {baseUrl} = mockData;
 const serviceType = 'vc-issuer';
