@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 14.0.1 - 2022-04-xx
+
+### Fixed
+- Fix peer deps; use `@bedrock/vc-status-list-context@4`.
+
 ## 14.0.0 - 2022-04-29
 
 ### Changed

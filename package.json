@@ -57,7 +57,7 @@
     "@bedrock/service-core": "^5.0.0",
     "@bedrock/validation": "^7.0.0",
     "@bedrock/vc-revocation-list-context": "^3.0.0",
-    "@bedrock/vc-status-list-context": "^3.0.0",
+    "@bedrock/vc-status-list-context": "^4.0.0",
     "@bedrock/veres-one-context": "^14.0.0"
   },
   "devDependencies": {
