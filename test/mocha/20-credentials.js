@@ -1,18 +1,17 @@
 /*!
  * Copyright (c) 2020-2022 Digital Bazaar, Inc. All rights reserved.
  */
-import * as bedrock from '@bedrock/core';
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
 import {createRequire} from 'module';
+import {httpClient} from '@digitalbazaar/http-client';
 import {issuer} from '@bedrock/vc-issuer';
+import {klona} from 'klona';
 import {mockData} from './mock.data.js';
 import sinon from 'sinon';
 const require = createRequire(import.meta.url);
 const {CapabilityAgent} = require('@digitalbazaar/webkms-client');
-const {httpClient} = require('@digitalbazaar/http-client');
 
-const {util: {clone}} = bedrock;
 const {_CredentialStatusWriter} = issuer;
 
 const {baseUrl} = mockData;
@@ -103,7 +102,7 @@ describe('issue APIs', () => {
   });
   describe('/credentials/issue', () => {
     it('issues a valid credential w/no "credentialStatus"', async () => {
-      const credential = clone(mockCredential);
+      const credential = klona(mockCredential);
       let error;
       let result;
       try {
@@ -152,7 +151,7 @@ describe('issue APIs', () => {
       error.data.type.should.equal('ValidationError');
     });
     it('issues a valid credential w/ "credentialStatus"', async () => {
-      const credential = clone(mockCredential);
+      const credential = klona(mockCredential);
       let error;
       let result;
       try {
@@ -187,7 +186,7 @@ describe('issue APIs', () => {
       const zcapClient = helpers.createZcapClient({capabilityAgent});
 
       // issue VC (should succeed)
-      let credential = clone(mockCredential);
+      let credential = klona(mockCredential);
       let error;
       let result;
       try {
@@ -207,7 +206,7 @@ describe('issue APIs', () => {
       should.exist(proof);
 
       // issue VC with the same ID again (should fail)
-      credential = clone(mockCredential);
+      credential = klona(mockCredential);
       result = undefined;
       try {
         result = await zcapClient.write({
@@ -226,7 +225,7 @@ describe('issue APIs', () => {
   describe('/credentials/status', () => {
     it('updates a credential status', async () => {
       // first issue VC
-      const credential = clone(mockCredential);
+      const credential = klona(mockCredential);
       const zcapClient = helpers.createZcapClient({capabilityAgent});
       const {data: {verifiableCredential}} = await zcapClient.write({
         url: `${issuerId}/credentials/issue`,
@@ -298,7 +297,7 @@ describe('issue APIs', () => {
       // VC, however, the revocation list index bookkeeping is not updated
       // The earlier failure is detected by the second issue of a VC and
       // the bookkeeping is repaired
-      const credential1 = clone(mockCredential);
+      const credential1 = klona(mockCredential);
       credential1.id = 'urn:id1';
       const {data: {verifiableCredential: vc1}} = await zcapClient.write({
         url: `${issuerId}/credentials/issue`,
@@ -309,7 +308,7 @@ describe('issue APIs', () => {
       const vc1StatusId = vc1.credentialStatus.id;
 
       // now issue second VC (should succeed and process the
-      const credential2 = clone(mockCredential);
+      const credential2 = klona(mockCredential);
       credential2.id = 'urn:id2';
       const {data: {verifiableCredential: vc2}} = await zcapClient.write({
         url: `${issuerId}/credentials/issue`,
@@ -331,7 +330,7 @@ describe('issue APIs', () => {
       const zcapClient = helpers.createZcapClient({capabilityAgent});
 
       // issue VC (should succeed)
-      let credential = clone(mockCredential);
+      let credential = klona(mockCredential);
       let error;
       let result;
       try {
@@ -351,7 +350,7 @@ describe('issue APIs', () => {
       should.exist(proof);
 
       // issue VC with the same ID again (should fail)
-      credential = clone(mockCredential);
+      credential = klona(mockCredential);
       result = undefined;
       try {
         result = await zcapClient.write({
