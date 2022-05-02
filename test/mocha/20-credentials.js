@@ -280,7 +280,7 @@ describe('issue APIs', () => {
       // see _chooseRandom helper in ListManager.js
       mathRandomStub = sinon.stub(Math, 'random').callsFake(() => 0);
       // make credentialStatusWriter.finish a noop
-      // making this a noop is simulating a failure where the revocation list
+      // making this a noop is simulating a failure where the status list
       // bookkeeping was not completed after an issuance
       credentialStatusWriterStub = sinon.stub(
         _CredentialStatusWriter.prototype, 'finish').callsFake(async () => {});
@@ -294,7 +294,7 @@ describe('issue APIs', () => {
       const zcapClient = helpers.createZcapClient({capabilityAgent});
 
       // first issue a VC that is partially completed enough to return the
-      // VC, however, the revocation list index bookkeeping is not updated
+      // VC, however, the status list index bookkeeping is not updated
       // The earlier failure is detected by the second issue of a VC and
       // the bookkeeping is repaired
       const credential1 = klona(mockCredential);
