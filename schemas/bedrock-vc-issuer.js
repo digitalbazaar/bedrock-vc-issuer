@@ -27,9 +27,14 @@ export const issueOptions = {
 export const statusListConfig = {
   title: 'Status List Configuration',
   type: 'object',
-  required: ['suiteName', 'statusPurpose'],
+  required: ['type', 'suiteName', 'statusPurpose'],
   additionalProperties: false,
   properties: {
+    type: {
+      type: 'string',
+      // supported types in this version
+      enum: ['StatusList2021', 'RevocationList2020']
+    },
     suiteName: {
       type: 'string',
       // supported suites in this version
@@ -38,7 +43,7 @@ export const statusListConfig = {
     statusPurpose: {
       type: 'string',
       // supported status types in this version
-      enum: ['revocation']
+      enum: ['revocation', 'suspension']
     }
   }
 };
@@ -47,9 +52,7 @@ export const statusListOptions = {
   title: 'Status List Options',
   type: 'array',
   minItems: 1,
-  items: {
-    statusListConfig
-  }
+  items: statusListConfig
 };
 
 export const issueCredentialBody = {

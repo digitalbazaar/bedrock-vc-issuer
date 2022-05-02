@@ -1,5 +1,14 @@
 # bedrock-vc-issuer ChangeLog
 
+## 15.0.0 - 2022-05-xx
+
+### Added
+- Add support for `StatusList2021` as a status list option.
+
+### Changed
+- **BREAKING**: Require `type` in status list config. Currently supported
+  types are `RevocationList2020` and `StatusList2021`.
+
 ## 14.0.1 - 2022-04-29
 
 ### Fixed
