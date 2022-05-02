@@ -90,8 +90,9 @@ describe('issue APIs', () => {
     noStatusListIssuerRootZcap =
       `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
 
-    // create issuer instance w/ no status list options
+    // create issuer instance w/ status list options
     const statusListOptions = [{
+      type: 'RevocationList2020',
       statusPurpose: 'revocation',
       suiteName: 'Ed25519Signature2020'
     }];
