@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 15.0.0 - 2022-05-xx
+## 15.0.0 - 2022-05-02
 
 ### Added
 - Add support for `StatusList2021` as a status list option.
