@@ -87,9 +87,13 @@ export const updateCredentialStatusBody = {
     },
     credentialStatus: {
       type: 'object',
+      required: ['type'],
       additionalProperties: false,
       properties: {
         type: {
+          type: 'string'
+        },
+        statusPurpose: {
           type: 'string'
         }
       }
