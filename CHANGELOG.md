@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 16.1.0 - 2022-05-xx
+
+### Changed
+- Add optimization to prevent getting document store when unnecessary.
+
 ## 16.0.0 - 2022-05-05
 
 ### Changed
