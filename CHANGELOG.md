@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 16.2.0 - 2022-05-xx
+
+### Changed
+- Require peer dependency `@bedrock-service-agent@5.1` to allow use of
+  ephemeral agent when invoking service agent zcaps.
+
 ## 16.1.0 - 2022-05-05
 
 ### Changed
