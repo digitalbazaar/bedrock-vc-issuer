@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 16.2.0 - 2022-05-xx
+## 16.2.0 - 2022-05-09
 
 ### Changed
 - Require peer dependency `@bedrock-service-agent@5.1` to allow use of
