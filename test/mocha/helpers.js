@@ -18,6 +18,8 @@ const {ZcapClient} = require('@digitalbazaar/ezcap');
 const edvBaseUrl = `${mockData.baseUrl}/edvs`;
 const kmsBaseUrl = `${mockData.baseUrl}/kms`;
 
+const FIVE_MINUTES = 1000 * 60 * 5;
+
 export async function createMeter({capabilityAgent, serviceType} = {}) {
   // create signer using the application's capability invocation key
   const {keys: {capabilityInvocationKey}} = getAppIdentity();
@@ -199,7 +201,7 @@ export async function delegate({
 }) {
   const zcapClient = createZcapClient({capabilityAgent: delegator});
   expires = expires || (capability && capability.expires) ||
-    new Date(Date.now() + 5000).toISOString().slice(0, -5) + 'Z';
+    new Date(Date.now() + FIVE_MINUTES).toISOString().slice(0, -5) + 'Z';
   return zcapClient.delegate({
     capability, controller, expires, invocationTarget, allowedActions
   });
