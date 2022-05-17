@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 17.0.0 - 2022-05-xx
+
+### Changed
+- **BREAKING**: Use `@bedrock-service-context-store@7` to cause migration of
+  old EDV context documents to the new EDV attribute version.
+
 ## 16.2.0 - 2022-05-09
 
 ### Changed
