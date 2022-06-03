@@ -7,11 +7,11 @@ import {createRequire} from 'module';
 import {didIo} from '@bedrock/did-io';
 import {getAppIdentity} from '@bedrock/app-identity';
 import {mockData} from './mock.data.js';
+import {httpClient} from '@digitalbazaar/http-client';
 const require = createRequire(import.meta.url);
 const {decodeList} = require('@digitalbazaar/vc-status-list');
 const {Ed25519Signature2020} = require('@digitalbazaar/ed25519-signature-2020');
 const {EdvClient} = require('@digitalbazaar/edv-client');
-const {httpClient} = require('@digitalbazaar/http-client');
 const {KeystoreAgent, KmsClient} = require('@digitalbazaar/webkms-client');
 const {ZcapClient} = require('@digitalbazaar/ezcap');
 
