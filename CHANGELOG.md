@@ -4,7 +4,7 @@
 
 ### Changed
 - **BREAKING**: Use `@digitalbazaar/vc-status-list` v4.0, now includes
-`statusPurpose` in SLC VCs.
+  `statusPurpose` in SLC VCs.
 
 ## 17.0.0 - 2022-05-17
 
