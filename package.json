@@ -43,6 +43,7 @@
     "vc-revocation-list": "^3.0.0"
   },
   "peerDependencies": {
+    "@bedrock/app-identity": "3.0.1",
     "@bedrock/core": "^6.0.0",
     "@bedrock/credentials-context": "^3.0.0",
     "@bedrock/did-context": "^4.0.0",
@@ -56,10 +57,9 @@
     "@bedrock/service-context-store": "^7.0.0",
     "@bedrock/service-core": "^5.0.0",
     "@bedrock/validation": "^7.0.0",
-    "@bedrock/vc-revocation-list-context": "digitalbazaar/bedrock-vc-revocation-list-context#export-constants",
-    "@bedrock/vc-status-list-context": "digitalbazaar/bedrock-vc-status-list-context#export-constants",
-    "@bedrock/veres-one-context": "^14.0.0",
-    "@bedrock/app-identity": "3.0.1"
+    "@bedrock/vc-revocation-list-context": "^3.1.0",
+    "@bedrock/vc-status-list-context": "^4.1.0",
+    "@bedrock/veres-one-context": "^14.0.0"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
