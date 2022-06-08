@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 18.0.0 - TBD
+## 18.0.0 - 2022-06-08
 
 ### Changed
 - **BREAKING**: Use `@digitalbazaar/vc-status-list` v4.0, now includes
