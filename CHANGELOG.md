@@ -8,6 +8,7 @@
 - **BREAKING**: Update peer dependencies.
 - Test on Node.js 18.x.
 - Lint module.
+- Use `package.json` `files` field.
 
 ## 18.0.0 - 2022-06-08
 
