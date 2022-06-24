@@ -2,17 +2,18 @@
  * Copyright (c) 2016-2022 Digital Bazaar, Inc. All rights reserved.
  */
 import * as bedrock from '@bedrock/core';
+import {getServiceIdentities} from '@bedrock/app-identity';
+import {handlers} from '@bedrock/meter-http';
 import '@bedrock/ssm-mongodb';
 import '@bedrock/kms';
 import '@bedrock/https-agent';
 import '@bedrock/meter';
 import '@bedrock/meter-usage-reporter';
-import {getServiceIdentities} from '@bedrock/app-identity';
-import {handlers} from '@bedrock/meter-http';
 import '@bedrock/server';
 import '@bedrock/kms-http';
 import '@bedrock/edv-storage';
 import '@bedrock/vc-issuer';
+
 import {mockData} from './mocha/mock.data.js';
 
 bedrock.events.on('bedrock.init', async () => {
