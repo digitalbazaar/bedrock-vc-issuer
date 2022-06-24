@@ -62,10 +62,11 @@
     "@bedrock/veres-one-context": "^14.0.0"
   },
   "devDependencies": {
-    "eslint": "^7.32.0",
-    "eslint-config-digitalbazaar": "^2.8.0",
-    "eslint-plugin-jsdoc": "^28.6.1",
-    "jsdoc": "^3.6.4",
+    "eslint": "^8.18.0",
+    "eslint-config-digitalbazaar": "^4.0.1",
+    "eslint-plugin-jsdoc": "^39.3.3",
+    "eslint-plugin-unicorn": "^42.0.0",
+    "jsdoc": "^3.6.10",
     "jsdoc-to-markdown": "^7.1.1"
   },
   "directories": {
