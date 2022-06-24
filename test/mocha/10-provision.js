@@ -105,7 +105,7 @@ describe('provision API', () => {
       result.controller.should.equal(capabilityAgentId);
     });
     it('creates a config including proper ipAllowList', async () => {
-      const ipAllowList = ['127.0.0.1/32'];
+      const ipAllowList = ['127.0.0.1/32', '::1/128'];
 
       let err;
       let result;
@@ -206,7 +206,7 @@ describe('provision API', () => {
       result.id.should.equal(config.id);
     });
     it('gets a config with ipAllowList', async () => {
-      const ipAllowList = ['127.0.0.1/32'];
+      const ipAllowList = ['127.0.0.1/32', '::1/128'];
 
       const config = await helpers.createConfig(
         {capabilityAgent, ipAllowList, zcaps});
@@ -421,7 +421,7 @@ describe('provision API', () => {
         const capabilityAgent2 = await CapabilityAgent.fromSecret(
           {secret: 's2', handle: 'h2'});
 
-        const ipAllowList = ['127.0.0.1/32'];
+        const ipAllowList = ['127.0.0.1/32', '::1/128'];
 
         let err;
         let result;
