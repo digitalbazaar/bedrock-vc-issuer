@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 18.0.1 - 2022-xx-xx
+
+### Changed
+- Test on Node.js 18.x.
+
 ## 18.0.0 - 2022-06-08
 
 ### Changed
