@@ -4,6 +4,8 @@
 
 ### Changed
 - **BREAKING**: Require Node.js >=16.
+- Update dependencies.
+- **BREAKING**: Update peer dependencies.
 - Test on Node.js 18.x.
 - Lint module.
 

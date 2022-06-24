@@ -3,14 +3,15 @@
  */
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
+import {CapabilityAgent} from '@digitalbazaar/webkms-client';
 import {createRequire} from 'node:module';
 import {httpClient} from '@digitalbazaar/http-client';
 import {issuer} from '@bedrock/vc-issuer';
 import {klona} from 'klona';
 import {mockData} from './mock.data.js';
 import sinon from 'sinon';
+
 const require = createRequire(import.meta.url);
-const {CapabilityAgent} = require('@digitalbazaar/webkms-client');
 
 const {_CredentialStatusWriter} = issuer;
 
@@ -19,7 +20,7 @@ const serviceType = 'vc-issuer';
 
 // NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
-const mockCredential = require('./mock-credential');
+const mockCredential = require('./mock-credential.json');
 
 describe('issue APIs', () => {
   let capabilityAgent;
