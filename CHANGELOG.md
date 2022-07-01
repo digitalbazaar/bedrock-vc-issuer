@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 19.0.0 - 2022-xx-xx
+## 19.0.0 - 2022-06-30
 
 ### Changed
 - **BREAKING**: Require Node.js >=16.
