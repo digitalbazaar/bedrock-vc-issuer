@@ -6,6 +6,10 @@
 - **BREAKING**: Require Node.js >=16.
 - Update dependencies.
 - **BREAKING**: Update peer dependencies.
+  - `@bedrock/did-io@9`
+  - `@bedrock/service-agent@6`
+  - `@bedrock/service-context-store@8`
+  - `@bedrock/service-core@6`
 - Test on Node.js 18.x.
 - Lint module.
 - Use `package.json` `files` field.
