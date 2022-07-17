@@ -2,6 +2,7 @@
  * Copyright (c) 2019-2022 Digital Bazaar, Inc. All rights reserved.
  */
 import * as bedrock from '@bedrock/core';
+import {importJWK, SignJWT} from 'jose';
 import {KeystoreAgent, KmsClient} from '@digitalbazaar/webkms-client';
 import {decodeList} from '@digitalbazaar/vc-status-list';
 import {didIo} from '@bedrock/did-io';
@@ -46,7 +47,8 @@ export async function createMeter({capabilityAgent, serviceType} = {}) {
 }
 
 export async function createConfig({
-  capabilityAgent, ipAllowList, meterId, zcaps, statusListOptions
+  capabilityAgent, ipAllowList, meterId, zcaps, statusListOptions,
+  oauth2 = false
 } = {}) {
   if(!meterId) {
     // create a meter for the keystore
@@ -73,6 +75,14 @@ export async function createConfig({
   if(statusListOptions) {
     config.statusListOptions = statusListOptions;
   }
+  if(oauth2) {
+    const {baseUri} = bedrock.config.server;
+    config.authorization = {
+      oauth2: {
+        issuerConfigUrl: `${baseUri}${mockData.oauth2IssuerConfigRoute}`
+      }
+    };
+  }
 
   const zcapClient = createZcapClient({capabilityAgent});
   const url = `${mockData.baseUrl}/issuers`;
@@ -80,10 +90,42 @@ export async function createConfig({
   return response.data;
 }
 
-export async function getConfig({id, capabilityAgent}) {
+export async function getConfig({id, capabilityAgent, accessToken}) {
+  if(accessToken) {
+    // do OAuth2
+    const {data} = await httpClient.get(id, {
+      agent: httpsAgent,
+      headers: {
+        authorization: `Bearer ${accessToken}`
+      }
+    });
+    return data;
+  }
+  // do zcap
   const zcapClient = createZcapClient({capabilityAgent});
   const {data} = await zcapClient.read({url: id});
   return data;
+}
+
+export async function getOAuth2AccessToken({
+  configId, action, target, exp, iss, nbf, typ = 'at+jwt'
+}) {
+  const scope = `${action}:${target}`;
+  const builder = new SignJWT({scope})
+    .setProtectedHeader({alg: 'EdDSA', typ})
+    .setIssuer(iss ?? mockData.oauth2Config.issuer)
+    .setAudience(configId);
+  if(exp !== undefined) {
+    builder.setExpirationTime(exp);
+  } else {
+    // default to 5 minute expiration time
+    builder.setExpirationTime('5m');
+  }
+  if(nbf !== undefined) {
+    builder.setNotBefore(nbf);
+  }
+  const key = await importJWK({...mockData.ed25519KeyPair, alg: 'EdDSA'});
+  return builder.sign(key);
 }
 
 export async function createEdv({
