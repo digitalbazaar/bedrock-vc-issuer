@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 19.1.0 - 2022-07-xx
+## 19.1.0 - 2022-07-17
 
 ### Added
 - Add support for oauth2-authorized issuer instances.
