@@ -32,6 +32,7 @@ describe('issue APIs', () => {
   let sl2021RevocationRootZcap;
   let sl2021SuspensionIssuerId;
   let sl2021SuspensionRootZcap;
+  let oauth2IssuerConfig;
   const zcaps = {};
   beforeEach(async () => {
     const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
@@ -137,6 +138,10 @@ describe('issue APIs', () => {
       sl2021SuspensionRootZcap =
         `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
     }
+
+    // create issuer instance w/ oauth2-based authz
+    oauth2IssuerConfig = await helpers.createConfig(
+      {capabilityAgent, zcaps, oauth2: true});
   });
   describe('/credentials/issue', () => {
     it('issues a valid credential w/no "credentialStatus"', async () => {
@@ -187,6 +192,135 @@ describe('issue APIs', () => {
       }
       should.exist(error);
       error.data.type.should.equal('ValidationError');
+    });
+    it('issues a valid credential w/oauth2 w/root scope', async () => {
+      const credential = klona(mockCredential);
+      let error;
+      let result;
+      try {
+        const configId = oauth2IssuerConfig.id;
+        const url = `${configId}/credentials/issue`;
+        const accessToken = await helpers.getOAuth2AccessToken(
+          {configId, action: 'write', target: '/'});
+        result = await httpClient.post(url, {
+          agent,
+          headers: {authorization: `Bearer ${accessToken}`},
+          json: {credential}
+        });
+      } catch(e) {
+        error = e;
+      }
+      assertNoError(error);
+      should.exist(result.data);
+      should.exist(result.data.verifiableCredential);
+      const {verifiableCredential} = result.data;
+      verifiableCredential.should.be.an('object');
+      should.exist(verifiableCredential['@context']);
+      should.exist(verifiableCredential.id);
+      should.exist(verifiableCredential.type);
+      should.exist(verifiableCredential.issuer);
+      should.exist(verifiableCredential.issuanceDate);
+      should.exist(verifiableCredential.credentialSubject);
+      verifiableCredential.credentialSubject.should.be.an('object');
+      should.not.exist(verifiableCredential.credentialStatus);
+      should.exist(verifiableCredential.proof);
+      verifiableCredential.proof.should.be.an('object');
+    });
+    it('issues a valid credential w/oauth2 w/credentials scope', async () => {
+      const credential = klona(mockCredential);
+      let error;
+      let result;
+      try {
+        const configId = oauth2IssuerConfig.id;
+        const url = `${configId}/credentials/issue`;
+        const accessToken = await helpers.getOAuth2AccessToken(
+          {configId, action: 'write', target: '/credentials'});
+        result = await httpClient.post(url, {
+          agent,
+          headers: {authorization: `Bearer ${accessToken}`},
+          json: {credential}
+        });
+      } catch(e) {
+        error = e;
+      }
+      assertNoError(error);
+      should.exist(result.data);
+      should.exist(result.data.verifiableCredential);
+      const {verifiableCredential} = result.data;
+      verifiableCredential.should.be.an('object');
+      should.exist(verifiableCredential['@context']);
+      should.exist(verifiableCredential.id);
+      should.exist(verifiableCredential.type);
+      should.exist(verifiableCredential.issuer);
+      should.exist(verifiableCredential.issuanceDate);
+      should.exist(verifiableCredential.credentialSubject);
+      verifiableCredential.credentialSubject.should.be.an('object');
+      should.not.exist(verifiableCredential.credentialStatus);
+      should.exist(verifiableCredential.proof);
+      verifiableCredential.proof.should.be.an('object');
+    });
+    it('issues a valid credential w/oauth2 w/targeted scope', async () => {
+      const credential = klona(mockCredential);
+      let error;
+      let result;
+      try {
+        const configId = oauth2IssuerConfig.id;
+        const url = `${configId}/credentials/issue`;
+        const accessToken = await helpers.getOAuth2AccessToken(
+          {configId, action: 'write', target: '/credentials/issue'});
+        result = await httpClient.post(url, {
+          agent,
+          headers: {authorization: `Bearer ${accessToken}`},
+          json: {credential}
+        });
+      } catch(e) {
+        error = e;
+      }
+      assertNoError(error);
+      should.exist(result.data);
+      should.exist(result.data.verifiableCredential);
+      const {verifiableCredential} = result.data;
+      verifiableCredential.should.be.an('object');
+      should.exist(verifiableCredential['@context']);
+      should.exist(verifiableCredential.id);
+      should.exist(verifiableCredential.type);
+      should.exist(verifiableCredential.issuer);
+      should.exist(verifiableCredential.issuanceDate);
+      should.exist(verifiableCredential.credentialSubject);
+      verifiableCredential.credentialSubject.should.be.an('object');
+      should.not.exist(verifiableCredential.credentialStatus);
+      should.exist(verifiableCredential.proof);
+      verifiableCredential.proof.should.be.an('object');
+    });
+    it('fails to issue a valid credential w/oauth2', async () => {
+      const credential = klona(mockCredential);
+      let error;
+      let result;
+      try {
+        const configId = oauth2IssuerConfig.id;
+        const url = `${configId}/credentials/issue`;
+        const accessToken = await helpers.getOAuth2AccessToken(
+          // wrong action: `read`
+          {configId, action: 'read', target: '/credentials/issue'});
+        result = await httpClient.post(url, {
+          agent,
+          headers: {authorization: `Bearer ${accessToken}`},
+          json: {credential}
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      should.not.exist(result);
+      error.status.should.equal(403);
+      error.data.type.should.equal('NotAllowedError');
+      should.exist(error.data.cause);
+      should.exist(error.data.cause.details);
+      should.exist(error.data.cause.details.code);
+      error.data.cause.details.code.should.equal(
+        'ERR_JWT_CLAIM_VALIDATION_FAILED');
+      should.exist(error.data.cause.details.claim);
+      error.data.cause.details.claim.should.equal('scope');
     });
     it('issues a valid credential w/ RL 2020 "credentialStatus" and ' +
       'revocation status purpose', async () => {
