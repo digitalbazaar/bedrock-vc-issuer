@@ -292,7 +292,7 @@ describe('issue APIs', () => {
       should.exist(verifiableCredential.proof);
       verifiableCredential.proof.should.be.an('object');
     });
-    it('fails to issue a valid credential w/oauth2', async () => {
+    it('fails to issue a valid credential w/bad action scope', async () => {
       const credential = klona(mockCredential);
       let error;
       let result;
@@ -302,6 +302,36 @@ describe('issue APIs', () => {
         const accessToken = await helpers.getOAuth2AccessToken(
           // wrong action: `read`
           {configId, action: 'read', target: '/credentials/issue'});
+        result = await httpClient.post(url, {
+          agent,
+          headers: {authorization: `Bearer ${accessToken}`},
+          json: {credential}
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      should.not.exist(result);
+      error.status.should.equal(403);
+      error.data.type.should.equal('NotAllowedError');
+      should.exist(error.data.cause);
+      should.exist(error.data.cause.details);
+      should.exist(error.data.cause.details.code);
+      error.data.cause.details.code.should.equal(
+        'ERR_JWT_CLAIM_VALIDATION_FAILED');
+      should.exist(error.data.cause.details.claim);
+      error.data.cause.details.claim.should.equal('scope');
+    });
+    it('fails to issue a valid credential w/bad path scope', async () => {
+      const credential = klona(mockCredential);
+      let error;
+      let result;
+      try {
+        const configId = oauth2IssuerConfig.id;
+        const url = `${configId}/credentials/issue`;
+        const accessToken = await helpers.getOAuth2AccessToken(
+          // wrong path: `/foo`
+          {configId, action: 'write', target: '/foo'});
         result = await httpClient.post(url, {
           agent,
           headers: {authorization: `Bearer ${accessToken}`},
