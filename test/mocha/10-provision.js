@@ -346,7 +346,7 @@ describe('provision API', () => {
       should.exist(result);
       result.should.eql(expectedConfig);
     });
-    it.only('updates a config enabling oauth2', async () => {
+    it('updates a config enabling oauth2', async () => {
       let err;
       let result;
       let existingConfig;
