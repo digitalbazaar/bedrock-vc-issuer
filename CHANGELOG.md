@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 19.2.0 - 2022-08-xx
+## 19.2.0 - 2022-08-02
 
 ### Changed
 - Use `@digitalbazaar/webkms-client@12`. Should be no
