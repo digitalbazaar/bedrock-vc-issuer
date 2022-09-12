@@ -27,6 +27,7 @@
     "@bedrock/meter-http": "^9.0.1",
     "@bedrock/meter-usage-reporter": "^8.0.0",
     "@bedrock/mongodb": "^10.0.0",
+    "@bedrock/multikey-context": "github:digitalbazaar/bedrock-multikey-context#initial",
     "@bedrock/package-manager": "^3.0.0",
     "@bedrock/security-context": "^7.0.0",
     "@bedrock/server": "^5.0.0",
