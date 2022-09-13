@@ -48,7 +48,7 @@ export async function createMeter({capabilityAgent, serviceType} = {}) {
 
 export async function createConfig({
   capabilityAgent, ipAllowList, meterId, zcaps, statusListOptions,
-  oauth2 = false
+  oauth2 = false, suiteName = 'Ed25519Signature2020'
 } = {}) {
   if(!meterId) {
     // create a meter for the keystore
@@ -61,9 +61,7 @@ export async function createConfig({
   const config = {
     sequence: 0,
     controller: capabilityAgent.id,
-    issueOptions: {
-      suiteName: 'Ed25519Signature2020'
-    },
+    issueOptions: {suiteName},
     meterId
   };
   if(ipAllowList) {
