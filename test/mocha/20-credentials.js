@@ -23,7 +23,11 @@ const serviceType = 'vc-issuer';
 const mockCredential = require('./mock-credential.json');
 
 describe('issue APIs', () => {
-  const suiteNames = ['Ed25519Signature2018', 'Ed25519Signature2020'];
+  const suiteNames = [
+    'Ed25519Signature2018',
+    'Ed25519Signature2020',
+    'eddsa-2022'
+  ];
   const zcaps = {};
   for(const suiteName of suiteNames) {
     describe(suiteName, function() {
