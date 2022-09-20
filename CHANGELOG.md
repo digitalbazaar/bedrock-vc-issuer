@@ -1,5 +1,14 @@
 # bedrock-vc-issuer ChangeLog
 
+## 19.3.0 -
+
+### Added
+- Add support for `@digitalbazaar/eddsa-2022-cryptosuite` suite when issuing.
+- Add `@digitalbazaar/data-integrity` to library.
+
+### Changed
+- Use `@digitalbazaar/webkms-client@12.1` in order to enable DataIntegrityProofs.
+
 ## 19.2.0 - 2022-08-02
 
 ### Changed
