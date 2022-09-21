@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 19.3.0 -
+## 19.3.0 - 2022-09-21
 
 ### Added
 - Add support for `@digitalbazaar/eddsa-2022-cryptosuite` suite when issuing.
