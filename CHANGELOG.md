@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 19.3.1 -
+
+### Fixed
+- Do not await `createSuite`.
+- Change `eddsa-2022` `createSuite` function to non-async function.
+
 ## 19.3.0 - 2022-09-21
 
 ### Added
