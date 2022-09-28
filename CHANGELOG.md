@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 19.3.1 -
+## 19.3.1 - 2022-09-28
 
 ### Fixed
 - Do not await `createSuite`.
