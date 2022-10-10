@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 19.4.0 -
+## 19.4.0 - 2022-10-10
 
 ### Changed
 - Allow any valid json as `req.body` not just Objects and Arrays.
