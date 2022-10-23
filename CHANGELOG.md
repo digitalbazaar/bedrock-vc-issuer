@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 20.0.0 - 2022-10-xx
+## 20.0.0 - 2022-10-23
 
 ### Changed
 - **BREAKING**: Update peer deps:
