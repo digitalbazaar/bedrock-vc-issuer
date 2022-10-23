@@ -1,5 +1,14 @@
 # bedrock-vc-issuer ChangeLog
 
+## 20.0.0 - 2022-10-xx
+
+### Changed
+- **BREAKING**: Update peer deps:
+  - `@bedrock/service-context-store@9`
+  - `@bedrock/service-core@7`.
+- **BREAKING**: See `@bedrock/service-core@7` for important config changes
+  and new peer dependency `@bedrock/oauth2-verifier@1`.
+
 ## 19.4.0 - 2022-10-10
 
 ### Changed
