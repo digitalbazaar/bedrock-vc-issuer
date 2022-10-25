@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 20.0.1 - 2022-10-xx
+
+### Fixed
+- Update `@digitalbazaar/vc` and `@digitalbazaar/ed25519-signature-2020`
+  dependencies.
+
 ## 20.0.0 - 2022-10-23
 
 ### Changed
