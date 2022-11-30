@@ -1,5 +1,16 @@
 # bedrock-vc-issuer ChangeLog
 
+## 21.0.0 -
+
+### Changed
+- **BREAKING**: Change assertions for documents upserted or modified to use Mongo Driver 4.
+- **BREAKING**: Upgrade to
+  - `@bedrock/mongodb@11`
+  - `@bedrock/service-agent@7`
+  - `@bedrock/service-context-store@10`
+  - `@bedrock/service-core@8`
+
+
 ## 20.0.1 - 2022-10-25
 
 ### Fixed
