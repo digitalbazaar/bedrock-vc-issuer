@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 21.0.0 - 2023-01-dd
+## 21.0.0 - 2023-01-08
 
 ### Changed
 - **BREAKING**: Use little-endian bit order for all bitstrings, both
