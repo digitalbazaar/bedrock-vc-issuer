@@ -1,5 +1,12 @@
 # bedrock-vc-issuer ChangeLog
 
+## 21.0.0 - 2023-01-dd
+
+### Changed
+- **BREAKING**: Use little-endian bit order for all bitstrings, both
+  for internal use and with revocation and status lists. This change
+  is incompatible with previous deployments.
+
 ## 20.0.1 - 2022-10-25
 
 ### Fixed
