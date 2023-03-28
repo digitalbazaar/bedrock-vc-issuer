@@ -1,6 +1,7 @@
 /*!
  * Copyright (c) 2020-2022 Digital Bazaar, Inc. All rights reserved.
  */
+import * as EcdsaMultikey from '@digitalbazaar/ecdsa-multikey';
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
 import {CapabilityAgent} from '@digitalbazaar/webkms-client';
@@ -45,12 +46,31 @@ describe('issue APIs', () => {
       beforeEach(async () => {
         const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
         const handle = 'test';
-        capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
+        if(suiteName === 'ecdsa-2019') {
+          const keyPair = await EcdsaMultikey.generate({
+            id: '53ad64ce-8e1d-11ec-bb12-10bf48838a41',
+            controller: 'did:example:1234',
+            curve: 'P-256'
+          });
+          console.log(keyPair);
+          capabilityAgent = new CapabilityAgent({
+            handle: 'test',
+            signer: keyPair.signer(),
+            keyPair: await keyPair.export({publicKey: true, secretKey: true})
+          });
+        } else {
+          capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
+        }
         console.log(capabilityAgent, 'capabilityAgent');
-
+        let keystoreAgent;
         // create keystore for capability agent
-        const keystoreAgent = await helpers.createKeystoreAgent(
-          {capabilityAgent});
+        try {
+          keystoreAgent = await helpers.createKeystoreAgent(
+            {capabilityAgent});
+        } catch(error) {
+          console.log(error);
+        }
+        console.log(keystoreAgent, 'keystoreAgent');
         // generate key for signing VCs (make it a did:key DID for simplicity)
         const assertionMethodKey = await keystoreAgent.generateKey({
           type: 'asymmetric',
@@ -91,18 +111,21 @@ describe('issue APIs', () => {
           invocationTarget: keyAgreementKey.kmsId,
           delegator: capabilityAgent
         });
-        zcaps['assertionMethod:ed25519'] = await helpers.delegate({
-          capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-          controller: serviceAgent.id,
-          invocationTarget: assertionMethodKey.kmsId,
-          delegator: capabilityAgent
-        });
-        zcaps['assertionMethod:P-256'] = await helpers.delegate({
-          capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-          controller: serviceAgent.id,
-          invocationTarget: assertionMethodKey.kmsId,
-          delegator: capabilityAgent
-        });
+        if(suiteName === 'ecdsa-2019') {
+          zcaps['assertionMethod:P-256'] = await helpers.delegate({
+            capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
+            controller: serviceAgent.id,
+            invocationTarget: assertionMethodKey.kmsId,
+            delegator: capabilityAgent
+          });
+        } else {
+          zcaps['assertionMethod:ed25519'] = await helpers.delegate({
+            capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
+            controller: serviceAgent.id,
+            invocationTarget: assertionMethodKey.kmsId,
+            delegator: capabilityAgent
+          });
+        }
 
         // create issuer instance w/ no status list options
         const noStatusListIssuerConfig = await helpers.createConfig(
