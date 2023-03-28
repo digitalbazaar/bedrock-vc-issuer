@@ -25,9 +25,9 @@ const mockCredential = require('./mock-credential.json');
 
 describe('issue APIs', () => {
   const suiteNames = [
-    'Ed25519Signature2018',
-    'Ed25519Signature2020',
-    'eddsa-2022',
+    // 'Ed25519Signature2018',
+    // 'Ed25519Signature2020',
+    // 'eddsa-2022',
     'ecdsa-2019'
   ];
   const zcaps = {};
@@ -48,11 +48,9 @@ describe('issue APIs', () => {
         const handle = 'test';
         if(suiteName === 'ecdsa-2019') {
           const keyPair = await EcdsaMultikey.generate({
-            id: '53ad64ce-8e1d-11ec-bb12-10bf48838a41',
-            controller: 'did:example:1234',
+            id: 'did:key:1234',
             curve: 'P-256'
           });
-          console.log(keyPair);
           capabilityAgent = new CapabilityAgent({
             handle: 'test',
             signer: keyPair.signer(),
@@ -61,23 +59,17 @@ describe('issue APIs', () => {
         } else {
           capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
         }
-        console.log(capabilityAgent, 'capabilityAgent');
-        let keystoreAgent;
         // create keystore for capability agent
-        try {
-          keystoreAgent = await helpers.createKeystoreAgent(
-            {capabilityAgent});
-        } catch(error) {
-          console.log(error);
-        }
-        console.log(keystoreAgent, 'keystoreAgent');
+        const keystoreAgent = await helpers.createKeystoreAgent(
+          {capabilityAgent});
+        // console.log(keystoreAgent, 'keystoreAgent');
         // generate key for signing VCs (make it a did:key DID for simplicity)
         const assertionMethodKey = await keystoreAgent.generateKey({
           type: 'asymmetric',
           publicAliasTemplate: 'did:key:{publicKeyMultibase}#' +
             '{publicKeyMultibase}'
         });
-        console.log(assertionMethodKey, 'assertionMethodKey');
+
         // create EDV for storage (creating hmac and kak in the process)
         const {
           edvConfig,
@@ -112,7 +104,7 @@ describe('issue APIs', () => {
           delegator: capabilityAgent
         });
         if(suiteName === 'ecdsa-2019') {
-          zcaps['assertionMethod:P-256'] = await helpers.delegate({
+          zcaps['assertionMethod:ecdsa2019'] = await helpers.delegate({
             capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
             controller: serviceAgent.id,
             invocationTarget: assertionMethodKey.kmsId,

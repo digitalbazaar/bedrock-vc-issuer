@@ -205,7 +205,9 @@ export async function createKeystoreAgent({capabilityAgent, ipAllowList}) {
   let keystore;
   try {
     keystore = await createKeystore({capabilityAgent, ipAllowList});
+    console.log(keystore, '<><><>keystore');
   } catch(e) {
+    console.log(e, '<><><>e');
     err = e;
   }
   assertNoError(err);
