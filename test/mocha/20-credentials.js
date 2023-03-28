@@ -46,6 +46,7 @@ describe('issue APIs', () => {
         const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
         const handle = 'test';
         capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
+        console.log(capabilityAgent, 'capabilityAgent');
 
         // create keystore for capability agent
         const keystoreAgent = await helpers.createKeystoreAgent(
@@ -56,7 +57,7 @@ describe('issue APIs', () => {
           publicAliasTemplate: 'did:key:{publicKeyMultibase}#' +
             '{publicKeyMultibase}'
         });
-
+        console.log(assertionMethodKey, 'assertionMethodKey');
         // create EDV for storage (creating hmac and kak in the process)
         const {
           edvConfig,
@@ -91,6 +92,12 @@ describe('issue APIs', () => {
           delegator: capabilityAgent
         });
         zcaps['assertionMethod:ed25519'] = await helpers.delegate({
+          capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
+          controller: serviceAgent.id,
+          invocationTarget: assertionMethodKey.kmsId,
+          delegator: capabilityAgent
+        });
+        zcaps['assertionMethod:P-256'] = await helpers.delegate({
           capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
           controller: serviceAgent.id,
           invocationTarget: assertionMethodKey.kmsId,
@@ -153,38 +160,39 @@ describe('issue APIs', () => {
           {capabilityAgent, zcaps, oauth2: true, suiteName});
       });
       describe('/credentials/issue', () => {
-        it.only('issues a valid credential w/no "credentialStatus"', async () => {
-          const credential = klona(mockCredential);
-          let error;
-          let result;
-          try {
-            const zcapClient = helpers.createZcapClient({capabilityAgent});
-            result = await zcapClient.write({
-              url: `${noStatusListIssuerId}/credentials/issue`,
-              capability: noStatusListIssuerRootZcap,
-              json: {
-                credential
-              }
-            });
-          } catch(e) {
-            error = e;
-          }
-          assertNoError(error);
-          should.exist(result.data);
-          should.exist(result.data.verifiableCredential);
-          const {verifiableCredential} = result.data;
-          verifiableCredential.should.be.an('object');
-          should.exist(verifiableCredential['@context']);
-          should.exist(verifiableCredential.id);
-          should.exist(verifiableCredential.type);
-          should.exist(verifiableCredential.issuer);
-          should.exist(verifiableCredential.issuanceDate);
-          should.exist(verifiableCredential.credentialSubject);
-          verifiableCredential.credentialSubject.should.be.an('object');
-          should.not.exist(verifiableCredential.credentialStatus);
-          should.exist(verifiableCredential.proof);
-          verifiableCredential.proof.should.be.an('object');
-        });
+        it.only('issues a valid credential w/no "credentialStatus"',
+          async () => {
+            const credential = klona(mockCredential);
+            let error;
+            let result;
+            try {
+              const zcapClient = helpers.createZcapClient({capabilityAgent});
+              result = await zcapClient.write({
+                url: `${noStatusListIssuerId}/credentials/issue`,
+                capability: noStatusListIssuerRootZcap,
+                json: {
+                  credential
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            assertNoError(error);
+            should.exist(result.data);
+            should.exist(result.data.verifiableCredential);
+            const {verifiableCredential} = result.data;
+            verifiableCredential.should.be.an('object');
+            should.exist(verifiableCredential['@context']);
+            should.exist(verifiableCredential.id);
+            should.exist(verifiableCredential.type);
+            should.exist(verifiableCredential.issuer);
+            should.exist(verifiableCredential.issuanceDate);
+            should.exist(verifiableCredential.credentialSubject);
+            verifiableCredential.credentialSubject.should.be.an('object');
+            should.not.exist(verifiableCredential.credentialStatus);
+            should.exist(verifiableCredential.proof);
+            verifiableCredential.proof.should.be.an('object');
+          });
         it('fails to issue a valid credential', async () => {
           let error;
           try {
