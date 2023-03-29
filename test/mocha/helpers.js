@@ -2,6 +2,7 @@
  * Copyright (c) 2019-2022 Digital Bazaar, Inc. All rights reserved.
  */
 import * as bedrock from '@bedrock/core';
+import * as EcdsaMultikey from '@digitalbazaar/ecdsa-multikey';
 import {importJWK, SignJWT} from 'jose';
 import {KeystoreAgent, KmsClient} from '@digitalbazaar/webkms-client';
 import {decodeList} from '@digitalbazaar/vc-status-list';
@@ -228,11 +229,18 @@ export function createZcapClient({
   capabilityAgent, delegationSigner, invocationSigner
 }) {
   const signer = capabilityAgent && capabilityAgent.getSigner();
+  let SuiteClass;
+  if(signer.type === 'Ed25519VerificationKey2020') {
+    SuiteClass = Ed25519Signature2020;
+  }
+  if(signer.algorithm) {
+    SuiteClass = EcdsaMultikey;
+  }
   return new ZcapClient({
     agent: httpsAgent,
     invocationSigner: invocationSigner || signer,
     delegationSigner: delegationSigner || signer,
-    SuiteClass: Ed25519Signature2020
+    SuiteClass
   });
 }
 
