@@ -19,7 +19,10 @@ export const issueOptions = {
     suiteName: {
       type: 'string',
       // supported default suites in this version
-      enum: ['eddsa-2022', 'Ed25519Signature2020', 'Ed25519Signature2018']
+      enum: [
+        'ecdsa-2019', 'eddsa-2022', 'Ed25519Signature2020',
+        'Ed25519Signature2018'
+      ]
     }
   }
 };
@@ -38,7 +41,10 @@ export const statusListConfig = {
     suiteName: {
       type: 'string',
       // supported suites in this version
-      enum: ['eddsa-2022', 'Ed25519Signature2020', 'Ed25519Signature2018']
+      enum: [
+        'ecdsa-2019', 'eddsa-2022', 'Ed25519Signature2020',
+        'Ed25519Signature2018'
+      ]
     },
     statusPurpose: {
       type: 'string',
