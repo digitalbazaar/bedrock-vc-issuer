@@ -48,7 +48,7 @@ describe('issue APIs', () => {
         const handle = 'test';
         if(suiteName === 'ecdsa-2019') {
           const keyPair = await EcdsaMultikey.generate({
-            id: 'did:key:1234',
+            id: 'did:key:zDnaeao4Jt99H9v4EwZRye4MH8bF2gQ7Bejci15bsCSrNA6Jt',
             curve: 'P-256'
           });
           capabilityAgent = new CapabilityAgent({
