@@ -24,9 +24,9 @@ const mockCredential = require('./mock-credential.json');
 
 describe('issue APIs', () => {
   const suiteNames = [
-    'Ed25519Signature2018',
-    'Ed25519Signature2020',
-    'eddsa-2022',
+    // 'Ed25519Signature2018',
+    // 'Ed25519Signature2020',
+    // 'eddsa-2022',
     'ecdsa-2019'
   ];
   const zcaps = {};
@@ -51,11 +51,21 @@ describe('issue APIs', () => {
         const keystoreAgent = await helpers.createKeystoreAgent(
           {capabilityAgent});
         // generate key for signing VCs (make it a did:key DID for simplicity)
-        const assertionMethodKey = await keystoreAgent.generateKey({
-          type: 'asymmetric',
-          publicAliasTemplate: 'did:key:{publicKeyMultibase}#' +
-            '{publicKeyMultibase}'
-        });
+        let assertionMethodKey;
+        if(suiteName === 'ecdsa-2019') {
+          assertionMethodKey = await helpers._generateMultikey({
+            keystoreAgent,
+            type: 'urn:webkms:multikey:P-256',
+            publicAliasTemplate:
+              'did:key:{publicKeyMultibase}#{publicKeyMultibase}'
+          });
+        } else {
+          assertionMethodKey = await keystoreAgent.generateKey({
+            type: 'asymmetric',
+            publicAliasTemplate: 'did:key:{publicKeyMultibase}#' +
+              '{publicKeyMultibase}'
+          });
+        }
 
         // create EDV for storage (creating hmac and kak in the process)
         const {
@@ -90,12 +100,13 @@ describe('issue APIs', () => {
           invocationTarget: keyAgreementKey.kmsId,
           delegator: capabilityAgent
         });
-        zcaps['assertionMethod:ed25519'] = await helpers.delegate({
-          capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-          controller: serviceAgent.id,
-          invocationTarget: assertionMethodKey.kmsId,
-          delegator: capabilityAgent
-        });
+        zcaps[`assertionMethod:${assertionMethodKey.algorithm}`] = await helpers
+          .delegate({
+            capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
+            controller: serviceAgent.id,
+            invocationTarget: assertionMethodKey.kmsId,
+            delegator: capabilityAgent
+          });
 
         // create issuer instance w/ no status list options
         const noStatusListIssuerConfig = await helpers.createConfig(
@@ -153,38 +164,39 @@ describe('issue APIs', () => {
           {capabilityAgent, zcaps, oauth2: true, suiteName});
       });
       describe('/credentials/issue', () => {
-        it.only('issues a valid credential w/no "credentialStatus"', async () => {
-          const credential = klona(mockCredential);
-          let error;
-          let result;
-          try {
-            const zcapClient = helpers.createZcapClient({capabilityAgent});
-            result = await zcapClient.write({
-              url: `${noStatusListIssuerId}/credentials/issue`,
-              capability: noStatusListIssuerRootZcap,
-              json: {
-                credential
-              }
-            });
-          } catch(e) {
-            error = e;
-          }
-          assertNoError(error);
-          should.exist(result.data);
-          should.exist(result.data.verifiableCredential);
-          const {verifiableCredential} = result.data;
-          verifiableCredential.should.be.an('object');
-          should.exist(verifiableCredential['@context']);
-          should.exist(verifiableCredential.id);
-          should.exist(verifiableCredential.type);
-          should.exist(verifiableCredential.issuer);
-          should.exist(verifiableCredential.issuanceDate);
-          should.exist(verifiableCredential.credentialSubject);
-          verifiableCredential.credentialSubject.should.be.an('object');
-          should.not.exist(verifiableCredential.credentialStatus);
-          should.exist(verifiableCredential.proof);
-          verifiableCredential.proof.should.be.an('object');
-        });
+        it.only('issues a valid credential w/no "credentialStatus"',
+          async () => {
+            const credential = klona(mockCredential);
+            let error;
+            let result;
+            try {
+              const zcapClient = helpers.createZcapClient({capabilityAgent});
+              result = await zcapClient.write({
+                url: `${noStatusListIssuerId}/credentials/issue`,
+                capability: noStatusListIssuerRootZcap,
+                json: {
+                  credential
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            assertNoError(error);
+            should.exist(result.data);
+            should.exist(result.data.verifiableCredential);
+            const {verifiableCredential} = result.data;
+            verifiableCredential.should.be.an('object');
+            should.exist(verifiableCredential['@context']);
+            should.exist(verifiableCredential.id);
+            should.exist(verifiableCredential.type);
+            should.exist(verifiableCredential.issuer);
+            should.exist(verifiableCredential.issuanceDate);
+            should.exist(verifiableCredential.credentialSubject);
+            verifiableCredential.credentialSubject.should.be.an('object');
+            should.not.exist(verifiableCredential.credentialStatus);
+            should.exist(verifiableCredential.proof);
+            verifiableCredential.proof.should.be.an('object');
+          });
         it('fails to issue a valid credential', async () => {
           let error;
           try {

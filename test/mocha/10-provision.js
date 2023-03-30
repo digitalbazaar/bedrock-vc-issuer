@@ -64,12 +64,13 @@ describe('provision API', () => {
       invocationTarget: keyAgreementKey.kmsId,
       delegator: capabilityAgent
     });
-    zcaps['assertionMethod:ed25519'] = await helpers.delegate({
-      capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-      controller: serviceAgent.id,
-      invocationTarget: assertionMethodKey.kmsId,
-      delegator: capabilityAgent
-    });
+    zcaps[`assertionMethod:${assertionMethodKey.algorithm}`] = await helpers
+      .delegate({
+        capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
+        controller: serviceAgent.id,
+        invocationTarget: assertionMethodKey.kmsId,
+        delegator: capabilityAgent
+      });
   });
   describe('create config', () => {
     it('throws error on missing zcaps', async () => {
