@@ -2,12 +2,16 @@
  * Copyright (c) 2019-2022 Digital Bazaar, Inc. All rights reserved.
  */
 import * as bedrock from '@bedrock/core';
+import * as didMethodKey from '@digitalbazaar/did-method-key';
+import * as EcdsaMultikey from '@digitalbazaar/ecdsa-multikey';
 import {importJWK, SignJWT} from 'jose';
 import {KeystoreAgent, KmsClient} from '@digitalbazaar/webkms-client';
 import {AsymmetricKey} from '@digitalbazaar/webkms-client';
 import {decodeList} from '@digitalbazaar/vc-status-list';
 import {didIo} from '@bedrock/did-io';
 import {Ed25519Signature2020} from '@digitalbazaar/ed25519-signature-2020';
+import {Ed25519VerificationKey2020} from
+  '@digitalbazaar/ed25519-verification-key-2020';
 import {EdvClient} from '@digitalbazaar/edv-client';
 import {getAppIdentity} from '@bedrock/app-identity';
 import {httpClient} from '@digitalbazaar/http-client';
@@ -20,6 +24,19 @@ const edvBaseUrl = `${mockData.baseUrl}/edvs`;
 const kmsBaseUrl = `${mockData.baseUrl}/kms`;
 
 const FIVE_MINUTES = 1000 * 60 * 5;
+
+const didKeyDriver = didMethodKey.driver();
+
+didKeyDriver.use({
+  multibaseMultikeyHeader: 'z6Mk',
+  fromMultibase: Ed25519VerificationKey2020.from
+});
+didKeyDriver.use({
+  multibaseMultikeyHeader: 'zDna',
+  fromMultibase: EcdsaMultikey.from
+});
+
+didIo.use(didKeyDriver);
 
 export async function createMeter({capabilityAgent, serviceType} = {}) {
   // create signer using the application's capability invocation key
