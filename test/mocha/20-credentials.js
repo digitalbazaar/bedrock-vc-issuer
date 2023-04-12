@@ -24,9 +24,9 @@ const mockCredential = require('./mock-credential.json');
 
 describe('issue APIs', () => {
   const suiteNames = [
-    // 'Ed25519Signature2018',
-    // 'Ed25519Signature2020',
-    // 'eddsa-2022',
+    'Ed25519Signature2018',
+    'Ed25519Signature2020',
+    'eddsa-2022',
     'ecdsa-2019'
   ];
   const zcaps = {};
@@ -164,7 +164,7 @@ describe('issue APIs', () => {
           {capabilityAgent, zcaps, oauth2: true, suiteName});
       });
       describe('/credentials/issue', () => {
-        it.only('issues a valid credential w/no "credentialStatus"',
+        it('issues a valid credential w/no "credentialStatus"',
           async () => {
             const credential = klona(mockCredential);
             let error;
