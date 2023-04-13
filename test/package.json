@@ -36,7 +36,7 @@
     "@bedrock/service-agent": "^6.2.0",
     "@bedrock/service-context-store": "^9.0.0",
     "@bedrock/service-core": "^7.0.1",
-    "@bedrock/ssm-mongodb": "^10.0.0",
+    "@bedrock/ssm-mongodb": "digitalbazaar/bedrock-ssm-mongodb#multikey-fix",
     "@bedrock/test": "^8.0.5",
     "@bedrock/validation": "^7.0.0",
     "@bedrock/vc-issuer": "file:..",
