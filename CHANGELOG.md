@@ -1,5 +1,13 @@
 # bedrock-vc-issuer ChangeLog
 
+## 21.1.0 - 2023-TBD
+
+### Added
+- Add support for `@digitalbazaar/ecdsa-2019-cryptosuite` suite when issuing.
+
+### Changed
+- Update peerdep `@bedrock/did-io` to v10.0.
+
 ## 21.0.0 - 2023-01-08
 
 ### Changed
