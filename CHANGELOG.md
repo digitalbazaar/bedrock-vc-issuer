@@ -7,6 +7,8 @@
 
 ### Changed
 - **BREAKING**: Update peerdep `@bedrock/did-io` to v10.0.
+- **BREAKING**: Update `keyType` used to generate assertionMethod zcap
+  referenceId to be uppercase format.
 
 ## 21.0.0 - 2023-01-08
 
