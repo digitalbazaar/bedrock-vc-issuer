@@ -105,6 +105,24 @@ describe('provision API', () => {
       const {id: capabilityAgentId} = capabilityAgent;
       result.controller.should.equal(capabilityAgentId);
     });
+    it('throws error when creating a config without assertion method zcap',
+      async () => {
+        let err;
+        let result;
+        try {
+          const zcapsCopy = {...zcaps};
+          delete zcapsCopy['assertionMethod:Ed25519'];
+          result = await helpers.createConfig({
+            capabilityAgent, zcaps: zcapsCopy
+          });
+        } catch(e) {
+          err = e;
+        }
+        should.exist(err);
+        should.not.exist(result);
+        err.name.should.equal('OperstionError');
+        err.messgae.should.equal('An unspecified error occurred.');
+      });
     it('creates a config including proper ipAllowList', async () => {
       const ipAllowList = ['127.0.0.1/32', '::1/128'];
 
