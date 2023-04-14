@@ -120,8 +120,8 @@ describe('provision API', () => {
         }
         should.exist(err);
         should.not.exist(result);
-        err.name.should.equal('OperstionError');
-        err.messgae.should.equal('An unspecified error occurred.');
+        err.data.name.should.equal('OperationError');
+        err.data.message.should.equal('An unspecified error occurred.');
       });
     it('creates a config including proper ipAllowList', async () => {
       const ipAllowList = ['127.0.0.1/32', '::1/128'];
