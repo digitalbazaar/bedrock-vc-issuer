@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2020-2022 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2023 Digital Bazaar, Inc. All rights reserved.
  */
 import {config} from '@bedrock/core';
 import {fileURLToPath} from 'node:url';
