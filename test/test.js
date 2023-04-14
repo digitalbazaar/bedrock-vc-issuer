@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2016-2022 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2023 Digital Bazaar, Inc. All rights reserved.
  */
 import * as bedrock from '@bedrock/core';
 import {getServiceIdentities} from '@bedrock/app-identity';
