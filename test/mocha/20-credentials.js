@@ -52,18 +52,18 @@ describe('issue APIs', () => {
           {capabilityAgent});
         // generate key for signing VCs (make it a did:key DID for simplicity)
         let assertionMethodKey;
+        const publicAliasTemplate =
+          'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
         if(suiteName === 'ecdsa-2019') {
           assertionMethodKey = await helpers._generateMultikey({
             keystoreAgent,
             type: 'urn:webkms:multikey:P-256',
-            publicAliasTemplate:
-              'did:key:{publicKeyMultibase}#{publicKeyMultibase}'
+            publicAliasTemplate
           });
         } else {
           assertionMethodKey = await keystoreAgent.generateKey({
             type: 'asymmetric',
-            publicAliasTemplate: 'did:key:{publicKeyMultibase}#' +
-              '{publicKeyMultibase}'
+            publicAliasTemplate
           });
         }
 
