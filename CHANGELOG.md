@@ -7,10 +7,10 @@
 
 ### Changed
 - **BREAKING**: Update peerdep `@bedrock/did-io` to v10.0.
-- **BREAKING**: Update `@bedrock/service-core` to v8.0. Updates error thrown for
-  configuration validation failure.
 - **BREAKING**: Update `keyType` used to generate assertionMethod zcap
   referenceId to be uppercase format.
+- Use `@bedrock/service-core` v7.1. Updates error caused by configuration
+  validation failure.
 
 ## 21.0.0 - 2023-01-08
 
