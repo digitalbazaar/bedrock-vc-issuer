@@ -35,7 +35,7 @@
     "@bedrock/server": "^5.0.0",
     "@bedrock/service-agent": "^6.2.0",
     "@bedrock/service-context-store": "^9.0.0",
-    "@bedrock/service-core": "digitalbazaar/bedrock-service-core#change-to-bedrock-error",
+    "@bedrock/service-core": "^8.0.0",
     "@bedrock/ssm-mongodb": "^10.1.2",
     "@bedrock/test": "^8.0.5",
     "@bedrock/validation": "^7.0.0",
