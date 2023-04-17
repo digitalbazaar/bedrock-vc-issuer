@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 22.0.0 - 2023-TBD
+## 22.0.0 - 2023-04-17
 
 ### Added
 - Add support for issuing VCs using the `ecdsa-2019` cryptosuite via the
