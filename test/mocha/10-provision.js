@@ -120,8 +120,8 @@ describe('provision API', () => {
         }
         should.exist(err);
         should.not.exist(result);
-        err.data.name.should.equal('ValidationError');
-        err.data.message.should.equal('ConfigFn validation failed.');
+        err.data.name.should.equal('DataError');
+        err.data.message.should.equal('Configuration validation failed.');
         const {cause} = err.data.details;
         cause.message.should.equal(
           'No capability available to sign using suite ' +
