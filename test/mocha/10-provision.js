@@ -120,8 +120,12 @@ describe('provision API', () => {
         }
         should.exist(err);
         should.not.exist(result);
-        err.data.name.should.equal('OperationError');
-        err.data.message.should.equal('An unspecified error occurred.');
+        err.data.name.should.equal('ValidationError');
+        err.data.message.should.equal('ConfigFn validation failed.');
+        const {cause} = err.data.details;
+        cause.message.should.equal(
+          'No capability available to sign using suite ' +
+          '"Ed25519Signature2020".');
       });
     it('creates a config including proper ipAllowList', async () => {
       const ipAllowList = ['127.0.0.1/32', '::1/128'];
