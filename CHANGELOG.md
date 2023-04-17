@@ -3,7 +3,8 @@
 ## 22.0.0 - 2023-TBD
 
 ### Added
-- Add support for `@digitalbazaar/ecdsa-2019-cryptosuite` suite when issuing.
+- Add support for issuing VCs using the `ecdsa-2019` cryptosuite via the
+  `@digitalbazaar/ecdsa-2019-cryptosuite` implementation.
 
 ### Changed
 - **BREAKING**: Update peerdep `@bedrock/did-io` to v10.0.
