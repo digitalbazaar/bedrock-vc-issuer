@@ -106,9 +106,15 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
       }, {
         $rename: {
           'config.zcaps.assertionMethod:Ed25519':
-             'config.zcaps.assertionMethod:ed25519'
+            'config.zcaps.assertionMethod:ed25519'
         }
       });
+      // Check if assertion method zcap has been updated
+      const {config} = await serviceCoreConfigCollection.findOne({
+        'config.id': noStatusListIssuerId,
+      });
+      should.exist(config);
+      should.exist(config.zcaps['assertionMethod:ed25519']);
       // create issuer instance w/ revocation list 2020 status list options
       {
         const statusListOptions = [{
@@ -128,9 +134,15 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         }, {
           $rename: {
             'config.zcaps.assertionMethod:Ed25519':
-                'config.zcaps.assertionMethod:ed25519'
+              'config.zcaps.assertionMethod:ed25519'
           }
         });
+        // Check if assertion method zcap has been updated
+        const {config} = await serviceCoreConfigCollection.findOne({
+          'config.id': rl2020IssuerId,
+        });
+        should.exist(config);
+        should.exist(config.zcaps['assertionMethod:ed25519']);
       }
 
       // create issuer instance w/ status list 2021 status list options
@@ -153,9 +165,15 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         }, {
           $rename: {
             'config.zcaps.assertionMethod:Ed25519':
-                'config.zcaps.assertionMethod:ed25519'
+              'config.zcaps.assertionMethod:ed25519'
           }
         });
+        // Check if assertion method zcap has been updated
+        const {config} = await serviceCoreConfigCollection.findOne({
+          'config.id': sl2021RevocationIssuerId,
+        });
+        should.exist(config);
+        should.exist(config.zcaps['assertionMethod:ed25519']);
       }
 
       // create issuer instance w/ status list 2021 status list options
@@ -178,9 +196,15 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         }, {
           $rename: {
             'config.zcaps.assertionMethod:Ed25519':
-                'config.zcaps.assertionMethod:ed25519'
+              'config.zcaps.assertionMethod:ed25519'
           }
         });
+        // Check if assertion method zcap has been updated
+        const {config} = await serviceCoreConfigCollection.findOne({
+          'config.id': sl2021RevocationIssuerId,
+        });
+        should.exist(config);
+        should.exist(config.zcaps['assertionMethod:ed25519']);
       }
 
       // create issuer instance w/ oauth2-based authz
