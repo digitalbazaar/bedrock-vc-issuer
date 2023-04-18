@@ -1,5 +1,13 @@
 # bedrock-vc-issuer ChangeLog
 
+## 22.1.0 - 2023-TBD
+
+### Changed
+- Update peerdeps:
+  - Update `@bedrock/service-agent` to v7.0.
+  - Update `@bedrock/service-context-store` to v10.0.
+  - Update `@bedrock/service-core` to v8.0.
+
 ## 22.0.0 - 2023-04-17
 
 ### Added
