@@ -2,6 +2,7 @@
  * Copyright (c) 2019-2023 Digital Bazaar, Inc. All rights reserved.
  */
 import * as bedrock from '@bedrock/core';
+import * as database from '@bedrock/mongodb';
 import {importJWK, SignJWT} from 'jose';
 import {KeystoreAgent, KmsClient} from '@digitalbazaar/webkms-client';
 import {AsymmetricKey} from '@digitalbazaar/webkms-client';
@@ -309,5 +310,26 @@ export async function _generateMultikey({
   ({type} = keyDescription);
   return new AsymmetricKey({
     id, kmsId: keyId, type, invocationSigner, kmsClient, keyDescription
+  });
+}
+
+const serviceCoreConfigCollection =
+  database.collections['service-core-config-vc-issuer'];
+
+export async function updateConfig({configId}) {
+  const updateReferenceId = {
+    'config.zcaps.assertionMethod:Ed25519':
+      'config.zcaps.assertionMethod:ed25519'
+  };
+  await serviceCoreConfigCollection.updateOne({
+    'config.id': configId,
+  }, {
+    $rename: updateReferenceId
+  });
+}
+
+export async function findConfig({configId}) {
+  return serviceCoreConfigCollection.findOne({
+    'config.id': configId,
   });
 }
