@@ -1,9 +1,9 @@
 # bedrock-vc-issuer ChangeLog
 
-## 22.1.0 - 2023-TBD
+## 22.0.1 - 2023-04-18
 
-### Changed
-- Update peerdeps:
+### Fixed
+- Fixed mismatched / incompatible peerdeps. Updated to:
   - Update `@bedrock/service-agent` to v7.0.
   - Update `@bedrock/service-context-store` to v10.0.
   - Update `@bedrock/service-core` to v8.0.
