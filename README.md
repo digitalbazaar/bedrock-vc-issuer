@@ -17,7 +17,7 @@
 
 ## Background
 
-* [Verifiable Credentials HTTP API v0.3](https://w3c-ccg.github.io/vc-http-api/) specification.
+* [Verifiable Credentials HTTP API v0.3](https://w3c-ccg.github.io/vc-api/) specification.
 * Supports `RevocationList2020Status` type.
 
 ## Security
