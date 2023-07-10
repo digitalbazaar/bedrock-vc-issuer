@@ -21,6 +21,7 @@ const serviceType = 'vc-issuer';
 // NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
+const mockCredentialV2 = require('./mock-credential-v2.json');
 
 describe('issue APIs', () => {
   const suiteNames = {
@@ -220,6 +221,38 @@ describe('issue APIs', () => {
           should.exist(verifiableCredential.proof);
           verifiableCredential.proof.should.be.an('object');
         });
+        it('issues a VC 2.0 credential w/no "credentialStatus"', async () => {
+          const credential = klona(mockCredentialV2);
+          let error;
+          let result;
+          try {
+            const zcapClient = helpers.createZcapClient({capabilityAgent});
+            result = await zcapClient.write({
+              url: `${noStatusListIssuerId}/credentials/issue`,
+              capability: noStatusListIssuerRootZcap,
+              json: {
+                credential
+              }
+            });
+          } catch(e) {
+            error = e;
+          }
+          assertNoError(error);
+          should.exist(result.data);
+          should.exist(result.data.verifiableCredential);
+          const {verifiableCredential} = result.data;
+          verifiableCredential.should.be.an('object');
+          should.exist(verifiableCredential['@context']);
+          should.exist(verifiableCredential.id);
+          should.exist(verifiableCredential.type);
+          should.exist(verifiableCredential.issuer);
+          should.exist(verifiableCredential.credentialSubject);
+          verifiableCredential.credentialSubject.should.be.an('object');
+          should.not.exist(verifiableCredential.credentialStatus);
+          should.exist(verifiableCredential.proof);
+          verifiableCredential.proof.should.be.an('object');
+        });
+
         it('fails to issue a valid credential', async () => {
           let error;
           try {
