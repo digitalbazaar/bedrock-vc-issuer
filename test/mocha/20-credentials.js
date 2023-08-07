@@ -41,17 +41,17 @@ describe('issue APIs', () => {
   const zcaps = {};
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
-    let testDescription;
-    let selectedkeyType;
-    if(suiteInfo.keyType && !Array.isArray(suiteInfo.keyType)) {
-      testDescription = `${suiteName}: ${suiteInfo.keyType}`;
-      selectedkeyType = suiteInfo.keyType;
-    } else if(Array.isArray(suiteInfo.keyType)) {
+    if(Array.isArray(suiteInfo.keyType)) {
       for(const keyType of suiteInfo.keyType) {
-        testDescription = `${suiteName}: ${keyType}`;
-        selectedkeyType = keyType;
+        describeSuite({suiteName, selectedKeyType: keyType});
       }
+    } else {
+      describeSuite({suiteName, selectedKeyType: suiteInfo.keyType});
     }
+  }
+
+  function describeSuite({suiteName, selectedKeyType}) {
+    const testDescription = `${suiteName}, keyType: ${selectedKeyType}`;
     describe(testDescription, function() {
       let capabilityAgent;
       let noStatusListIssuerId;
@@ -75,19 +75,19 @@ describe('issue APIs', () => {
         let assertionMethodKey;
         const publicAliasTemplate =
           'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
-        if(selectedkeyType === 'P-256') {
+        if(selectedKeyType === 'P-256') {
           assertionMethodKey = await helpers._generateMultikey({
             keystoreAgent,
             type: 'urn:webkms:multikey:P-256',
             publicAliasTemplate
           });
-        } else if(selectedkeyType === 'P-384') {
+        } else if(selectedKeyType === 'P-384') {
           assertionMethodKey = await helpers._generateMultikey({
             keystoreAgent,
             type: 'urn:webkms:multikey:P-384',
             publicAliasTemplate
           });
-        } else if(selectedkeyType === 'Ed25519') {
+        } else if(selectedKeyType === 'Ed25519') {
           assertionMethodKey = await keystoreAgent.generateKey({
             type: 'asymmetric',
             publicAliasTemplate
@@ -136,7 +136,7 @@ describe('issue APIs', () => {
 
         // create issuer instance w/ no status list options
         const noStatusListIssuerConfig = await helpers.createConfig(
-          {capabilityAgent, zcaps, suiteName, keyType: selectedkeyType});
+          {capabilityAgent, zcaps, suiteName, keyType: selectedKeyType});
         noStatusListIssuerId = noStatusListIssuerConfig.id;
         noStatusListIssuerRootZcap =
           `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
@@ -147,11 +147,11 @@ describe('issue APIs', () => {
             type: 'RevocationList2020',
             statusPurpose: 'revocation',
             suiteName,
-            keyType: selectedkeyType
+            keyType: selectedKeyType
           }];
           const issuerConfig = await helpers.createConfig({
             capabilityAgent, zcaps, statusListOptions, suiteName,
-            keyType: selectedkeyType
+            keyType: selectedKeyType
           });
           rl2020IssuerId = issuerConfig.id;
           rl2020RootZcap =
@@ -165,11 +165,11 @@ describe('issue APIs', () => {
             type: 'StatusList2021',
             statusPurpose: 'revocation',
             suiteName,
-            keyType: selectedkeyType
+            keyType: selectedKeyType
           }];
           const issuerConfig = await helpers.createConfig({
             capabilityAgent, zcaps, statusListOptions, suiteName,
-            keyType: selectedkeyType
+            keyType: selectedKeyType
           });
           sl2021RevocationIssuerId = issuerConfig.id;
           sl2021RevocationRootZcap =
@@ -183,11 +183,11 @@ describe('issue APIs', () => {
             type: 'StatusList2021',
             statusPurpose: 'suspension',
             suiteName,
-            keyType: selectedkeyType
+            keyType: selectedKeyType
           }];
           const issuerConfig = await helpers.createConfig({
             capabilityAgent, zcaps, statusListOptions, suiteName,
-            keyType: selectedkeyType
+            keyType: selectedKeyType
           });
           sl2021SuspensionIssuerId = issuerConfig.id;
           sl2021SuspensionRootZcap =
@@ -197,7 +197,7 @@ describe('issue APIs', () => {
         // create issuer instance w/ oauth2-based authz
         oauth2IssuerConfig = await helpers.createConfig({
           capabilityAgent, zcaps, oauth2: true, suiteName,
-          keyType: selectedkeyType
+          keyType: selectedKeyType
         });
       });
       describe('/credentials/issue', () => {
