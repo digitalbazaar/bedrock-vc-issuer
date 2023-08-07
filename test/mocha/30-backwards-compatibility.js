@@ -34,6 +34,7 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
     let oauth2IssuerConfig;
     beforeEach(async () => {
       const suiteName = 'Ed25519Signature2020';
+      const keyType = 'Ed25519';
       const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
       const handle = 'test';
       capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
@@ -45,7 +46,7 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
       const assertionMethodKey = await keystoreAgent.generateKey({
         type: 'asymmetric',
         publicAliasTemplate: 'did:key:{publicKeyMultibase}#' +
-              '{publicKeyMultibase}'
+          '{publicKeyMultibase}'
       });
 
       // create EDV for storage (creating hmac and kak in the process)
@@ -57,7 +58,7 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
 
       // get service agent to delegate to
       const serviceAgentUrl =
-          `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
+        `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
       const {data: serviceAgent} = await httpClient.get(
         serviceAgentUrl, {agent});
 
@@ -94,7 +95,7 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         {capabilityAgent, zcaps, suiteName: 'Ed25519Signature2020'});
       noStatusListIssuerId = noStatusListIssuerConfig.id;
       noStatusListIssuerRootZcap =
-          `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
+        `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
 
       // Intentionally change the referenceId of the assertion method zcap
       // in the database to be lowercase
@@ -110,13 +111,14 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         const statusListOptions = [{
           type: 'RevocationList2020',
           statusPurpose: 'revocation',
-          suiteName
+          suiteName,
+          keyType
         }];
         const issuerConfig = await helpers.createConfig(
           {capabilityAgent, zcaps, statusListOptions, suiteName});
         rl2020IssuerId = issuerConfig.id;
         rl2020RootZcap =
-            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
         // Intentionally change the referenceId of the assertion method zcap
         // in the database to be lowercase
         await helpers.updateConfig({configId: rl2020IssuerId});
@@ -134,13 +136,14 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'revocation',
-          suiteName
+          suiteName,
+          keyType
         }];
         const issuerConfig = await helpers.createConfig(
           {capabilityAgent, zcaps, statusListOptions, suiteName});
         sl2021RevocationIssuerId = issuerConfig.id;
         sl2021RevocationRootZcap =
-            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
         // Intentionally change the referenceId of the assertion method zcap
         // in the database to be lowercase
         await helpers.updateConfig({configId: sl2021RevocationIssuerId});
@@ -158,13 +161,14 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'suspension',
-          suiteName
+          suiteName,
+          keyType
         }];
         const issuerConfig = await helpers.createConfig(
           {capabilityAgent, zcaps, statusListOptions, suiteName});
         sl2021SuspensionIssuerId = issuerConfig.id;
         sl2021SuspensionRootZcap =
-            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
         // Intentionally change the referenceId of the assertion method zcap
         // in the database to be lowercase
         await helpers.updateConfig({configId: sl2021SuspensionIssuerId});
