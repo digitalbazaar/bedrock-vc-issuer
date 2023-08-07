@@ -16,7 +16,7 @@
     "@bedrock/credentials-context": "^3.0.0",
     "@bedrock/data-integrity-context": "^1.0.0",
     "@bedrock/did-context": "^4.0.0",
-    "@bedrock/did-io": "^10.0.0",
+    "@bedrock/did-io": "digitalbazaar/bedrock-did-io#add-p-384",
     "@bedrock/edv-storage": "^16.0.0",
     "@bedrock/express": "^8.0.0",
     "@bedrock/https-agent": "^4.0.0",

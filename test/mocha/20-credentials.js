@@ -34,9 +34,7 @@ describe('issue APIs', () => {
       keyType: 'Ed25519'
     },
     'ecdsa-2019': {
-      keyType: [
-        'P-256', // 'P-384'
-      ]
+      keyType: ['P-256', 'P-384']
     }
   };
 
