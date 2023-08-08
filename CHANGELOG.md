@@ -1,5 +1,16 @@
 # bedrock-vc-issuer ChangeLog
 
+## 23.0.0 - 2023-08-TBD
+
+### Added
+- Add support for issuing VCs using `ecdsa-2019` cryptosuite with `P-384` key
+  type.
+
+### Changed
+- **BREAKING**: For both `issueOptions` and `statusListConfig`, it's required to
+  now specify a `keyType` property, else it will result in schema validation
+  errors.
+
 ## 22.0.1 - 2023-04-18
 
 ### Fixed
