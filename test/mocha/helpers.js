@@ -83,6 +83,7 @@ export async function createConfig({
       }
     };
   }
+
   const zcapClient = createZcapClient({capabilityAgent});
   const url = `${mockData.baseUrl}/issuers`;
   const response = await zcapClient.write({url, json: config});

@@ -93,6 +93,7 @@ describe('issue APIs', () => {
             publicAliasTemplate
           });
         }
+
         // create EDV for storage (creating hmac and kak in the process)
         const {
           edvConfig,
