@@ -26,7 +26,7 @@ TBD
 
 ## Install
 
-- Node.js 16+ is required.
+- Node.js 18+ is required.
 
 ### NPM
 
@@ -112,9 +112,9 @@ Example request:
   "credential": {
   },
   "options": {
-    "proofPurpose": "assertionMethod", 
-    "assertionMethod": "<key id>", 
-    "verificationMethod": "<key id>", 
+    "proofPurpose": "assertionMethod",
+    "assertionMethod": "<key id>",
+    "verificationMethod": "<key id>",
     "credentialStatus": {
       "type": "RevocationList2020Status"
     }
