@@ -13,7 +13,7 @@ const context = {
 export const issueOptions = {
   title: 'Issue Options',
   type: 'object',
-  required: ['suiteName', 'keyType'],
+  required: ['suiteName'],
   additionalProperties: false,
   properties: {
     suiteName: {
@@ -23,13 +23,6 @@ export const issueOptions = {
         'ecdsa-2019', 'eddsa-2022', 'Ed25519Signature2020',
         'Ed25519Signature2018'
       ]
-    },
-    keyType: {
-      type: 'string',
-      // supported key types
-      enum: [
-        'P-256', 'Ed25519', 'P-384'
-      ]
     }
   }
 };
@@ -37,7 +30,7 @@ export const issueOptions = {
 export const statusListConfig = {
   title: 'Status List Configuration',
   type: 'object',
-  required: ['type', 'suiteName', 'statusPurpose', 'keyType'],
+  required: ['type', 'suiteName', 'statusPurpose'],
   additionalProperties: false,
   properties: {
     type: {
@@ -51,13 +44,6 @@ export const statusListConfig = {
       enum: [
         'ecdsa-2019', 'eddsa-2022', 'Ed25519Signature2020',
         'Ed25519Signature2018'
-      ]
-    },
-    keyType: {
-      type: 'string',
-      // supported key types
-      enum: [
-        'P-256', 'Ed25519', 'P-384'
       ]
     },
     statusPurpose: {
