@@ -34,7 +34,6 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
     let oauth2IssuerConfig;
     beforeEach(async () => {
       const suiteName = 'Ed25519Signature2020';
-      const keyType = 'Ed25519';
       const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
       const handle = 'test';
       capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
@@ -111,8 +110,7 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         const statusListOptions = [{
           type: 'RevocationList2020',
           statusPurpose: 'revocation',
-          suiteName,
-          keyType
+          suiteName
         }];
         const issuerConfig = await helpers.createConfig(
           {capabilityAgent, zcaps, statusListOptions, suiteName});
@@ -136,8 +134,7 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'revocation',
-          suiteName,
-          keyType
+          suiteName
         }];
         const issuerConfig = await helpers.createConfig(
           {capabilityAgent, zcaps, statusListOptions, suiteName});
@@ -161,8 +158,7 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'suspension',
-          suiteName,
-          keyType
+          suiteName
         }];
         const issuerConfig = await helpers.createConfig(
           {capabilityAgent, zcaps, statusListOptions, suiteName});

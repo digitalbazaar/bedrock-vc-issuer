@@ -38,7 +38,6 @@ describe('issue APIs', () => {
     }
   };
 
-  const zcaps = {};
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
     if(Array.isArray(suiteInfo.keyType)) {
@@ -63,6 +62,7 @@ describe('issue APIs', () => {
       let sl2021SuspensionIssuerId;
       let sl2021SuspensionRootZcap;
       let oauth2IssuerConfig;
+      const zcaps = {};
       beforeEach(async () => {
         const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
         const handle = 'test';
@@ -135,8 +135,9 @@ describe('issue APIs', () => {
           });
 
         // create issuer instance w/ no status list options
-        const noStatusListIssuerConfig = await helpers.createConfig(
-          {capabilityAgent, zcaps, suiteName, keyType: selectedKeyType});
+        const noStatusListIssuerConfig = await helpers.createConfig({
+          capabilityAgent, zcaps, suiteName
+        });
         noStatusListIssuerId = noStatusListIssuerConfig.id;
         noStatusListIssuerRootZcap =
           `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
@@ -146,12 +147,10 @@ describe('issue APIs', () => {
           const statusListOptions = [{
             type: 'RevocationList2020',
             statusPurpose: 'revocation',
-            suiteName,
-            keyType: selectedKeyType
+            suiteName
           }];
           const issuerConfig = await helpers.createConfig({
-            capabilityAgent, zcaps, statusListOptions, suiteName,
-            keyType: selectedKeyType
+            capabilityAgent, zcaps, statusListOptions, suiteName
           });
           rl2020IssuerId = issuerConfig.id;
           rl2020RootZcap =
@@ -164,12 +163,10 @@ describe('issue APIs', () => {
           const statusListOptions = [{
             type: 'StatusList2021',
             statusPurpose: 'revocation',
-            suiteName,
-            keyType: selectedKeyType
+            suiteName
           }];
           const issuerConfig = await helpers.createConfig({
-            capabilityAgent, zcaps, statusListOptions, suiteName,
-            keyType: selectedKeyType
+            capabilityAgent, zcaps, statusListOptions, suiteName
           });
           sl2021RevocationIssuerId = issuerConfig.id;
           sl2021RevocationRootZcap =
@@ -182,12 +179,10 @@ describe('issue APIs', () => {
           const statusListOptions = [{
             type: 'StatusList2021',
             statusPurpose: 'suspension',
-            suiteName,
-            keyType: selectedKeyType
+            suiteName
           }];
           const issuerConfig = await helpers.createConfig({
-            capabilityAgent, zcaps, statusListOptions, suiteName,
-            keyType: selectedKeyType
+            capabilityAgent, zcaps, statusListOptions, suiteName
           });
           sl2021SuspensionIssuerId = issuerConfig.id;
           sl2021SuspensionRootZcap =
@@ -196,8 +191,7 @@ describe('issue APIs', () => {
 
         // create issuer instance w/ oauth2-based authz
         oauth2IssuerConfig = await helpers.createConfig({
-          capabilityAgent, zcaps, oauth2: true, suiteName,
-          keyType: selectedKeyType
+          capabilityAgent, zcaps, oauth2: true, suiteName
         });
       });
       describe('/credentials/issue', () => {
