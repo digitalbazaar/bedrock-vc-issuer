@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 23.0.0 - 2023-08-TBD
+## 23.0.0 - 2023-08-16
 
 ### Changed
 - **BREAKING**: Drop support for Node.js 16.
