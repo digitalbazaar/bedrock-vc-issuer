@@ -47,7 +47,7 @@
     "cors": "^2.8.5",
     "klona": "^2.0.5",
     "lru-cache": "^6.0.0",
-    "uuid": "^8.3.2"
+    "uuid": "^9.0.1"
   },
   "peerDependencies": {
     "@bedrock/app-identity": "4.0.0",
