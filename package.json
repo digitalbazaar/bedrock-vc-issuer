@@ -37,7 +37,7 @@
     "@digitalbazaar/ed25519-signature-2020": "^5.0.0",
     "@digitalbazaar/eddsa-2022-cryptosuite": "^1.0.0",
     "@digitalbazaar/lru-memoize": "^3.0.0",
-    "@digitalbazaar/vc": "^5.0.0",
+    "@digitalbazaar/vc": "^6.0.2",
     "@digitalbazaar/vc-revocation-list": "^6.0.0",
     "@digitalbazaar/vc-status-list": "^7.0.0",
     "@digitalbazaar/webkms-client": "^13.0.0",

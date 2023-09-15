@@ -5,6 +5,7 @@
 ### Changed
 - Use `@digitalbazaar/webkms-client@13`. This version required Node.js 18+.
 - Use `uuid@9`. This version requires Node.js 12+.
+- Use `@digitalbazaar/vc@6`.
 
 ## 23.0.0 - 2023-08-16
 
