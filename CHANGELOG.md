@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 23.1.0 - 2023-09-xx
+## 23.1.0 - 2023-09-15
 
 ### Changed
 - Use `@digitalbazaar/webkms-client@13`. This version required Node.js 18+.
