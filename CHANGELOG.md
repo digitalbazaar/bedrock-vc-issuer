@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 23.1.1 - 2023-09-18
+
+### Fixed
+- Fix failed `23.1.0` release.
+
 ## 23.1.0 - 2023-09-15
 
 ### Changed
