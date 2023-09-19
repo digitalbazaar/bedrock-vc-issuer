@@ -1,5 +1,22 @@
 # bedrock-vc-issuer ChangeLog
 
+## 24.0.0 - 2023-09-xx
+
+### Changed
+- **BREAKING**: Update peer deps:
+  - Use `@bedrock/credentials-context@4`.
+  - Use `@bedrock/data-integrity-context@2`.
+  - Use `@bedrock/did-context@5`.
+  - Use `@bedrock/jsonld-document-loader4`.
+  - Use `@bedrock/multikey-context@2`.
+  - Use `@bedrock/security-context@8`.
+  - Use `@bedrock/service-agent@8`.
+  - Use `@bedrock/service-context-store@11`.
+  - Use `@bedrock/service-core@9`.
+  - Use `@bedrock/vc-revocation-list-context@4`.
+  - Use `@bedrock/vc-status-list-context@5`.
+  - Use `@bedrock/veres-one-context@15`.
+
 ## 23.1.1 - 2023-09-18
 
 ### Fixed
