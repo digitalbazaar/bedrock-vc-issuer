@@ -16,6 +16,8 @@
   - Use `@bedrock/vc-revocation-list-context@4`.
   - Use `@bedrock/vc-status-list-context@5`.
   - Use `@bedrock/veres-one-context@15`.
+- Update to latest `documentStores` API.
+- Update test deps.
 
 ## 23.1.1 - 2023-09-18
 
