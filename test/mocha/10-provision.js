@@ -1018,8 +1018,8 @@ describe('provision API', () => {
       result.document.should.deep.equal(context);
 
       // now erroneously update context to new meta type
-      const docStore = await documentStores.get({config, serviceType});
-      await docStore.upsert({
+      const {documentStore} = await documentStores.get({config, serviceType});
+      await documentStore.upsert({
         content: {id: contextId, context},
         meta: {type: 'different'}
       });
