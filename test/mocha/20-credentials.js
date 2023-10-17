@@ -23,15 +23,33 @@ const serviceType = 'vc-issuer';
 const mockCredential = require('./mock-credential.json');
 
 describe('issue APIs', () => {
-  const suiteNames = [
-    'Ed25519Signature2018',
-    'Ed25519Signature2020',
-    'eddsa-2022',
-    'ecdsa-2019'
-  ];
-  const zcaps = {};
-  for(const suiteName of suiteNames) {
-    describe(suiteName, function() {
+  const suiteNames = {
+    Ed25519Signature2018: {
+      algorithm: 'Ed25519'
+    },
+    Ed25519Signature2020: {
+      algorithm: 'Ed25519'
+    },
+    'eddsa-2022': {
+      algorithm: 'Ed25519'
+    },
+    'ecdsa-2019': {
+      algorithm: ['P-256', 'P-384']
+    }
+  };
+  for(const suiteName in suiteNames) {
+    const suiteInfo = suiteNames[suiteName];
+    if(Array.isArray(suiteInfo.algorithm)) {
+      for(const algorithm of suiteInfo.algorithm) {
+        describeSuite({suiteName, algorithm});
+      }
+    } else {
+      describeSuite({suiteName, algorithm: suiteInfo.algorithm});
+    }
+  }
+  function describeSuite({suiteName, algorithm}) {
+    const testDescription = `${suiteName}, algorithm: ${algorithm}`;
+    describe(testDescription, function() {
       let capabilityAgent;
       let noStatusListIssuerId;
       let noStatusListIssuerRootZcap;
@@ -42,6 +60,7 @@ describe('issue APIs', () => {
       let sl2021SuspensionIssuerId;
       let sl2021SuspensionRootZcap;
       let oauth2IssuerConfig;
+      const zcaps = {};
       beforeEach(async () => {
         const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
         const handle = 'test';
@@ -54,10 +73,10 @@ describe('issue APIs', () => {
         let assertionMethodKey;
         const publicAliasTemplate =
           'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
-        if(suiteName === 'ecdsa-2019') {
+        if(algorithm === 'P-256' || algorithm === 'P-384') {
           assertionMethodKey = await helpers._generateMultikey({
             keystoreAgent,
-            type: 'urn:webkms:multikey:P-256',
+            type: `urn:webkms:multikey:${algorithm}`,
             publicAliasTemplate
           });
         } else {
