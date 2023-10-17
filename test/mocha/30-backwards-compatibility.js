@@ -18,7 +18,7 @@ const serviceType = 'vc-issuer';
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
 
-describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
+describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
   'compatibility test', () => {
   const zcaps = {};
   describe('Ed25519Signature2020', function() {
@@ -45,7 +45,7 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
       const assertionMethodKey = await keystoreAgent.generateKey({
         type: 'asymmetric',
         publicAliasTemplate: 'did:key:{publicKeyMultibase}#' +
-              '{publicKeyMultibase}'
+          '{publicKeyMultibase}'
       });
 
       // create EDV for storage (creating hmac and kak in the process)
@@ -81,7 +81,7 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         invocationTarget: keyAgreementKey.kmsId,
         delegator: capabilityAgent
       });
-      zcaps[`assertionMethod:${assertionMethodKey.algorithm}`] = await helpers
+      zcaps.assertionMethod = await helpers
         .delegate({
           capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
           controller: serviceAgent.id,
@@ -98,7 +98,10 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
 
       // Intentionally change the referenceId of the assertion method zcap
       // in the database to be lowercase
-      await helpers.updateConfig({configId: noStatusListIssuerId});
+      await helpers.updateConfig({
+        configId: noStatusListIssuerId,
+        referenceId: 'assertionMethod:ed25519'
+      });
       // Check if assertion method zcap has been updated
       const {config} = await helpers.findConfig({
         configId: noStatusListIssuerId
@@ -118,14 +121,17 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         rl2020RootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
         // Intentionally change the referenceId of the assertion method zcap
-        // in the database to be lowercase
-        await helpers.updateConfig({configId: rl2020IssuerId});
+        // in the database to be uppercase
+        await helpers.updateConfig({
+          configId: rl2020IssuerId,
+          referenceId: 'assertionMethod:Ed25519'
+        });
         // Check if assertion method zcap has been updated
         const {config} = await helpers.findConfig({
           configId: rl2020IssuerId
         });
         should.exist(config);
-        should.exist(config.zcaps['assertionMethod:ed25519']);
+        should.exist(config.zcaps['assertionMethod:Ed25519']);
       }
 
       // create issuer instance w/ status list 2021 status list options
@@ -143,7 +149,10 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
         // Intentionally change the referenceId of the assertion method zcap
         // in the database to be lowercase
-        await helpers.updateConfig({configId: sl2021RevocationIssuerId});
+        await helpers.updateConfig({
+          configId: sl2021RevocationIssuerId,
+          referenceId: 'assertionMethod:ed25519'
+        });
         // Check if assertion method zcap has been updated
         const {config} = await helpers.findConfig({
           configId: sl2021RevocationIssuerId
@@ -166,14 +175,17 @@ describe('issue APIs - Reference id `assertionMethod:ed25519` backwards ' +
         sl2021SuspensionRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
         // Intentionally change the referenceId of the assertion method zcap
-        // in the database to be lowercase
-        await helpers.updateConfig({configId: sl2021SuspensionIssuerId});
+        // in the database to be uppercase
+        await helpers.updateConfig({
+          configId: sl2021SuspensionIssuerId,
+          referenceId: 'assertionMethod:Ed25519'
+        });
         // Check if assertion method zcap has been updated
         const {config} = await helpers.findConfig({
-          configId: sl2021RevocationIssuerId
+          configId: sl2021SuspensionIssuerId
         });
         should.exist(config);
-        should.exist(config.zcaps['assertionMethod:ed25519']);
+        should.exist(config.zcaps['assertionMethod:Ed25519']);
       }
 
       // create issuer instance w/ oauth2-based authz

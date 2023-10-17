@@ -64,7 +64,7 @@ describe('provision API', () => {
       invocationTarget: keyAgreementKey.kmsId,
       delegator: capabilityAgent
     });
-    zcaps[`assertionMethod:${assertionMethodKey.algorithm}`] = await helpers
+    zcaps.assertionMethod = await helpers
       .delegate({
         capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
         controller: serviceAgent.id,
@@ -111,7 +111,7 @@ describe('provision API', () => {
         let result;
         try {
           const zcapsCopy = {...zcaps};
-          delete zcapsCopy['assertionMethod:Ed25519'];
+          delete zcapsCopy.assertionMethod;
           result = await helpers.createConfig({
             capabilityAgent, zcaps: zcapsCopy
           });

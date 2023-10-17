@@ -316,10 +316,9 @@ export async function _generateMultikey({
 const serviceCoreConfigCollection =
   database.collections['service-core-config-vc-issuer'];
 
-export async function updateConfig({configId}) {
+export async function updateConfig({configId, referenceId}) {
   const updateReferenceId = {
-    'config.zcaps.assertionMethod:Ed25519':
-      'config.zcaps.assertionMethod:ed25519'
+    'config.zcaps.assertionMethod': `config.zcaps.${referenceId}`
   };
   await serviceCoreConfigCollection.updateOne({
     'config.id': configId,

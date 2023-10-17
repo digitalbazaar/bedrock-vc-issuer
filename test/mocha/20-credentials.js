@@ -100,7 +100,7 @@ describe('issue APIs', () => {
           invocationTarget: keyAgreementKey.kmsId,
           delegator: capabilityAgent
         });
-        zcaps[`assertionMethod:${assertionMethodKey.algorithm}`] = await helpers
+        zcaps.assertionMethod = await helpers
           .delegate({
             capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
             controller: serviceAgent.id,
