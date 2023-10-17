@@ -1,5 +1,18 @@
 # bedrock-vc-issuer ChangeLog
 
+## 24.1.0 - 2023-10-TBD
+
+### Changed
+- Updated zcaps referenceId `assertionMethod:foo` to `assertionMethod` and
+  added code for ensuring backwards compatibility to ensure continued
+  functionality of zcaps with older formatted referenceIds.
+- Update peer dep `bedrock/did-io` to v10.1 that adds `P-384` to the default
+  key types in the DID method key config.
+
+### Added
+- Add support for issuing VCs using `ecdsa-2019` cryptosuite with `P-384`
+  algorithm.
+
 ## 24.0.0 - 2023-09-19
 
 ### Changed
