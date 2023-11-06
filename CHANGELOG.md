@@ -9,7 +9,7 @@
 - Update peer dep `bedrock/did-io` to v10.1 that adds `P-384` to the default
   key types in the DID method key config.
 - Use `@digitalbazaar/data-integrity` v1.5.0 and
-  `@digitalbazaar/ecdsa-2019-cryptosuite` v1.1.0 that now includes `P-384` in
+  `@digitalbazaar/ecdsa-2019-cryptosuite` v2.0.0 that now includes `P-384` in
   the list of required algorithm for the cryptosuite, allowing issuance of VCs
   using `ecdsa-2019` with the `P-384` algorithm.
 
