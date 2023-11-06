@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 24.1.0 - 2023-10-TBD
+## 24.1.0 - 2023-11-06
 
 ### Changed
 - Updated zcaps referenceId `assertionMethod:foo` to `assertionMethod` and
