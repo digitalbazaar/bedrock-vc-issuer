@@ -8,10 +8,10 @@
   functionality of zcaps with older formatted referenceIds.
 - Update peer dep `bedrock/did-io` to v10.1 that adds `P-384` to the default
   key types in the DID method key config.
-
-### Added
-- Add support for issuing VCs using `ecdsa-2019` cryptosuite with `P-384`
-  algorithm.
+- Use `@digitalbazaar/data-integrity` v1.5.0 and
+  `@digitalbazaar/ecdsa-2019-cryptosuite` v1.1.0 that now includes `P-384` in
+  the list of required algorithm for the cryptosuite, allowing issuance of VCs
+  using `ecdsa-2019` with the `P-384` algorithm.
 
 ## 24.0.0 - 2023-09-19
 
