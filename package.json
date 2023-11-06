@@ -31,8 +31,8 @@
   "homepage": "https://github.com/digitalbazaar/bedrock-vc-issuer",
   "dependencies": {
     "@digitalbazaar/bitstring": "^3.0.0",
-    "@digitalbazaar/data-integrity": "digitalbazaar/data-integrity#refactor-algorithm-check",
-    "@digitalbazaar/ecdsa-2019-cryptosuite": "digitalbazaar/ecdsa-2019-cryptosuite#update-required-algorithm",
+    "@digitalbazaar/data-integrity": "^1.5.0",
+    "@digitalbazaar/ecdsa-2019-cryptosuite": "^2.0.0",
     "@digitalbazaar/ed25519-signature-2018": "^4.0.0",
     "@digitalbazaar/ed25519-signature-2020": "^5.0.0",
     "@digitalbazaar/eddsa-2022-cryptosuite": "^1.0.0",
