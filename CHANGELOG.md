@@ -5,7 +5,7 @@
   and `ecdsa-rdfc-2022` cryptosuites respectively.
 - **BREAKING**: Use `@digitalbazaar/data-integrity` v2.0 that uses the context
   `https://w3id.org/security/data-integrity/v2`.
-- **BREAKING**: Use `@bedrock/data-integrity-context` that uses
+- **BREAKING**: Use `@bedrock/data-integrity-context@3.0` peer dep that uses
   `@digitalbazaar/data-integrity-context` v2.0.
 
 ## 24.1.0 - 2023-11-06
