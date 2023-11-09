@@ -35,6 +35,7 @@
     "@digitalbazaar/ed25519-signature-2018": "^4.0.0",
     "@digitalbazaar/ed25519-signature-2020": "^5.0.0",
     "@digitalbazaar/ecdsa-rdfc-2019-cryptosuite": "digitalbazaar/ecdsa-rdfc-2019-cryptosuite#update-name-and-tests",
+    "@digitalbazaar/ecdsa-sd-2023-cryptosuite": "digitalbazaar/ecdsa-sd-2023-cryptosuite#use-context-v2",
     "@digitalbazaar/eddsa-rdfc-2022-cryptosuite": "digitalbazaar/eddsa-rdfc-2022-cryptosuite#update-name-and-test",
     "@digitalbazaar/lru-memoize": "^3.0.0",
     "@digitalbazaar/vc": "^6.0.2",
