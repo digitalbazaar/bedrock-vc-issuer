@@ -35,6 +35,9 @@ describe('issue APIs', () => {
     },
     'ecdsa-rdfc-2019': {
       algorithm: ['P-256', 'P-384']
+    },
+    'ecdsa-sd-2023': {
+      algorithm: ['P-256']
     }
   };
   for(const suiteName in suiteNames) {
