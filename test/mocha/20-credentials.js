@@ -30,10 +30,10 @@ describe('issue APIs', () => {
     Ed25519Signature2020: {
       algorithm: 'Ed25519'
     },
-    'eddsa-2022': {
+    'eddsa-rdfc-2022': {
       algorithm: 'Ed25519'
     },
-    'ecdsa-2019': {
+    'ecdsa-rdfc-2019': {
       algorithm: ['P-256', 'P-384']
     }
   };
