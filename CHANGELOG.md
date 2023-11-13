@@ -1,6 +1,8 @@
 # bedrock-vc-issuer ChangeLog
 
-## 25.0.0 - 2023-11-TBD
+## 25.0.0 - 2023-11-13
+
+### Changed
 - **BREAKING**: Replaced `ecdsa-2019` and `eddsa-2022` with `ecdsa-rdfc-2019`
   and `ecdsa-rdfc-2022` cryptosuites respectively.
 - **BREAKING**: Use `@digitalbazaar/data-integrity` v2.0 that uses the context
