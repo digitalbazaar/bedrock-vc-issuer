@@ -7,14 +7,14 @@
     "test": "node --preserve-symlinks test.js test",
     "debug": "node --preserve-symlinks test.js test --log-level debug",
     "coverage": "cross-env NODE_ENV=test c8 npm test",
-    "coverage-ci": "cross-env NODE_ENV=test c8 --reporter=lcovonly --reporter=text-summary --repoter=text npm test",
+    "coverage-ci": "cross-env NODE_ENV=test c8 --reporter=lcovonly --reporter=text-summary --reporter=text npm test",
     "coverage-report": "c8 report"
   },
   "dependencies": {
     "@bedrock/app-identity": "^4.0.0",
     "@bedrock/core": "^6.0.1",
     "@bedrock/credentials-context": "^4.0.0",
-    "@bedrock/data-integrity-context": "digitalbazaar/bedrock-data-integrity-context#use-data-integrity-v2-context",
+    "@bedrock/data-integrity-context": "^3.0.0",
     "@bedrock/did-context": "^5.0.0",
     "@bedrock/did-io": "^10.1.0",
     "@bedrock/edv-storage": "^18.0.0",
