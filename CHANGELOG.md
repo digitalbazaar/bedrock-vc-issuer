@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 25.1.0 - 2023-11-dd
+
+### Added
+- Add back support to issue credentials with instances using legacy draft
+  suites `ecdsa-2019` and `eddsa-2022`.
+
 ## 25.0.0 - 2023-11-13
 
 ### Changed
