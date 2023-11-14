@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 25.1.0 - 2023-11-dd
+## 25.1.0 - 2023-11-14
 
 ### Added
 - Add back support to issue credentials with instances using legacy draft
