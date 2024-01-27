@@ -613,7 +613,7 @@ describe('issue APIs', () => {
         });
         it('updates a StatusList2021 revocation credential status',
           async () => {
-          // first issue VC
+            // first issue VC
             const credential = klona(mockCredential);
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             const {data: {verifiableCredential}} = await zcapClient.write({
