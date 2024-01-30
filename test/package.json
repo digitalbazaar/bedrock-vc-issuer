@@ -13,7 +13,7 @@
   "dependencies": {
     "@bedrock/app-identity": "^4.0.0",
     "@bedrock/core": "^6.0.1",
-    "@bedrock/credentials-context": "^4.0.0",
+    "@bedrock/credentials-context": "digitalbazaar/bedrock-credentials-context#update-vc-2.0",
     "@bedrock/data-integrity-context": "^3.0.0",
     "@bedrock/did-context": "^5.0.0",
     "@bedrock/did-io": "^10.1.0",
