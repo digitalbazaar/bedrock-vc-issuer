@@ -10,19 +10,39 @@ const context = {
   }
 };
 
+const suiteName = {
+  type: 'string',
+  // supported default suites in this version
+  enum: [
+    'ecdsa-rdfc-2019', 'eddsa-rdfc-2022', 'Ed25519Signature2020',
+    'Ed25519Signature2018', 'ecdsa-sd-2023'
+  ]
+};
+
+const suiteOption = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['cryptosuite'],
+  properties: {
+    cryptosuite: suiteName,
+    options: {
+      type: 'object',
+      additionalProperties: true
+    }
+  }
+};
+
 export const issueOptions = {
   title: 'Issue Options',
   type: 'object',
-  required: ['suiteName'],
+  oneOf: [{required: ['suiteName']}, {required: ['cryptosuites']}],
   additionalProperties: false,
   properties: {
-    suiteName: {
-      type: 'string',
-      // supported default suites in this version
-      enum: [
-        'ecdsa-rdfc-2019', 'eddsa-rdfc-2022', 'Ed25519Signature2020',
-        'Ed25519Signature2018', 'ecdsa-sd-2023'
-      ]
+    suiteName: {...suiteName},
+    cryptosuites: {
+      type: 'array',
+      items: suiteOption,
+      minItems: 1
     }
   }
 };
