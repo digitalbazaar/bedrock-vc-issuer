@@ -7,6 +7,7 @@
 
 ### Changed
 - Passing invalid `options` to the `/credentials/issue` route now throws a validation error.
+- When provisioning an issuer a new option `cryptosuites` maybe used in place of `suiteName`.
 
 ## 25.1.0 - 2023-11-14
 
