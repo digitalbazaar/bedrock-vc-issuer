@@ -318,7 +318,10 @@ describe('issue APIs', () => {
               url: `${noStatusListIssuerId}/credentials/issue`,
               capability: noStatusListIssuerRootZcap,
               json: {
-                credential
+                credential,
+                options: {
+                  mandatoryPointers: ['issuer']
+                }
               }
             });
           } catch(e) {
