@@ -6,7 +6,7 @@
 - Add the ability to send `options.mandatoryPointers` to the `/credentials/issue` route.
 
 ### Changed
-- Passing `options` to the `/credentials/issue` route no longer throws.
+- Passing invalid `options` to the `/credentials/issue` route now throws a validation error.
 
 ## 25.1.0 - 2023-11-14
 
