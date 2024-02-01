@@ -68,8 +68,17 @@ export const issueCredentialBody = {
   additionalProperties: false,
   properties: {
     options: {
-      // FIXME: make restricted
-      type: 'object'
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        mandatoryPointers: {
+          type: 'array',
+          minItems: 1,
+          items: {
+            type: 'string'
+          }
+        }
+      }
     },
     credential: {
       type: 'object',
