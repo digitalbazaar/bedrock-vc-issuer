@@ -501,6 +501,7 @@ describe('issue APIs', () => {
           should.exist(error);
           error.data.type.should.equal('DuplicateError');
         });
+        // selective disclosure specific tests here
         if(sdSuites.has(suiteName)) {
           it('issues a valid credential w/ "options.mandatoryPointers"',
             async () => {
@@ -538,28 +539,28 @@ describe('issue APIs', () => {
               should.exist(verifiableCredential.proof);
               verifiableCredential.proof.should.be.an('object');
             });
-          it('fails to issue a valid credential w/ "options.mandatoryPointers"',
-            async () => {
-              let error;
-              try {
-                const credential = klona(mockCredential);
-                const zcapClient = helpers.createZcapClient({capabilityAgent});
-                await zcapClient.write({
-                  url: `${noStatusListIssuerId}/credentials/issue`,
-                  capability: noStatusListIssuerRootZcap,
-                  json: {
-                    credential,
-                    options: {
-                      mandatoryPointers: ['/nonExistentPointer']
-                    }
+          it('fails to issue a valid credential w/ invalid ' +
+            '"options.mandatoryPointers"', async () => {
+            let error;
+            try {
+              const credential = klona(mockCredential);
+              const zcapClient = helpers.createZcapClient({capabilityAgent});
+              await zcapClient.write({
+                url: `${noStatusListIssuerId}/credentials/issue`,
+                capability: noStatusListIssuerRootZcap,
+                json: {
+                  credential,
+                  options: {
+                    mandatoryPointers: ['/nonExistentPointer']
                   }
-                });
-              } catch(e) {
-                error = e;
-              }
-              should.exist(error);
-              error.data.type.should.equal('OperationError');
-            });
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            should.exist(error);
+            error.data.type.should.equal('OperationError');
+          });
         }
       });
 
