@@ -560,7 +560,6 @@ describe('issue APIs', () => {
               should.exist(error);
               error.data.type.should.equal('OperationError');
             });
-
         }
       });
 
