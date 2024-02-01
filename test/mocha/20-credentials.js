@@ -40,6 +40,8 @@ describe('issue APIs', () => {
       algorithm: ['P-256']
     }
   };
+  // list of suites to run the selective disclosure tests on
+  const sdSuites = new Set(['ecdsa-sd-2023']);
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
     if(Array.isArray(suiteInfo.algorithm)) {
@@ -499,6 +501,67 @@ describe('issue APIs', () => {
           should.exist(error);
           error.data.type.should.equal('DuplicateError');
         });
+        if(sdSuites.has(suiteName)) {
+          it('issues a valid credential w/ "options.mandatoryPointers"',
+            async () => {
+              const credential = klona(mockCredential);
+              let error;
+              let result;
+              try {
+                const zcapClient = helpers.createZcapClient({capabilityAgent});
+                result = await zcapClient.write({
+                  url: `${noStatusListIssuerId}/credentials/issue`,
+                  capability: noStatusListIssuerRootZcap,
+                  json: {
+                    credential,
+                    options: {
+                      mandatoryPointers: ['/issuer']
+                    }
+                  }
+                });
+              } catch(e) {
+                error = e;
+              }
+              assertNoError(error);
+              should.exist(result.data);
+              should.exist(result.data.verifiableCredential);
+              const {verifiableCredential} = result.data;
+              verifiableCredential.should.be.an('object');
+              should.exist(verifiableCredential['@context']);
+              should.exist(verifiableCredential.id);
+              should.exist(verifiableCredential.type);
+              should.exist(verifiableCredential.issuer);
+              should.exist(verifiableCredential.issuanceDate);
+              should.exist(verifiableCredential.credentialSubject);
+              verifiableCredential.credentialSubject.should.be.an('object');
+              should.not.exist(verifiableCredential.credentialStatus);
+              should.exist(verifiableCredential.proof);
+              verifiableCredential.proof.should.be.an('object');
+            });
+          it('fails to issue a valid credential w/ "options.mandatoryPointers"',
+            async () => {
+              let error;
+              try {
+                const credential = klona(mockCredential);
+                const zcapClient = helpers.createZcapClient({capabilityAgent});
+                await zcapClient.write({
+                  url: `${noStatusListIssuerId}/credentials/issue`,
+                  capability: noStatusListIssuerRootZcap,
+                  json: {
+                    credential,
+                    options: {
+                      mandatoryPointers: ['/nonExistentPointer']
+                    }
+                  }
+                });
+              } catch(e) {
+                error = e;
+              }
+              should.exist(error);
+              error.data.type.should.equal('OperationError');
+            });
+
+        }
       });
 
       describe('/credentials/status', () => {
