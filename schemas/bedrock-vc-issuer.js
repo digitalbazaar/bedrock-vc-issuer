@@ -73,7 +73,7 @@ export const issueCredentialBody = {
       properties: {
         mandatoryPointers: {
           type: 'array',
-          minItems: 1,
+          minItems: 0,
           items: {
             type: 'string'
           }
