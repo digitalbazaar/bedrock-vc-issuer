@@ -10,6 +10,7 @@ const context = {
   }
 };
 
+// a supported cryptosuite name
 const suiteName = {
   type: 'string',
   // supported default suites in this version
@@ -19,6 +20,7 @@ const suiteName = {
   ]
 };
 
+// allows an issuer to sign with multiple cryptosuites with custom defaults.
 const suiteOption = {
   type: 'object',
   additionalProperties: false,
