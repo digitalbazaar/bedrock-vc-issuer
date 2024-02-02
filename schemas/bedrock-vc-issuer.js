@@ -131,6 +131,9 @@ export const issueCredentialBody = {
           items: {
             type: 'string'
           }
+        },
+        extraInformation: {
+          type: 'string'
         }
       }
     },
