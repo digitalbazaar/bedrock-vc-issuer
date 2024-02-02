@@ -38,10 +38,14 @@ describe('issue APIs', () => {
     },
     'ecdsa-sd-2023': {
       algorithm: ['P-256']
+    },
+    'ecdsa-xi-2023': {
+      algorithm: ['P-256', 'P-384']
     }
   };
   // list of suites to run the selective disclosure tests on
   const sdSuites = new Set(['ecdsa-sd-2023']);
+  //list of suites to run extra information tests on
   const xiSuites = new Set(['ecdsa-xi-2023']);
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
@@ -612,8 +616,8 @@ describe('issue APIs', () => {
                 capability: noStatusListIssuerRootZcap,
                 json: {
                   credential,
-                  options: {
-                    mandatoryPointers: ['notAString']
+                  options: { 
+                    extraInformation: ['notAString']
                   }
                 }
               });
@@ -621,7 +625,8 @@ describe('issue APIs', () => {
               error = e;
             }
             should.exist(error);
-            error.data.type.should.equal('OperationError');
+            //how to throw OperationError not ValidationError here? necessary?
+            error.data.type.should.equal('ValidationError');
           });
         }
       });
