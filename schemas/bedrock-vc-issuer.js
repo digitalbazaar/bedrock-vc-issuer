@@ -40,7 +40,7 @@ export const issueOptions = {
   oneOf: [{required: ['suiteName']}, {required: ['cryptosuites']}],
   additionalProperties: false,
   properties: {
-    suiteName: {...suiteName},
+    suiteName,
     cryptosuites: {
       type: 'array',
       items: suiteOption,
@@ -60,14 +60,7 @@ export const statusListConfig = {
       // supported types in this version
       enum: ['StatusList2021', 'RevocationList2020']
     },
-    suiteName: {
-      type: 'string',
-      // supported suites in this version
-      enum: [
-        'ecdsa-rdfc-2019', 'eddsa-rdfc-2022', 'Ed25519Signature2020',
-        'Ed25519Signature2018', 'ecdsa-sd-2023'
-      ]
-    },
+    suiteName,
     statusPurpose: {
       type: 'string',
       // supported status types in this version
