@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 25.2.0 -
+## 25.2.0 - 2024-02-02
 
 ### Added
 - Add the ability to send `options.mandatoryPointers` to the `/credentials/issue` route.
