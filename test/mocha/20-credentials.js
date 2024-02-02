@@ -706,7 +706,7 @@ describe('issue APIs', () => {
                 capability: noStatusListIssuerRootZcap,
                 json: {
                   credential,
-                  options: { 
+                  options: {
                     extraInformation: ['notAString']
                   }
                 }
