@@ -1,5 +1,14 @@
 # bedrock-vc-issuer ChangeLog
 
+## 26.0.0 - 2024-mm-dd
+
+### Changed
+- **BREAKING**: Management of status list index allocation has been rewritten
+  in this version and is incompatible with previous versions. There is no
+  backwards compatibility code to transition deployments with issuer instances
+  that were configured to use VC status lists, so it is not possible to upgrade
+  any issuer services with such instances to this new version.
+
 ## 25.2.0 - 2024-02-02
 
 ### Added
