@@ -2,12 +2,22 @@
 
 ## 26.0.0 - 2024-mm-dd
 
+### Added
+- Allow setting the `blockSize` and `blockCount` for status lists via status
+  list configuration options.
+
 ### Changed
 - **BREAKING**: Management of status list index allocation has been rewritten
   in this version and is incompatible with previous versions. There is no
   backwards compatibility code to transition deployments with issuer instances
   that were configured to use VC status lists, so it is not possible to upgrade
   any issuer services with such instances to this new version.
+- **BREAKING**: Default status list block size has changed to `32`
+  (from `128`) to support greater concurrency and reduce the impact of unused
+  blocks (though all blocks should always be used with a correct
+  implementation and sufficient issuance calls). No changes are needed in new
+  deployments of this version given that no index allocation state will yet
+  exist (when following the above breaking changes requirements).
 
 ## 25.2.0 - 2024-02-02
 
