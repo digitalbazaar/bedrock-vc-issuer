@@ -1,6 +1,8 @@
 /*!
- * Copyright (c) 2022-2023 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2022-2024 Digital Bazaar, Inc. All rights reserved.
  */
+import {MAX_BLOCK_COUNT, MAX_BLOCK_SIZE} from '../lib/constants.js';
+
 const context = {
   title: '@context',
   type: 'array',
@@ -27,12 +29,21 @@ export const issueOptions = {
   }
 };
 
+// FIXME: support specifying multiple statuses (triggering multiple lists)
+// FIXME: support external status service w/zcap(s) and expression of the
+//   target types (TerseBitstringStatusList, BitstringStatusList)
 export const statusListConfig = {
   title: 'Status List Configuration',
   type: 'object',
   required: ['type', 'suiteName', 'statusPurpose'],
   additionalProperties: false,
   properties: {
+    // FIXME: each status list config might need a unique ID for list manager
+    // tracking purposes; notably, an `id` (or other mechanism) already needs
+    // to be associated with each SL that is created on a status service to
+    // help avoid accidental concurrent use by multiple issuer instances --
+    // potentially resulting in corruption / reuse of indexes for different
+    // VCs -- and this could be reused for that purpose
     type: {
       type: 'string',
       // supported types in this version
@@ -46,10 +57,28 @@ export const statusListConfig = {
         'Ed25519Signature2018', 'ecdsa-sd-2023'
       ]
     },
+    // note: scoped to `type`
     statusPurpose: {
       type: 'string',
       // supported status types in this version
       enum: ['revocation', 'suspension']
+    },
+    // note: scoped to `type`
+    options: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        blockCount: {
+          type: 'integer',
+          minimum: 1,
+          maximum: MAX_BLOCK_COUNT
+        },
+        blockSize: {
+          type: 'integer',
+          minimum: 1,
+          maximum: MAX_BLOCK_SIZE
+        }
+      }
     }
   }
 };
