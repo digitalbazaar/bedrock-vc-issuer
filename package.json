@@ -44,6 +44,7 @@
     "@digitalbazaar/vc": "github:digitalbazaar/vc#vc-2.0-time-props",
     "@digitalbazaar/webkms-client": "^13.0.0",
     "assert-plus": "^1.0.0",
+    "base64url-universal": "2.0.0",
     "bnid": "^3.0.0",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
