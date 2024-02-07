@@ -43,7 +43,7 @@ describe('issue APIs', () => {
   };
   // list of suites to run the selective disclosure tests on
   const sdSuites = new Set(['ecdsa-sd-2023']);
-  //list of suites to run extra information tests on
+  // list of suites to run extra information tests on
   const xiSuites = new Set(['ecdsa-xi-2023']);
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
@@ -657,7 +657,7 @@ describe('issue APIs', () => {
             error.data.type.should.equal('OperationError');
           });
         }
-        //extra information tests
+        // extra information tests
         if(xiSuites.has(suiteName)) {
           it('issues a valid credential w/ "options.extraInformation"',
             async () => {
@@ -715,7 +715,7 @@ describe('issue APIs', () => {
               error = e;
             }
             should.exist(error);
-            //how to throw OperationError not ValidationError here? necessary?
+            // how to throw OperationError not ValidationError here? necessary?
             error.data.type.should.equal('ValidationError');
           });
         }
