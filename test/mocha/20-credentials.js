@@ -5,6 +5,7 @@ import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
 import {CapabilityAgent} from '@digitalbazaar/webkms-client';
 import {createRequire} from 'node:module';
+import {encode} from 'base64url-universal';
 import {httpClient} from '@digitalbazaar/http-client';
 import {issuer} from '@bedrock/vc-issuer';
 import {klona} from 'klona';
@@ -576,13 +577,17 @@ describe('issue APIs', () => {
               let result;
               try {
                 const zcapClient = helpers.createZcapClient({capabilityAgent});
+                const extraInformationBytes = new Uint8Array([
+                  12, 52, 75, 63, 74, 85, 21, 5, 62, 10
+                ]);
+                const extraInformationEncoded = encode(extraInformationBytes);
                 result = await zcapClient.write({
                   url: `${noStatusListIssuerId}/credentials/issue`,
                   capability: noStatusListIssuerRootZcap,
                   json: {
                     credential,
                     options: {
-                      extraInformation: '6d721ae5d334cead832a8576bdd24d9a'
+                      extraInformation: extraInformationEncoded
                     }
                   }
                 });
