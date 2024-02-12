@@ -38,16 +38,16 @@ export const statusListConfig = {
   required: ['type', 'suiteName', 'statusPurpose'],
   additionalProperties: false,
   properties: {
-    // FIXME: each status list config might need a unique ID for list manager
-    // tracking purposes; notably, an `id` (or other mechanism) already needs
-    // to be associated with each SL that is created on a status service to
-    // help avoid accidental concurrent use by multiple issuer instances --
-    // potentially resulting in corruption / reuse of indexes for different
-    // VCs -- and this could be reused for that purpose
     type: {
       type: 'string',
       // supported types in this version
       enum: ['StatusList2021', 'RevocationList2020']
+    },
+    // an ID value required to track index allocation and used with external
+    // status list service; can be auto-generated, so not required
+    indexAllocator: {
+      // an ID (URL) referring to an index allocator
+      type: 'string'
     },
     suiteName: {
       type: 'string',
@@ -59,11 +59,14 @@ export const statusListConfig = {
     },
     // note: scoped to `type`
     statusPurpose: {
+      // FIXME: also support array with multiple status purposes; triggers
+      // creation of multiple lists
       type: 'string',
       // supported status types in this version
       enum: ['revocation', 'suspension']
     },
-    // note: scoped to `type`
+    // note: scoped to `type`; will be auto-populated with defaults so not
+    // required
     options: {
       type: 'object',
       additionalProperties: false,
