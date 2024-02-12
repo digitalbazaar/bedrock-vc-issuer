@@ -54,7 +54,8 @@
     "cross-env": "^7.0.3",
     "jose": "^4.8.3",
     "klona": "^2.0.5",
-    "sinon": "^17.0.1"
+    "sinon": "^17.0.1",
+    "uuid": "^9.0.1"
   },
   "c8": {
     "excludeNodeModules": false,
