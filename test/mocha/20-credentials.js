@@ -884,6 +884,62 @@ describe('issue APIs', () => {
           should.exist(error);
           error.data.type.should.equal('DuplicateError');
         });
+
+        it('issues VCs with list rollover', async function() {
+          // two minutes to issue and rollover lists
+          this.timeout(1000 * 60 * 2);
+
+          // list size is 8, do two rollovers
+          const listSize = 8;
+          for(let i = 0; i < (listSize * 2 + 1); ++i) {
+            // first issue VC
+            const credential = klona(mockCredential);
+            credential.id = `urn:uuid:${uuid()}`;
+            const zcapClient = helpers.createZcapClient({capabilityAgent});
+            const {data: {verifiableCredential}} = await zcapClient.write({
+              url: `${smallStatusListIssuerId}/credentials/issue`,
+              capability: smallStatusListRootZcap,
+              json: {credential}
+            });
+
+            // get VC status
+            const statusInfo = await helpers.getCredentialStatus(
+              {verifiableCredential});
+            let {status} = statusInfo;
+            status.should.equal(false);
+
+            // then revoke VC
+            let error;
+            try {
+              await zcapClient.write({
+                url: `${smallStatusListIssuerId}/credentials/status`,
+                capability: smallStatusListRootZcap,
+                json: {
+                  credentialId: verifiableCredential.id,
+                  credentialStatus: {
+                    type: 'StatusList2021Entry',
+                    statusPurpose: 'revocation'
+                  }
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            assertNoError(error);
+
+            // force publication of new SLC
+            await zcapClient.write({
+              url: `${statusInfo.statusListCredential}/publish`,
+              capability: smallStatusListRootZcap,
+              json: {}
+            });
+
+            // check status of VC has changed
+            ({status} = await helpers.getCredentialStatus(
+              {verifiableCredential}));
+            status.should.equal(true);
+          }
+        });
       });
     });
   }
