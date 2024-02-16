@@ -20,6 +20,10 @@
   implementation and sufficient issuance calls). No changes are needed in new
   deployments of this version given that no index allocation state will yet
   exist (when following the above breaking changes requirements).
+- **BREAKING**: Change the unique index for credential status to use
+  `meta.credentialStatus.id` instead of what is in the VC itself, as
+  the credential status ID may not be present in a VC (with a credential
+  status).
 
 ## 25.2.0 - 2024-02-02
 
