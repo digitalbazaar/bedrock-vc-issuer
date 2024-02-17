@@ -1,7 +1,9 @@
 /*!
  * Copyright (c) 2022-2024 Digital Bazaar, Inc. All rights reserved.
  */
-import {MAX_BLOCK_COUNT, MAX_BLOCK_SIZE} from '../lib/constants.js';
+import {
+  MAX_BLOCK_COUNT, MAX_BLOCK_SIZE, MAX_LIST_COUNT
+} from '../lib/constants.js';
 
 const context = {
   title: '@context',
@@ -41,7 +43,19 @@ export const statusListConfig = {
     type: {
       type: 'string',
       // supported types in this version
-      enum: ['StatusList2021', 'RevocationList2020']
+      enum: [
+        // FIXME: add support for `BitstringStatusList`
+        // FIXME: consider removing `StatusList2021` support
+        'StatusList2021',
+        // FIXME: remove support for `RevocationList2020`
+        'RevocationList2020',
+        'TerseBitstringStatusList'
+      ]
+    },
+    // FIXME: make `baseUrl` required once status service is separated
+    // base URL to use for new lists
+    baseUrl: {
+      type: 'string'
     },
     // an ID value required to track index allocation and used with external
     // status list service; can be auto-generated, so not required
@@ -80,6 +94,14 @@ export const statusListConfig = {
           type: 'integer',
           minimum: 1,
           maximum: MAX_BLOCK_SIZE
+        },
+        // note: some list types will require a `listCount`, each having their
+        // own different list count limits and defaults applied elsewhere; the
+        // `MAX_LIST_COUNT` here is the maximum this software can keep track of
+        listCount: {
+          type: 'integer',
+          minimum: 1,
+          maximum: MAX_LIST_COUNT
         }
       }
     }
