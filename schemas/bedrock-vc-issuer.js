@@ -2,7 +2,7 @@
  * Copyright (c) 2022-2024 Digital Bazaar, Inc. All rights reserved.
  */
 import {
-  MAX_BLOCK_COUNT, MAX_BLOCK_SIZE, MAX_LIST_COUNT
+  DEFAULT_BLOCK_COUNT, DEFAULT_BLOCK_SIZE, MAX_LIST_COUNT
 } from '../lib/constants.js';
 
 const context = {
@@ -88,12 +88,12 @@ export const statusListConfig = {
         blockCount: {
           type: 'integer',
           minimum: 1,
-          maximum: MAX_BLOCK_COUNT
+          maximum: DEFAULT_BLOCK_COUNT
         },
         blockSize: {
           type: 'integer',
           minimum: 1,
-          maximum: MAX_BLOCK_SIZE
+          maximum: DEFAULT_BLOCK_SIZE
         },
         // note: some list types will require a `listCount`, each having their
         // own different list count limits and defaults applied elsewhere; the
