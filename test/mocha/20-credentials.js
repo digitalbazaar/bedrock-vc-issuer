@@ -25,21 +25,21 @@ const mockCredential = require('./mock-credential.json');
 
 describe('issue APIs', () => {
   const suiteNames = {
-    // Ed25519Signature2018: {
-    //   algorithm: 'Ed25519'
-    // },
-    // Ed25519Signature2020: {
-    //   algorithm: 'Ed25519'
-    // },
+    Ed25519Signature2018: {
+      algorithm: 'Ed25519'
+    },
+    Ed25519Signature2020: {
+      algorithm: 'Ed25519'
+    },
     'eddsa-rdfc-2022': {
       algorithm: 'Ed25519'
     },
-    // 'ecdsa-rdfc-2019': {
-    //   algorithm: ['P-256', 'P-384']
-    // },
-    // 'ecdsa-sd-2023': {
-    //   algorithm: ['P-256']
-    // }
+    'ecdsa-rdfc-2019': {
+      algorithm: ['P-256', 'P-384']
+    },
+    'ecdsa-sd-2023': {
+      algorithm: ['P-256']
+    }
   };
   // list of suites to run the selective disclosure tests on
   const sdSuites = new Set(['ecdsa-sd-2023']);
@@ -216,7 +216,7 @@ describe('issue APIs', () => {
             options: {
               blockSize: 8,
               blockCount: 1,
-              listCount: 1
+              listCount: 2
             }
           }];
           const issuerConfig = await helpers.createConfig(
@@ -809,22 +809,32 @@ describe('issue APIs', () => {
           }
         });
 
-        it.skip('issues VCs with limited lists', async function() {
+        it('issues VCs with limited lists', async function() {
           // two minutes to issue and rollover lists
           this.timeout(1000 * 60 * 2);
 
-          // list size is 8, do two rollovers
+          // list size is 8, do two rollovers to hit list count capacity of 2
           const listSize = 8;
           for(let i = 0; i < (listSize * 2 + 1); ++i) {
             // first issue VC
             const credential = klona(mockCredential);
             credential.id = `urn:uuid:${uuid()}`;
             const zcapClient = helpers.createZcapClient({capabilityAgent});
-            const {data: {verifiableCredential}} = await zcapClient.write({
-              url: `${smallTerseStatusListIssuerId}/credentials/issue`,
-              capability: smallTerseStatusListRootZcap,
-              json: {credential}
-            });
+            let verifiableCredential;
+            try {
+              ({data: {verifiableCredential}} = await zcapClient.write({
+                url: `${smallTerseStatusListIssuerId}/credentials/issue`,
+                capability: smallTerseStatusListRootZcap,
+                json: {credential}
+              }));
+            } catch(e) {
+              // max list count reached, expected at `listSize * 2` only
+              if(e?.data?.name === 'QuotaExceededError') {
+                i.should.equal(listSize * 2);
+                return;
+              }
+              throw e;
+            }
 
             // get VC status
             // FIXME: needs to include `indexAllocator` as TBD property
@@ -869,7 +879,7 @@ describe('issue APIs', () => {
         });
       });
 
-      describe.only('/credential/issue crash recovery', () => {
+      describe('/credential/issue crash recovery', () => {
         // stub modules in order to simulate failure conditions
         let credentialStatusWriterStub;
         let mathRandomStub;
