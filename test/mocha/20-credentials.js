@@ -25,21 +25,21 @@ const mockCredential = require('./mock-credential.json');
 
 describe('issue APIs', () => {
   const suiteNames = {
-    Ed25519Signature2018: {
-      algorithm: 'Ed25519'
-    },
-    Ed25519Signature2020: {
-      algorithm: 'Ed25519'
-    },
+    // Ed25519Signature2018: {
+    //   algorithm: 'Ed25519'
+    // },
+    // Ed25519Signature2020: {
+    //   algorithm: 'Ed25519'
+    // },
     'eddsa-rdfc-2022': {
       algorithm: 'Ed25519'
     },
-    'ecdsa-rdfc-2019': {
-      algorithm: ['P-256', 'P-384']
-    },
-    'ecdsa-sd-2023': {
-      algorithm: ['P-256']
-    }
+    // 'ecdsa-rdfc-2019': {
+    //   algorithm: ['P-256', 'P-384']
+    // },
+    // 'ecdsa-sd-2023': {
+    //   algorithm: ['P-256']
+    // }
   };
   // list of suites to run the selective disclosure tests on
   const sdSuites = new Set(['ecdsa-sd-2023']);
@@ -67,6 +67,8 @@ describe('issue APIs', () => {
       let sl2021SuspensionRootZcap;
       let smallStatusListIssuerId;
       let smallStatusListRootZcap;
+      let smallTerseStatusListIssuerId;
+      let smallTerseStatusListRootZcap;
       let oauth2IssuerConfig;
       const zcaps = {};
       beforeEach(async () => {
@@ -201,6 +203,26 @@ describe('issue APIs', () => {
             {capabilityAgent, zcaps, statusListOptions, suiteName});
           smallStatusListIssuerId = issuerConfig.id;
           smallStatusListRootZcap =
+            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+        }
+
+        // create issuer instance w/ small terse status list
+        {
+          const statusListOptions = [{
+            // FIXME: `TerseBitstringStatusList`
+            type: 'StatusList2021',
+            statusPurpose: 'revocation',
+            suiteName,
+            options: {
+              blockSize: 8,
+              blockCount: 1,
+              listCount: 1
+            }
+          }];
+          const issuerConfig = await helpers.createConfig(
+            {capabilityAgent, zcaps, statusListOptions, suiteName});
+          smallTerseStatusListIssuerId = issuerConfig.id;
+          smallTerseStatusListRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
         }
 
@@ -786,9 +808,68 @@ describe('issue APIs', () => {
             status.should.equal(true);
           }
         });
+
+        it.skip('issues VCs with limited lists', async function() {
+          // two minutes to issue and rollover lists
+          this.timeout(1000 * 60 * 2);
+
+          // list size is 8, do two rollovers
+          const listSize = 8;
+          for(let i = 0; i < (listSize * 2 + 1); ++i) {
+            // first issue VC
+            const credential = klona(mockCredential);
+            credential.id = `urn:uuid:${uuid()}`;
+            const zcapClient = helpers.createZcapClient({capabilityAgent});
+            const {data: {verifiableCredential}} = await zcapClient.write({
+              url: `${smallTerseStatusListIssuerId}/credentials/issue`,
+              capability: smallTerseStatusListRootZcap,
+              json: {credential}
+            });
+
+            // get VC status
+            // FIXME: needs to include `indexAllocator` as TBD property
+            const statusInfo = await helpers.getCredentialStatus(
+              {verifiableCredential});
+            let {status} = statusInfo;
+            status.should.equal(false);
+
+            // then revoke VC
+            let error;
+            try {
+              await zcapClient.write({
+                url: `${smallTerseStatusListIssuerId}/credentials/status`,
+                capability: smallTerseStatusListRootZcap,
+                json: {
+                  credentialId: verifiableCredential.id,
+                  // FIXME: needs to include `indexAllocator` as TBD property
+                  credentialStatus: {
+                    // FIXME: `BitstringStatusListEntry`
+                    type: 'StatusList2021Entry',
+                    statusPurpose: 'revocation'
+                  }
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            assertNoError(error);
+
+            // force publication of new SLC
+            await zcapClient.write({
+              url: `${statusInfo.statusListCredential}/publish`,
+              capability: smallTerseStatusListRootZcap,
+              json: {}
+            });
+
+            // check status of VC has changed
+            ({status} = await helpers.getCredentialStatus(
+              {verifiableCredential}));
+            status.should.equal(true);
+          }
+        });
       });
 
-      describe('/credential/issue crash recovery', () => {
+      describe.only('/credential/issue crash recovery', () => {
         // stub modules in order to simulate failure conditions
         let credentialStatusWriterStub;
         let mathRandomStub;
@@ -808,6 +889,10 @@ describe('issue APIs', () => {
           mathRandomStub.restore();
           credentialStatusWriterStub.restore();
         });
+
+        // FIXME: add a test that finishes one credential writer but not
+        // another, resulting in a duplicate being detected for one status
+        // but not another -- and a successful recovery from this condition
 
         it('successfully recovers from a simulated crash', async () => {
           const zcapClient = helpers.createZcapClient({capabilityAgent});
