@@ -53,7 +53,7 @@ export async function createConfig({
   oauth2 = false, suiteName = 'Ed25519Signature2020'
 } = {}) {
   if(!meterId) {
-    // create a meter for the keystore
+    // create a meter for the issuer
     ({id: meterId} = await createMeter({
       capabilityAgent, serviceType: 'vc-issuer'
     }));
