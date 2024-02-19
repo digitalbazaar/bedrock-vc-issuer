@@ -1035,6 +1035,75 @@ describe('issue APIs', () => {
             status.should.equal(true);
           }
         });
+
+        it('issues VCs with limited lists', async function() {
+          // two minutes to issue and rollover lists
+          this.timeout(1000 * 60 * 2);
+
+          // list size is 8, do two rollovers to hit list count capacity of 2
+          const listSize = 8;
+          for(let i = 0; i < (listSize * 2 + 1); ++i) {
+            // first issue VC
+            const credential = klona(mockCredential);
+            credential.id = `urn:uuid:${uuid()}`;
+            const zcapClient = helpers.createZcapClient({capabilityAgent});
+            let verifiableCredential;
+            try {
+              ({data: {verifiableCredential}} = await zcapClient.write({
+                url: `${smallTerseStatusListIssuerId}/credentials/issue`,
+                capability: smallTerseStatusListRootZcap,
+                json: {credential}
+              }));
+            } catch(e) {
+              // max list count reached, expected at `listSize * 2` only
+              if(e?.data?.name === 'QuotaExceededError') {
+                i.should.equal(listSize * 2);
+                return;
+              }
+              throw e;
+            }
+
+            // get VC status
+            // FIXME: needs to include `indexAllocator` as TBD property
+            const statusInfo = await helpers.getCredentialStatus(
+              {verifiableCredential});
+            let {status} = statusInfo;
+            status.should.equal(false);
+
+            // then revoke VC
+            let error;
+            try {
+              await zcapClient.write({
+                url: `${smallTerseStatusListIssuerId}/credentials/status`,
+                capability: smallTerseStatusListRootZcap,
+                json: {
+                  credentialId: verifiableCredential.id,
+                  // FIXME: needs to include `indexAllocator` as TBD property
+                  credentialStatus: {
+                    // FIXME: `BitstringStatusListEntry`
+                    type: 'StatusList2021Entry',
+                    statusPurpose: 'revocation'
+                  }
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            assertNoError(error);
+
+            // force publication of new SLC
+            await zcapClient.write({
+              url: `${statusInfo.statusListCredential}/publish`,
+              capability: smallTerseStatusListRootZcap,
+              json: {}
+            });
+
+            // check status of VC has changed
+            ({status} = await helpers.getCredentialStatus(
+              {verifiableCredential}));
+            status.should.equal(true);
+          }
+        });
       });
     });
   }
