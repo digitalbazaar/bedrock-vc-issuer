@@ -32,11 +32,10 @@ export const issueOptions = {
   }
 };
 
-// FIXME: support specifying multiple statuses (triggering multiple lists)
 export const statusListConfig = {
   title: 'Status List Configuration',
   type: 'object',
-  required: ['type', 'suiteName', 'statusPurpose', 'zcapReferenceIds'],
+  required: ['type', 'statusPurpose', 'zcapReferenceIds'],
   additionalProperties: false,
   properties: {
     type: {
@@ -49,8 +48,8 @@ export const statusListConfig = {
         'TerseBitstringStatusList'
       ]
     },
-    // FIXME: make `baseUrl` required once status service is separated
-    // base URL to use for new lists
+    // base URL to use for new lists, defaults to `invocationTarget` from
+    // zcap referred to by `createCredentialStatusList` reference ID
     baseUrl: {
       type: 'string'
     },
@@ -60,15 +59,8 @@ export const statusListConfig = {
       // an ID (URL) referring to an index allocator
       type: 'string'
     },
-    suiteName: {
-      type: 'string',
-      // supported suites in this version
-      enum: [
-        'ecdsa-rdfc-2019', 'eddsa-rdfc-2022', 'Ed25519Signature2020',
-        'Ed25519Signature2018', 'ecdsa-sd-2023'
-      ]
-    },
     // note: scoped to `type`
+    // FIXME: support specifying multiple statuses (triggering multiple lists)
     statusPurpose: {
       // FIXME: also support array with multiple status purposes; triggers
       // creation of multiple lists
@@ -151,37 +143,4 @@ export const issueCredentialBody = {
       }
     }
   }
-};
-
-export const updateCredentialStatusBody = {
-  title: 'Update Credential Status',
-  type: 'object',
-  required: ['credentialId', 'credentialStatus'],
-  additionalProperties: false,
-  properties: {
-    credentialId: {
-      type: 'string'
-    },
-    credentialStatus: {
-      type: 'object',
-      required: ['type'],
-      additionalProperties: false,
-      properties: {
-        type: {
-          type: 'string'
-        },
-        statusPurpose: {
-          type: 'string'
-        }
-      }
-    }
-  }
-};
-
-export const publishSlcBody = {
-  title: 'Publish Status List Credential',
-  type: 'object',
-  additionalProperties: false,
-  // body must be empty
-  properties: {}
 };
