@@ -18,7 +18,7 @@ const serviceType = 'vc-issuer';
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
 
-describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
+describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
   'compatibility test', () => {
   const zcaps = {};
   describe('Ed25519Signature2020', function() {
@@ -27,8 +27,12 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
     let noStatusListIssuerRootZcap;
     let sl2021RevocationIssuerId;
     let sl2021RevocationRootZcap;
+    let sl2021RevocationStatusId;
+    let sl2021RevocationStatusRootZcap;
     let sl2021SuspensionIssuerId;
     let sl2021SuspensionRootZcap;
+    let sl2021SuspensionStatusId;
+    let sl2021SuspensionStatusRootZcap;
     let oauth2IssuerConfig;
     beforeEach(async () => {
       const suiteName = 'Ed25519Signature2020';
@@ -111,6 +115,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
       // w/ revocation status purpose
       {
         const {
+          statusConfig,
           issuerCreateStatusListZcap
         } = await helpers.provisionDependencies();
         const statusListOptions = [{
@@ -130,7 +135,10 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
         });
         sl2021RevocationIssuerId = issuerConfig.id;
         sl2021RevocationRootZcap =
-            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+        sl2021RevocationStatusId = statusConfig.id;
+        sl2021RevocationStatusRootZcap =
+          `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         // Intentionally change the referenceId of the assertion method zcap
         // in the database to be lowercase
         await helpers.updateConfig({
@@ -149,6 +157,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
       // w/ suspension status purpose
       {
         const {
+          statusConfig,
           issuerCreateStatusListZcap
         } = await helpers.provisionDependencies();
         const statusListOptions = [{
@@ -168,7 +177,10 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
         });
         sl2021SuspensionIssuerId = issuerConfig.id;
         sl2021SuspensionRootZcap =
-            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+        sl2021SuspensionStatusId = statusConfig.id;
+        sl2021SuspensionStatusRootZcap =
+          `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         // Intentionally change the referenceId of the assertion method zcap
         // in the database to be uppercase
         await helpers.updateConfig({
@@ -377,14 +389,12 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           let error;
           try {
             await zcapClient.write({
-              url: `${sl2021RevocationIssuerId}/credentials/status`,
-              capability: sl2021RevocationRootZcap,
+              url: `${sl2021RevocationStatusId}/credentials/status`,
+              capability: sl2021RevocationStatusRootZcap,
               json: {
                 credentialId: verifiableCredential.id,
-                credentialStatus: {
-                  type: 'StatusList2021Entry',
-                  statusPurpose: 'revocation'
-                }
+                credentialStatus: verifiableCredential.credentialStatus,
+                status: true
               }
             });
           } catch(e) {
@@ -392,10 +402,10 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           }
           assertNoError(error);
 
-          // force publication of new SLC
+          // force refresh of new SLC
           await zcapClient.write({
-            url: `${statusInfo.statusListCredential}/publish`,
-            capability: sl2021RevocationRootZcap,
+            url: `${statusInfo.statusListCredential}?refresh=true`,
+            capability: sl2021RevocationStatusRootZcap,
             json: {}
           });
 
@@ -425,14 +435,12 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           let error;
           try {
             await zcapClient.write({
-              url: `${sl2021SuspensionIssuerId}/credentials/status`,
-              capability: sl2021SuspensionRootZcap,
+              url: `${sl2021SuspensionStatusId}/credentials/status`,
+              capability: sl2021SuspensionStatusRootZcap,
               json: {
                 credentialId: verifiableCredential.id,
-                credentialStatus: {
-                  type: 'StatusList2021Entry',
-                  statusPurpose: 'suspension'
-                }
+                credentialStatus: verifiableCredential.credentialStatus,
+                status: true
               }
             });
           } catch(e) {
@@ -440,10 +448,10 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           }
           assertNoError(error);
 
-          // force publication of new SLC
+          // force refresh of new SLC
           await zcapClient.write({
-            url: `${statusInfo.statusListCredential}/publish`,
-            capability: sl2021SuspensionRootZcap,
+            url: `${statusInfo.statusListCredential}?refresh=true`,
+            capability: sl2021SuspensionStatusRootZcap,
             json: {}
           });
 

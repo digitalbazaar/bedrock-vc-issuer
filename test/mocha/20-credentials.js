@@ -55,12 +55,20 @@ describe('issue APIs', () => {
       let noStatusListIssuerRootZcap;
       let sl2021RevocationIssuerId;
       let sl2021RevocationRootZcap;
+      let sl2021RevocationStatusId;
+      let sl2021RevocationStatusRootZcap;
       let sl2021SuspensionIssuerId;
       let sl2021SuspensionRootZcap;
+      let sl2021SuspensionStatusId;
+      let sl2021SuspensionStatusRootZcap;
       let smallStatusListIssuerId;
       let smallStatusListRootZcap;
+      let smallStatusListStatusId;
+      let smallStatusListStatusRootZcap;
       let smallTerseStatusListIssuerId;
       let smallTerseStatusListRootZcap;
+      let smallTerseStatusListStatusId;
+      let smallTerseStatusListStatusRootZcap;
       let oauth2IssuerConfig;
       const zcaps = {};
       beforeEach(async () => {
@@ -139,6 +147,7 @@ describe('issue APIs', () => {
         // w/ revocation status purpose
         {
           const {
+            statusConfig,
             issuerCreateStatusListZcap
           } = await helpers.provisionDependencies();
           const statusListOptions = [{
@@ -159,12 +168,16 @@ describe('issue APIs', () => {
           sl2021RevocationIssuerId = issuerConfig.id;
           sl2021RevocationRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          sl2021RevocationStatusId = statusConfig.id;
+          sl2021RevocationStatusRootZcap =
+            `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         }
 
         // create issuer instance w/ status list 2021 status list options
         // w/ suspension status purpose
         {
           const {
+            statusConfig,
             issuerCreateStatusListZcap
           } = await helpers.provisionDependencies();
           const statusListOptions = [{
@@ -185,11 +198,15 @@ describe('issue APIs', () => {
           sl2021SuspensionIssuerId = issuerConfig.id;
           sl2021SuspensionRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          sl2021SuspensionStatusId = statusConfig.id;
+          sl2021SuspensionStatusRootZcap =
+            `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         }
 
         // create issuer instance w/ small status list
         {
           const {
+            statusConfig,
             issuerCreateStatusListZcap
           } = await helpers.provisionDependencies();
           const statusListOptions = [{
@@ -214,11 +231,15 @@ describe('issue APIs', () => {
           smallStatusListIssuerId = issuerConfig.id;
           smallStatusListRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          smallStatusListStatusId = statusConfig.id;
+          smallStatusListStatusRootZcap =
+            `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         }
 
         // create issuer instance w/ small terse status list
         {
           const {
+            statusConfig,
             issuerCreateStatusListZcap
           } = await helpers.provisionDependencies();
           const statusListOptions = [{
@@ -245,6 +266,9 @@ describe('issue APIs', () => {
           smallTerseStatusListIssuerId = issuerConfig.id;
           smallTerseStatusListRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          smallTerseStatusListStatusId = statusConfig.id;
+          smallTerseStatusListStatusRootZcap =
+            `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         }
 
         // create issuer instance w/ oauth2-based authz
@@ -534,6 +558,8 @@ describe('issue APIs', () => {
         });
       });
 
+      // FIXME: consider removal as only this tests the status service which is
+      // now separate
       describe('/credentials/status', () => {
         it('updates a StatusList2021 revocation credential status',
           async () => {
@@ -556,14 +582,12 @@ describe('issue APIs', () => {
             let error;
             try {
               await zcapClient.write({
-                url: `${sl2021RevocationIssuerId}/credentials/status`,
-                capability: sl2021RevocationRootZcap,
+                url: `${sl2021RevocationStatusId}/credentials/status`,
+                capability: sl2021RevocationStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
-                  credentialStatus: {
-                    type: 'StatusList2021Entry',
-                    statusPurpose: 'revocation'
-                  }
+                  credentialStatus: verifiableCredential.credentialStatus,
+                  status: true
                 }
               });
             } catch(e) {
@@ -571,10 +595,10 @@ describe('issue APIs', () => {
             }
             assertNoError(error);
 
-            // force publication of new SLC
+            // force refresh of new SLC
             await zcapClient.write({
-              url: `${statusInfo.statusListCredential}/publish`,
-              capability: sl2021RevocationRootZcap,
+              url: `${statusInfo.statusListCredential}?refresh=true`,
+              capability: sl2021RevocationStatusRootZcap,
               json: {}
             });
 
@@ -604,14 +628,12 @@ describe('issue APIs', () => {
             let error;
             try {
               await zcapClient.write({
-                url: `${sl2021SuspensionIssuerId}/credentials/status`,
-                capability: sl2021SuspensionRootZcap,
+                url: `${sl2021SuspensionStatusId}/credentials/status`,
+                capability: sl2021SuspensionStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
-                  credentialStatus: {
-                    type: 'StatusList2021Entry',
-                    statusPurpose: 'suspension'
-                  }
+                  credentialStatus: verifiableCredential.credentialStatus,
+                  status: true
                 }
               });
             } catch(e) {
@@ -619,10 +641,10 @@ describe('issue APIs', () => {
             }
             assertNoError(error);
 
-            // force publication of new SLC
+            // force refresh of new SLC
             await zcapClient.write({
-              url: `${statusInfo.statusListCredential}/publish`,
-              capability: sl2021SuspensionRootZcap,
+              url: `${statusInfo.statusListCredential}?refresh=true`,
+              capability: sl2021SuspensionStatusRootZcap,
               json: {}
             });
 
@@ -661,14 +683,12 @@ describe('issue APIs', () => {
             let error;
             try {
               await zcapClient.write({
-                url: `${smallStatusListIssuerId}/credentials/status`,
-                capability: smallStatusListRootZcap,
+                url: `${smallStatusListStatusId}/credentials/status`,
+                capability: smallStatusListStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
-                  credentialStatus: {
-                    type: 'StatusList2021Entry',
-                    statusPurpose: 'revocation'
-                  }
+                  credentialStatus: verifiableCredential.credentialStatus,
+                  status: true
                 }
               });
             } catch(e) {
@@ -676,10 +696,10 @@ describe('issue APIs', () => {
             }
             assertNoError(error);
 
-            // force publication of new SLC
+            // force refresh of new SLC
             await zcapClient.write({
-              url: `${statusInfo.statusListCredential}/publish`,
-              capability: smallStatusListRootZcap,
+              url: `${statusInfo.statusListCredential}?refresh=true`,
+              capability: smallStatusListStatusRootZcap,
               json: {}
             });
 
@@ -728,16 +748,14 @@ describe('issue APIs', () => {
             let error;
             try {
               await zcapClient.write({
-                url: `${smallTerseStatusListIssuerId}/credentials/status`,
-                capability: smallTerseStatusListRootZcap,
+                url: `${smallTerseStatusListStatusId}/credentials/status`,
+                capability: smallTerseStatusListStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
-                  // FIXME: needs to include `indexAllocator` as TBD property
-                  credentialStatus: {
-                    // FIXME: `BitstringStatusListEntry`
-                    type: 'StatusList2021Entry',
-                    statusPurpose: 'revocation'
-                  }
+                  // FIXME: needs to include `indexAllocator`
+                  // FIXME: `BitstringStatusListEntry`
+                  credentialStatus: verifiableCredential.credentialStatus,
+                  status: true
                 }
               });
             } catch(e) {
@@ -745,10 +763,10 @@ describe('issue APIs', () => {
             }
             assertNoError(error);
 
-            // force publication of new SLC
+            // force refresh of new SLC
             await zcapClient.write({
-              url: `${statusInfo.statusListCredential}/publish`,
-              capability: smallTerseStatusListRootZcap,
+              url: `${statusInfo.statusListCredential}?refresh=true`,
+              capability: smallTerseStatusListStatusRootZcap,
               json: {}
             });
 
@@ -888,14 +906,12 @@ describe('issue APIs', () => {
             let error;
             try {
               await zcapClient.write({
-                url: `${smallStatusListIssuerId}/credentials/status`,
-                capability: smallStatusListRootZcap,
+                url: `${smallStatusListStatusId}/credentials/status`,
+                capability: smallStatusListStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
-                  credentialStatus: {
-                    type: 'StatusList2021Entry',
-                    statusPurpose: 'revocation'
-                  }
+                  credentialStatus: verifiableCredential.credentialStatus,
+                  status: true
                 }
               });
             } catch(e) {
@@ -903,10 +919,10 @@ describe('issue APIs', () => {
             }
             assertNoError(error);
 
-            // force publication of new SLC
+            // force refresh of new SLC
             await zcapClient.write({
-              url: `${statusInfo.statusListCredential}/publish`,
-              capability: smallStatusListRootZcap,
+              url: `${statusInfo.statusListCredential}?refresh=true`,
+              capability: smallStatusListStatusRootZcap,
               json: {}
             });
 
@@ -955,16 +971,14 @@ describe('issue APIs', () => {
             let error;
             try {
               await zcapClient.write({
-                url: `${smallTerseStatusListIssuerId}/credentials/status`,
-                capability: smallTerseStatusListRootZcap,
+                url: `${smallTerseStatusListStatusId}/credentials/status`,
+                capability: smallTerseStatusListStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
-                  // FIXME: needs to include `indexAllocator` as TBD property
-                  credentialStatus: {
-                    // FIXME: `BitstringStatusListEntry`
-                    type: 'StatusList2021Entry',
-                    statusPurpose: 'revocation'
-                  }
+                  // FIXME: needs to include `indexAllocator`
+                  // FIXME: `BitstringStatusListEntry`
+                  credentialStatus: verifiableCredential.credentialStatus,
+                  status: true
                 }
               });
             } catch(e) {
@@ -972,10 +986,10 @@ describe('issue APIs', () => {
             }
             assertNoError(error);
 
-            // force publication of new SLC
+            // force refresh of new SLC
             await zcapClient.write({
-              url: `${statusInfo.statusListCredential}/publish`,
-              capability: smallTerseStatusListRootZcap,
+              url: `${statusInfo.statusListCredential}?refresh=true`,
+              capability: smallTerseStatusListStatusRootZcap,
               json: {}
             });
 
