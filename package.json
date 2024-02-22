@@ -41,7 +41,6 @@
     "@digitalbazaar/eddsa-rdfc-2022-cryptosuite": "^1.0.1",
     "@digitalbazaar/lru-memoize": "^3.0.0",
     "@digitalbazaar/vc": "^6.0.2",
-    "@digitalbazaar/vc-status-list": "^7.0.0",
     "@digitalbazaar/webkms-client": "^13.0.0",
     "assert-plus": "^1.0.0",
     "bnid": "^3.0.0",

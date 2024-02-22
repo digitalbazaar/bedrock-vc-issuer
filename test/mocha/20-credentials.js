@@ -49,6 +49,7 @@ describe('issue APIs', () => {
   }
   function describeSuite({suiteName, algorithm}) {
     const testDescription = `${suiteName}, algorithm: ${algorithm}`;
+    const depOptions = {suiteOptions: {suiteName, algorithm}};
     describe(testDescription, function() {
       let capabilityAgent;
       let noStatusListIssuerId;
@@ -73,7 +74,7 @@ describe('issue APIs', () => {
       const zcaps = {};
       beforeEach(async () => {
         // provision dependencies
-        ({capabilityAgent} = await helpers.provisionDependencies());
+        ({capabilityAgent} = await helpers.provisionDependencies(depOptions));
 
         // create keystore for capability agent
         const keystoreAgent = await helpers.createKeystoreAgent(
@@ -149,11 +150,10 @@ describe('issue APIs', () => {
           const {
             statusConfig,
             issuerCreateStatusListZcap
-          } = await helpers.provisionDependencies();
+          } = await helpers.provisionDependencies(depOptions);
           const statusListOptions = [{
             type: 'StatusList2021',
             statusPurpose: 'revocation',
-            suiteName,
             zcapReferenceIds: {
               createCredentialStatusList: 'createCredentialStatusList'
             }
@@ -179,11 +179,10 @@ describe('issue APIs', () => {
           const {
             statusConfig,
             issuerCreateStatusListZcap
-          } = await helpers.provisionDependencies();
+          } = await helpers.provisionDependencies(depOptions);
           const statusListOptions = [{
             type: 'StatusList2021',
             statusPurpose: 'suspension',
-            suiteName,
             zcapReferenceIds: {
               createCredentialStatusList: 'createCredentialStatusList'
             }
@@ -208,11 +207,10 @@ describe('issue APIs', () => {
           const {
             statusConfig,
             issuerCreateStatusListZcap
-          } = await helpers.provisionDependencies();
+          } = await helpers.provisionDependencies(depOptions);
           const statusListOptions = [{
             type: 'StatusList2021',
             statusPurpose: 'revocation',
-            suiteName,
             options: {
               blockSize: 8,
               blockCount: 1
@@ -241,12 +239,11 @@ describe('issue APIs', () => {
           const {
             statusConfig,
             issuerCreateStatusListZcap
-          } = await helpers.provisionDependencies();
+          } = await helpers.provisionDependencies(depOptions);
           const statusListOptions = [{
             // FIXME: `TerseBitstringStatusList`
             type: 'StatusList2021',
             statusPurpose: 'revocation',
-            suiteName,
             options: {
               blockSize: 8,
               blockCount: 1,
