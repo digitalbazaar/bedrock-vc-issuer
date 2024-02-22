@@ -24,9 +24,16 @@
   `meta.credentialStatus.id` instead of what is in the VC itself, as
   the credential status ID may not be present in a VC (with a credential
   status).
+- **BREAKING**: Status lists and status list credentials are no longer served
+  by this module and must be provided by an external status service, such
+  as `@bedrock/vc-status`. Issuer configurations that use status lists must
+  include a zcap to create status lists on such a service.
 
 ### Removed
 - **BREAKING**: Remove support for obsolete `RevocationList2020`.
+- **BREAKING**: `/credentials/status` API has been removed because status
+  list and status list credentials are served via an external service now
+  such as `@bedrock/vc-status`.
 
 ## 25.2.0 - 2024-02-02
 
