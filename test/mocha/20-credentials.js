@@ -145,12 +145,17 @@ describe('issue APIs', () => {
             type: 'StatusList2021',
             statusPurpose: 'revocation',
             suiteName,
-            zcaps: {
-              createCredentialStatusList: issuerCreateStatusListZcap
+            zcapReferenceIds: {
+              createCredentialStatusList: 'createCredentialStatusList'
             }
           }];
-          const issuerConfig = await helpers.createIssuerConfig(
-            {capabilityAgent, zcaps, statusListOptions, suiteName});
+          const newZcaps = {
+            ...zcaps,
+            createCredentialStatusList: issuerCreateStatusListZcap
+          };
+          const issuerConfig = await helpers.createIssuerConfig({
+            capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+          });
           sl2021RevocationIssuerId = issuerConfig.id;
           sl2021RevocationRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -166,12 +171,17 @@ describe('issue APIs', () => {
             type: 'StatusList2021',
             statusPurpose: 'suspension',
             suiteName,
-            zcaps: {
-              createCredentialStatusList: issuerCreateStatusListZcap
+            zcapReferenceIds: {
+              createCredentialStatusList: 'createCredentialStatusList'
             }
           }];
-          const issuerConfig = await helpers.createIssuerConfig(
-            {capabilityAgent, zcaps, statusListOptions, suiteName});
+          const newZcaps = {
+            ...zcaps,
+            createCredentialStatusList: issuerCreateStatusListZcap
+          };
+          const issuerConfig = await helpers.createIssuerConfig({
+            capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+          });
           sl2021SuspensionIssuerId = issuerConfig.id;
           sl2021SuspensionRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -190,12 +200,17 @@ describe('issue APIs', () => {
               blockSize: 8,
               blockCount: 1
             },
-            zcaps: {
-              createCredentialStatusList: issuerCreateStatusListZcap
+            zcapReferenceIds: {
+              createCredentialStatusList: 'createCredentialStatusList'
             }
           }];
-          const issuerConfig = await helpers.createIssuerConfig(
-            {capabilityAgent, zcaps, statusListOptions, suiteName});
+          const newZcaps = {
+            ...zcaps,
+            createCredentialStatusList: issuerCreateStatusListZcap
+          };
+          const issuerConfig = await helpers.createIssuerConfig({
+            capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+          });
           smallStatusListIssuerId = issuerConfig.id;
           smallStatusListRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -216,12 +231,17 @@ describe('issue APIs', () => {
               blockCount: 1,
               listCount: 2
             },
-            zcaps: {
-              createCredentialStatusList: issuerCreateStatusListZcap
+            zcapReferenceIds: {
+              createCredentialStatusList: 'createCredentialStatusList'
             }
           }];
-          const issuerConfig = await helpers.createIssuerConfig(
-            {capabilityAgent, zcaps, statusListOptions, suiteName});
+          const newZcaps = {
+            ...zcaps,
+            createCredentialStatusList: issuerCreateStatusListZcap
+          };
+          const issuerConfig = await helpers.createIssuerConfig({
+            capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+          });
           smallTerseStatusListIssuerId = issuerConfig.id;
           smallTerseStatusListRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
