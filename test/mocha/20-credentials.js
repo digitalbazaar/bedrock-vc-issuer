@@ -23,7 +23,7 @@ const serviceType = 'vc-issuer';
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
 
-describe('issue APIs', () => {
+describe.only('issue APIs', () => {
   const suiteNames = {
     Ed25519Signature2018: {
       algorithm: 'Ed25519'
@@ -70,9 +70,8 @@ describe('issue APIs', () => {
       let oauth2IssuerConfig;
       const zcaps = {};
       beforeEach(async () => {
-        const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
-        const handle = 'test';
-        capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
+        // provision dependencies
+        ({capabilityAgent} = await helpers.provisionDependencies());
 
         // create keystore for capability agent
         const keystoreAgent = await helpers.createKeystoreAgent(
@@ -136,7 +135,7 @@ describe('issue APIs', () => {
           });
 
         // create issuer instance w/ no status list options
-        const noStatusListIssuerConfig = await helpers.createConfig(
+        const noStatusListIssuerConfig = await helpers.createIssuerConfig(
           {capabilityAgent, zcaps, suiteName});
         noStatusListIssuerId = noStatusListIssuerConfig.id;
         noStatusListIssuerRootZcap =
@@ -149,7 +148,7 @@ describe('issue APIs', () => {
             statusPurpose: 'revocation',
             suiteName
           }];
-          const issuerConfig = await helpers.createConfig(
+          const issuerConfig = await helpers.createIssuerConfig(
             {capabilityAgent, zcaps, statusListOptions, suiteName});
           rl2020IssuerId = issuerConfig.id;
           rl2020RootZcap =
@@ -164,7 +163,7 @@ describe('issue APIs', () => {
             statusPurpose: 'revocation',
             suiteName
           }];
-          const issuerConfig = await helpers.createConfig(
+          const issuerConfig = await helpers.createIssuerConfig(
             {capabilityAgent, zcaps, statusListOptions, suiteName});
           sl2021RevocationIssuerId = issuerConfig.id;
           sl2021RevocationRootZcap =
@@ -179,7 +178,7 @@ describe('issue APIs', () => {
             statusPurpose: 'suspension',
             suiteName
           }];
-          const issuerConfig = await helpers.createConfig(
+          const issuerConfig = await helpers.createIssuerConfig(
             {capabilityAgent, zcaps, statusListOptions, suiteName});
           sl2021SuspensionIssuerId = issuerConfig.id;
           sl2021SuspensionRootZcap =
@@ -197,7 +196,7 @@ describe('issue APIs', () => {
               blockCount: 1
             }
           }];
-          const issuerConfig = await helpers.createConfig(
+          const issuerConfig = await helpers.createIssuerConfig(
             {capabilityAgent, zcaps, statusListOptions, suiteName});
           smallStatusListIssuerId = issuerConfig.id;
           smallStatusListRootZcap =
@@ -217,7 +216,7 @@ describe('issue APIs', () => {
               listCount: 2
             }
           }];
-          const issuerConfig = await helpers.createConfig(
+          const issuerConfig = await helpers.createIssuerConfig(
             {capabilityAgent, zcaps, statusListOptions, suiteName});
           smallTerseStatusListIssuerId = issuerConfig.id;
           smallTerseStatusListRootZcap =
@@ -225,7 +224,7 @@ describe('issue APIs', () => {
         }
 
         // create issuer instance w/ oauth2-based authz
-        oauth2IssuerConfig = await helpers.createConfig(
+        oauth2IssuerConfig = await helpers.createIssuerConfig(
           {capabilityAgent, zcaps, oauth2: true, suiteName});
       });
       describe('/credentials/issue', () => {

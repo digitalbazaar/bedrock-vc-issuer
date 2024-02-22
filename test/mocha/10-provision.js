@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2019-2023 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2019-2024 Digital Bazaar, Inc. All rights reserved.
  */
 import * as bedrock from '@bedrock/core';
 import * as helpers from './helpers.js';
@@ -77,7 +77,7 @@ describe('provision API', () => {
       let err;
       let result;
       try {
-        result = await helpers.createConfig({capabilityAgent});
+        result = await helpers.createIssuerConfig({capabilityAgent});
       } catch(e) {
         err = e;
       }
@@ -92,7 +92,7 @@ describe('provision API', () => {
       let err;
       let result;
       try {
-        result = await helpers.createConfig({capabilityAgent, zcaps});
+        result = await helpers.createIssuerConfig({capabilityAgent, zcaps});
       } catch(e) {
         err = e;
       }
@@ -112,7 +112,7 @@ describe('provision API', () => {
         try {
           const zcapsCopy = {...zcaps};
           delete zcapsCopy.assertionMethod;
-          result = await helpers.createConfig({
+          result = await helpers.createIssuerConfig({
             capabilityAgent, zcaps: zcapsCopy
           });
         } catch(e) {
@@ -133,7 +133,7 @@ describe('provision API', () => {
       let err;
       let result;
       try {
-        result = await helpers.createConfig(
+        result = await helpers.createIssuerConfig(
           {capabilityAgent, ipAllowList, zcaps});
       } catch(e) {
         err = e;
@@ -156,7 +156,7 @@ describe('provision API', () => {
       let err;
       let result;
       try {
-        result = await helpers.createConfig(
+        result = await helpers.createIssuerConfig(
           {capabilityAgent, ipAllowList, zcaps});
       } catch(e) {
         err = e;
@@ -176,7 +176,7 @@ describe('provision API', () => {
       let err;
       let result;
       try {
-        result = await helpers.createConfig(
+        result = await helpers.createIssuerConfig(
           {capabilityAgent, ipAllowList, zcaps});
       } catch(e) {
         err = e;
@@ -212,7 +212,7 @@ describe('provision API', () => {
 
   describe('get config', () => {
     it('gets a config', async () => {
-      const config = await helpers.createConfig(
+      const config = await helpers.createIssuerConfig(
         {capabilityAgent, zcaps});
       let err;
       let result;
@@ -229,7 +229,7 @@ describe('provision API', () => {
       result.id.should.equal(config.id);
     });
     it('gets a config w/oauth2', async () => {
-      const config = await helpers.createConfig(
+      const config = await helpers.createIssuerConfig(
         {capabilityAgent, zcaps, oauth2: true});
       const accessToken = await helpers.getOAuth2AccessToken(
         {configId: config.id, action: 'read', target: '/'});
@@ -251,7 +251,7 @@ describe('provision API', () => {
     it('gets a config with ipAllowList', async () => {
       const ipAllowList = ['127.0.0.1/32', '::1/128'];
 
-      const config = await helpers.createConfig(
+      const config = await helpers.createIssuerConfig(
         {capabilityAgent, ipAllowList, zcaps});
       let err;
       let result;
@@ -273,7 +273,7 @@ describe('provision API', () => {
     it('returns NotAllowedError for invalid source IP', async () => {
       const ipAllowList = ['8.8.8.8/32'];
 
-      const config = await helpers.createConfig(
+      const config = await helpers.createIssuerConfig(
         {capabilityAgent, ipAllowList, zcaps});
       let err;
       let result;
@@ -299,7 +299,7 @@ describe('provision API', () => {
       let result;
       let existingConfig;
       try {
-        existingConfig = result = await helpers.createConfig(
+        existingConfig = result = await helpers.createIssuerConfig(
           {capabilityAgent, zcaps});
       } catch(e) {
         err = e;
@@ -374,7 +374,7 @@ describe('provision API', () => {
       let result;
       let existingConfig;
       try {
-        existingConfig = result = await helpers.createConfig(
+        existingConfig = result = await helpers.createIssuerConfig(
           {capabilityAgent, zcaps});
       } catch(e) {
         err = e;
@@ -499,7 +499,7 @@ describe('provision API', () => {
       let err;
       let result;
       try {
-        result = await helpers.createConfig(
+        result = await helpers.createIssuerConfig(
           {capabilityAgent, zcaps});
       } catch(e) {
         err = e;
@@ -547,7 +547,7 @@ describe('provision API', () => {
       let err;
       let result;
       try {
-        result = await helpers.createConfig(
+        result = await helpers.createIssuerConfig(
           {capabilityAgent, zcaps});
       } catch(e) {
         err = e;
@@ -593,7 +593,7 @@ describe('provision API', () => {
         let result;
         let existingConfig;
         try {
-          existingConfig = result = await helpers.createConfig(
+          existingConfig = result = await helpers.createIssuerConfig(
             {capabilityAgent, ipAllowList, zcaps});
         } catch(e) {
           err = e;
@@ -673,7 +673,7 @@ describe('provision API', () => {
         let err;
         let result;
         try {
-          result = await helpers.createConfig(
+          result = await helpers.createIssuerConfig(
             {capabilityAgent, ipAllowList, zcaps});
         } catch(e) {
           err = e;
@@ -713,7 +713,7 @@ describe('provision API', () => {
 
   describe('revocations', () => {
     it('throws error with invalid zcap when revoking', async () => {
-      const config = await helpers.createConfig({capabilityAgent, zcaps});
+      const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
       const zcap = {
         '@context': ['https://w3id.org/zcap/v1'],
         id: 'urn:uuid:895d985c-8e20-11ec-b82f-10bf48838a41',
@@ -737,7 +737,7 @@ describe('provision API', () => {
         'A validation error occured in the \'Delegated ZCAP\' validator.');
     });
     it('revokes a zcap', async () => {
-      const config = await helpers.createConfig({capabilityAgent, zcaps});
+      const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
 
       const capabilityAgent2 = await CapabilityAgent.fromSecret(
         {secret: 's2', handle: 'h2'});
@@ -778,7 +778,7 @@ describe('provision API', () => {
 
   describe('contexts', () => {
     it('fails to inserts a context due to bad zcap', async () => {
-      const config = await helpers.createConfig({capabilityAgent, zcaps});
+      const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
 
       // insert `context`
       const contextId = 'https://test.example/v1';
@@ -803,7 +803,7 @@ describe('provision API', () => {
       err.data.type.should.equal('NotAllowedError');
     });
     it('inserts a context', async () => {
-      const config = await helpers.createConfig({capabilityAgent, zcaps});
+      const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
       const rootZcap = `urn:zcap:root:${encodeURIComponent(config.id)}`;
 
       // insert `context`
@@ -832,7 +832,7 @@ describe('provision API', () => {
       });
     });
     it('throws error on no "context"', async () => {
-      const config = await helpers.createConfig({capabilityAgent, zcaps});
+      const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
       const rootZcap = `urn:zcap:root:${encodeURIComponent(config.id)}`;
 
       const contextId = 'https://test.example/v1';
@@ -853,7 +853,7 @@ describe('provision API', () => {
         'A validation error occured in the \'createContextBody\' validator.');
     });
     it('updates a context', async () => {
-      const config = await helpers.createConfig({capabilityAgent, zcaps});
+      const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
       const rootZcap = `urn:zcap:root:${encodeURIComponent(config.id)}`;
 
       // insert `context`
@@ -889,7 +889,7 @@ describe('provision API', () => {
       });
     });
     it('fails to update a context with wrong sequence', async () => {
-      const config = await helpers.createConfig({capabilityAgent, zcaps});
+      const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
       const rootZcap = `urn:zcap:root:${encodeURIComponent(config.id)}`;
 
       // insert `context`
@@ -920,7 +920,7 @@ describe('provision API', () => {
       err.data.type.should.equal('InvalidStateError');
     });
     it('gets a context', async () => {
-      const config = await helpers.createConfig({capabilityAgent, zcaps});
+      const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
       const rootZcap = `urn:zcap:root:${encodeURIComponent(config.id)}`;
 
       // insert `context`
@@ -953,7 +953,7 @@ describe('provision API', () => {
       });
     });
     it('gets a context with a context document loader', async () => {
-      const config = await helpers.createConfig({capabilityAgent, zcaps});
+      const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
       const rootZcap = `urn:zcap:root:${encodeURIComponent(config.id)}`;
 
       // insert `context`
@@ -985,7 +985,7 @@ describe('provision API', () => {
       result.document.should.deep.equal(context);
     });
     it('fails to get a context with wrong meta type', async () => {
-      const config = await helpers.createConfig({capabilityAgent, zcaps});
+      const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
       const rootZcap = `urn:zcap:root:${encodeURIComponent(config.id)}`;
 
       // insert `context`
