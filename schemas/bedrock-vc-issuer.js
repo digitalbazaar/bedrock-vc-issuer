@@ -44,11 +44,9 @@ export const statusListConfig = {
       type: 'string',
       // supported types in this version
       enum: [
-        // FIXME: add support for `BitstringStatusList`
+        'BitstringStatusList',
         // FIXME: consider removing `StatusList2021` support
         'StatusList2021',
-        // FIXME: remove support for `RevocationList2020`
-        'RevocationList2020',
         'TerseBitstringStatusList'
       ]
     },
