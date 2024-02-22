@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2020-2023 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
  */
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
@@ -90,7 +90,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
         });
 
       // create issuer instance w/ no status list options
-      const noStatusListIssuerConfig = await helpers.createConfig(
+      const noStatusListIssuerConfig = await helpers.createIssuerConfig(
         {capabilityAgent, zcaps, suiteName: 'Ed25519Signature2020'});
       noStatusListIssuerId = noStatusListIssuerConfig.id;
       noStatusListIssuerRootZcap =
@@ -115,7 +115,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           statusPurpose: 'revocation',
           suiteName
         }];
-        const issuerConfig = await helpers.createConfig(
+        const issuerConfig = await helpers.createIssuerConfig(
           {capabilityAgent, zcaps, statusListOptions, suiteName});
         rl2020IssuerId = issuerConfig.id;
         rl2020RootZcap =
@@ -142,7 +142,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           statusPurpose: 'revocation',
           suiteName
         }];
-        const issuerConfig = await helpers.createConfig(
+        const issuerConfig = await helpers.createIssuerConfig(
           {capabilityAgent, zcaps, statusListOptions, suiteName});
         sl2021RevocationIssuerId = issuerConfig.id;
         sl2021RevocationRootZcap =
@@ -169,7 +169,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           statusPurpose: 'suspension',
           suiteName
         }];
-        const issuerConfig = await helpers.createConfig(
+        const issuerConfig = await helpers.createIssuerConfig(
           {capabilityAgent, zcaps, statusListOptions, suiteName});
         sl2021SuspensionIssuerId = issuerConfig.id;
         sl2021SuspensionRootZcap =
@@ -189,7 +189,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
       }
 
       // create issuer instance w/ oauth2-based authz
-      oauth2IssuerConfig = await helpers.createConfig(
+      oauth2IssuerConfig = await helpers.createIssuerConfig(
         {capabilityAgent, zcaps, oauth2: true, suiteName});
     });
     describe('/credentials/issue', () => {
