@@ -24,9 +24,6 @@ const mockCredential = require('./mock-credential.json');
 
 describe('issue APIs', () => {
   const suiteNames = {
-    Ed25519Signature2018: {
-      algorithm: 'Ed25519'
-    },
     Ed25519Signature2020: {
       algorithm: 'Ed25519'
     },
