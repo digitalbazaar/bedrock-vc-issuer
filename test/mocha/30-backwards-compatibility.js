@@ -110,13 +110,24 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
       // create issuer instance w/ status list 2021 status list options
       // w/ revocation status purpose
       {
+        const {
+          issuerCreateStatusListZcap
+        } = await helpers.provisionDependencies();
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'revocation',
-          suiteName
+          suiteName,
+          zcapReferenceIds: {
+            createCredentialStatusList: 'createCredentialStatusList'
+          }
         }];
-        const issuerConfig = await helpers.createIssuerConfig(
-          {capabilityAgent, zcaps, statusListOptions, suiteName});
+        const newZcaps = {
+          ...zcaps,
+          createCredentialStatusList: issuerCreateStatusListZcap
+        };
+        const issuerConfig = await helpers.createIssuerConfig({
+          capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+        });
         sl2021RevocationIssuerId = issuerConfig.id;
         sl2021RevocationRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -137,13 +148,24 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
       // create issuer instance w/ status list 2021 status list options
       // w/ suspension status purpose
       {
+        const {
+          issuerCreateStatusListZcap
+        } = await helpers.provisionDependencies();
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'suspension',
-          suiteName
+          suiteName,
+          zcapReferenceIds: {
+            createCredentialStatusList: 'createCredentialStatusList'
+          }
         }];
-        const issuerConfig = await helpers.createIssuerConfig(
-          {capabilityAgent, zcaps, statusListOptions, suiteName});
+        const newZcaps = {
+          ...zcaps,
+          createCredentialStatusList: issuerCreateStatusListZcap
+        };
+        const issuerConfig = await helpers.createIssuerConfig({
+          capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+        });
         sl2021SuspensionIssuerId = issuerConfig.id;
         sl2021SuspensionRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -299,7 +321,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
         verifiableCredential.proof.should.be.an('object');
       });
       it('issues a valid credential w/ SL 2021 "credentialStatus" and ' +
-          'suspension status purpose', async () => {
+        'suspension status purpose', async () => {
         const credential = klona(mockCredential);
         let error;
         let result;
