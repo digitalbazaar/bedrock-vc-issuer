@@ -143,10 +143,16 @@ describe('issue APIs', () => {
         // create issuer instance w/ status list 2021 status list options
         // w/ revocation status purpose
         {
+          const {
+            issuerCreateStatusListZcap
+          } = await helpers.provisionDependencies();
           const statusListOptions = [{
             type: 'StatusList2021',
             statusPurpose: 'revocation',
-            suiteName
+            suiteName,
+            zcaps: {
+              createCredentialStatusList: issuerCreateStatusListZcap
+            }
           }];
           const issuerConfig = await helpers.createIssuerConfig(
             {capabilityAgent, zcaps, statusListOptions, suiteName});
@@ -158,10 +164,16 @@ describe('issue APIs', () => {
         // create issuer instance w/ status list 2021 status list options
         // w/ suspension status purpose
         {
+          const {
+            issuerCreateStatusListZcap
+          } = await helpers.provisionDependencies();
           const statusListOptions = [{
             type: 'StatusList2021',
             statusPurpose: 'suspension',
-            suiteName
+            suiteName,
+            zcaps: {
+              createCredentialStatusList: issuerCreateStatusListZcap
+            }
           }];
           const issuerConfig = await helpers.createIssuerConfig(
             {capabilityAgent, zcaps, statusListOptions, suiteName});
@@ -172,6 +184,9 @@ describe('issue APIs', () => {
 
         // create issuer instance w/ small status list
         {
+          const {
+            issuerCreateStatusListZcap
+          } = await helpers.provisionDependencies();
           const statusListOptions = [{
             type: 'StatusList2021',
             statusPurpose: 'revocation',
@@ -179,6 +194,9 @@ describe('issue APIs', () => {
             options: {
               blockSize: 8,
               blockCount: 1
+            },
+            zcaps: {
+              createCredentialStatusList: issuerCreateStatusListZcap
             }
           }];
           const issuerConfig = await helpers.createIssuerConfig(
@@ -190,6 +208,9 @@ describe('issue APIs', () => {
 
         // create issuer instance w/ small terse status list
         {
+          const {
+            issuerCreateStatusListZcap
+          } = await helpers.provisionDependencies();
           const statusListOptions = [{
             // FIXME: `TerseBitstringStatusList`
             type: 'StatusList2021',
@@ -199,6 +220,9 @@ describe('issue APIs', () => {
               blockSize: 8,
               blockCount: 1,
               listCount: 2
+            },
+            zcaps: {
+              createCredentialStatusList: issuerCreateStatusListZcap
             }
           }];
           const issuerConfig = await helpers.createIssuerConfig(

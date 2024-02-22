@@ -4,6 +4,7 @@
 import {
   DEFAULT_BLOCK_COUNT, DEFAULT_BLOCK_SIZE, MAX_LIST_COUNT
 } from '../lib/constants.js';
+import {schemas} from '@bedrock/service-core';
 
 const context = {
   title: '@context',
@@ -32,12 +33,10 @@ export const issueOptions = {
 };
 
 // FIXME: support specifying multiple statuses (triggering multiple lists)
-// FIXME: support external status service w/zcap(s) and expression of the
-//   target types (TerseBitstringStatusList, BitstringStatusList)
 export const statusListConfig = {
   title: 'Status List Configuration',
   type: 'object',
-  required: ['type', 'suiteName', 'statusPurpose'],
+  required: ['type', 'suiteName', 'statusPurpose', 'zcaps'],
   additionalProperties: false,
   properties: {
     type: {
@@ -101,6 +100,14 @@ export const statusListConfig = {
           minimum: 1,
           maximum: MAX_LIST_COUNT
         }
+      }
+    },
+    zcaps: {
+      type: 'object',
+      required: ['createCredentialStatusList'],
+      additionalProperties: false,
+      properties: {
+        createCredentialStatusList: schemas.delegatedZcap
       }
     }
   }
