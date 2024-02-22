@@ -2,9 +2,9 @@
  * Copyright (c) 2022-2024 Digital Bazaar, Inc. All rights reserved.
  */
 import {
-  DEFAULT_BLOCK_COUNT, DEFAULT_BLOCK_SIZE, MAX_LIST_COUNT
+  DEFAULT_BLOCK_COUNT, DEFAULT_BLOCK_SIZE, MAX_LIST_COUNT,
+  MAX_STATUS_LIST_OPTIONS
 } from '../lib/constants.js';
-import {schemas} from '@bedrock/service-core';
 
 const context = {
   title: '@context',
@@ -36,7 +36,7 @@ export const issueOptions = {
 export const statusListConfig = {
   title: 'Status List Configuration',
   type: 'object',
-  required: ['type', 'suiteName', 'statusPurpose', 'zcaps'],
+  required: ['type', 'suiteName', 'statusPurpose', 'zcapReferenceIds'],
   additionalProperties: false,
   properties: {
     type: {
@@ -102,12 +102,15 @@ export const statusListConfig = {
         }
       }
     },
-    zcaps: {
+    // zcap reference IDs reference zcaps in the root config
+    zcapReferenceIds: {
       type: 'object',
       required: ['createCredentialStatusList'],
       additionalProperties: false,
       properties: {
-        createCredentialStatusList: schemas.delegatedZcap
+        createCredentialStatusList: {
+          type: 'string'
+        }
       }
     }
   }
@@ -116,7 +119,7 @@ export const statusListConfig = {
 export const statusListOptions = {
   title: 'Status List Options',
   type: 'array',
-  minItems: 1,
+  minItems: MAX_STATUS_LIST_OPTIONS,
   items: statusListConfig
 };
 
