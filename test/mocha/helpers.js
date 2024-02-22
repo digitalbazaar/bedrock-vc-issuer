@@ -315,7 +315,7 @@ async function keyResolver({id}) {
   return data;
 }
 
-export async function provisionDependencies() {
+export async function provisionDependencies({suiteOptions}) {
   const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
   const handle = 'test';
   const capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
@@ -326,7 +326,9 @@ export async function provisionDependencies() {
   const {
     statusConfig,
     issuerCreateStatusListZcap
-  } = await provisionStatus({capabilityAgent, keystoreAgent});
+  } = await provisionStatus({
+    capabilityAgent, keystoreAgent, suiteOptions
+  });
 
   return {
     statusConfig, issuerCreateStatusListZcap, capabilityAgent
@@ -334,13 +336,25 @@ export async function provisionDependencies() {
 }
 
 export async function provisionIssuerForStatus({
-  capabilityAgent, keystoreAgent
+  capabilityAgent, keystoreAgent, suiteOptions
 }) {
   // generate key for signing VCs (make it a did:key DID for simplicity)
-  const assertionMethodKey = await keystoreAgent.generateKey({
-    type: 'asymmetric',
-    publicAliasTemplate: 'did:key:{publicKeyMultibase}#{publicKeyMultibase}'
-  });
+  let assertionMethodKey;
+  const publicAliasTemplate =
+    'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
+  const {algorithm} = suiteOptions;
+  if(algorithm === 'P-256' || algorithm === 'P-384') {
+    assertionMethodKey = await _generateMultikey({
+      keystoreAgent,
+      type: `urn:webkms:multikey:${algorithm}`,
+      publicAliasTemplate
+    });
+  } else {
+    assertionMethodKey = await keystoreAgent.generateKey({
+      type: 'asymmetric',
+      publicAliasTemplate
+    });
+  }
 
   // create EDV for storage (creating hmac and kak in the process)
   const {
@@ -407,12 +421,14 @@ export async function provisionIssuerForStatus({
 }
 
 export async function provisionStatus({
-  capabilityAgent, keystoreAgent
+  capabilityAgent, keystoreAgent, suiteOptions
 }) {
   const {
     issuerConfig,
     statusIssueZcap
-  } = await provisionIssuerForStatus({capabilityAgent, keystoreAgent});
+  } = await provisionIssuerForStatus({
+    capabilityAgent, keystoreAgent, suiteOptions
+  });
 
   const zcaps = {
     issue: statusIssueZcap

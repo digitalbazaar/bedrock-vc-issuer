@@ -38,6 +38,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
       const suiteName = 'Ed25519Signature2020';
       const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
       const handle = 'test';
+      const depOptions = {suiteOptions: {suiteName, algorithm: 'Ed25519'}};
       capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
 
       // create keystore for capability agent
@@ -59,7 +60,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
 
       // get service agent to delegate to
       const serviceAgentUrl =
-          `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
+        `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
       const {data: serviceAgent} = await httpClient.get(
         serviceAgentUrl, {agent});
 
@@ -117,11 +118,10 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
         const {
           statusConfig,
           issuerCreateStatusListZcap
-        } = await helpers.provisionDependencies();
+        } = await helpers.provisionDependencies(depOptions);
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'revocation',
-          suiteName,
           zcapReferenceIds: {
             createCredentialStatusList: 'createCredentialStatusList'
           }
@@ -159,11 +159,10 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
         const {
           statusConfig,
           issuerCreateStatusListZcap
-        } = await helpers.provisionDependencies();
+        } = await helpers.provisionDependencies(depOptions);
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'suspension',
-          suiteName,
           zcapReferenceIds: {
             createCredentialStatusList: 'createCredentialStatusList'
           }
