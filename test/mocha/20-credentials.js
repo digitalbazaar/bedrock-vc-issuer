@@ -3,7 +3,6 @@
  */
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
-import {CapabilityAgent} from '@digitalbazaar/webkms-client';
 import {createRequire} from 'node:module';
 import {httpClient} from '@digitalbazaar/http-client';
 import {issuer} from '@bedrock/vc-issuer';
