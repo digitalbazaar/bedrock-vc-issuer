@@ -25,6 +25,9 @@
   the credential status ID may not be present in a VC (with a credential
   status).
 
+### Removed
+- **BREAKING**: Remove support for obsolete `RevocationList2020`.
+
 ## 25.1.0 - 2023-11-14
 
 ### Added

@@ -281,26 +281,19 @@ export async function getCredentialStatus({verifiableCredential}) {
   if(Array.isArray(credentialStatus)) {
     throw new Error('Multiple credential statuses not supported.');
   }
-  let slcUrl;
-  let statusListIndexProperty;
-  if(credentialStatus.type === 'RevocationList2020Status') {
-    slcUrl = credentialStatus.revocationListCredential;
-    statusListIndexProperty = 'revocationListIndex';
-  } else {
-    slcUrl = credentialStatus.statusListCredential;
-    statusListIndexProperty = 'statusListIndex';
-  }
-  if(!slcUrl) {
+  const {statusListCredential} = credentialStatus;
+  if(!statusListCredential) {
     throw new Error('Status list credential missing from credential status.');
   }
-  const {data: slc} = await httpClient.get(slcUrl, {agent: httpsAgent});
+  const {data: slc} = await httpClient.get(
+    statusListCredential, {agent: httpsAgent});
 
   const {encodedList} = slc.credentialSubject;
   const list = await decodeList({encodedList});
   const statusListIndex = parseInt(
-    credentialStatus[statusListIndexProperty], 10);
+    credentialStatus.statusListIndex, 10);
   const status = list.getStatus(statusListIndex);
-  return {status, statusListCredential: slcUrl};
+  return {status, statusListCredential};
 }
 
 export async function revokeDelegatedCapability({
