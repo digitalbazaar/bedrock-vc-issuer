@@ -22,7 +22,7 @@ const serviceType = 'vc-issuer';
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
 
-describe.only('issue APIs', () => {
+describe('issue APIs', () => {
   const suiteNames = {
     Ed25519Signature2018: {
       algorithm: 'Ed25519'
