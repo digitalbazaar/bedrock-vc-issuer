@@ -38,7 +38,11 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
       const suiteName = 'Ed25519Signature2020';
       const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
       const handle = 'test';
-      const depOptions = {suiteOptions: {suiteName, algorithm: 'Ed25519'}};
+      const depOptions = {
+        suiteOptions: {
+          suiteName, algorithm: 'Ed25519', statusOptions: {suiteName}
+        }
+      };
       capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
 
       // create keystore for capability agent
