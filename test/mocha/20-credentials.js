@@ -5,6 +5,7 @@ import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
 import {CapabilityAgent} from '@digitalbazaar/webkms-client';
 import {createRequire} from 'node:module';
+import {encode} from 'base64url-universal';
 import {httpClient} from '@digitalbazaar/http-client';
 import {issuer} from '@bedrock/vc-issuer';
 import {klona} from 'klona';
@@ -38,10 +39,15 @@ describe('issue APIs', () => {
     },
     'ecdsa-sd-2023': {
       algorithm: ['P-256']
+    },
+    'ecdsa-xi-2023': {
+      algorithm: ['P-256', 'P-384']
     }
   };
   // list of suites to run the selective disclosure tests on
   const sdSuites = new Set(['ecdsa-sd-2023']);
+  // list of suites to run extra information tests on
+  const xiSuites = new Set(['ecdsa-xi-2023']);
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
     if(Array.isArray(suiteInfo.algorithm)) {
@@ -560,6 +566,72 @@ describe('issue APIs', () => {
             }
             should.exist(error);
             error.data.type.should.equal('OperationError');
+          });
+        }
+        // extra information tests
+        if(xiSuites.has(suiteName)) {
+          it('issues a valid credential w/ "options.extraInformation"',
+            async () => {
+              const credential = klona(mockCredential);
+              let error;
+              let result;
+              try {
+                const zcapClient = helpers.createZcapClient({capabilityAgent});
+                const extraInformationBytes = new Uint8Array([
+                  12, 52, 75, 63, 74, 85, 21, 5, 62, 10
+                ]);
+                const extraInformationEncoded = encode(extraInformationBytes);
+                result = await zcapClient.write({
+                  url: `${noStatusListIssuerId}/credentials/issue`,
+                  capability: noStatusListIssuerRootZcap,
+                  json: {
+                    credential,
+                    options: {
+                      extraInformation: extraInformationEncoded
+                    }
+                  }
+                });
+              } catch(e) {
+                error = e;
+              }
+              assertNoError(error);
+              should.exist(result.data);
+              should.exist(result.data.verifiableCredential);
+              const {verifiableCredential} = result.data;
+              verifiableCredential.should.be.an('object');
+              should.exist(verifiableCredential['@context']);
+              should.exist(verifiableCredential.id);
+              should.exist(verifiableCredential.type);
+              should.exist(verifiableCredential.issuer);
+              should.exist(verifiableCredential.issuanceDate);
+              should.exist(verifiableCredential.credentialSubject);
+              verifiableCredential.credentialSubject.should.be.an('object');
+              should.not.exist(verifiableCredential.credentialStatus);
+              should.exist(verifiableCredential.proof);
+              verifiableCredential.proof.should.be.an('object');
+            });
+          it('fails to issue a valid credential w/ invalid ' +
+            '"options.extraInformation"', async () => {
+            let error;
+            try {
+              const credential = klona(mockCredential);
+              const zcapClient = helpers.createZcapClient({capabilityAgent});
+              await zcapClient.write({
+                url: `${noStatusListIssuerId}/credentials/issue`,
+                capability: noStatusListIssuerRootZcap,
+                json: {
+                  credential,
+                  options: {
+                    extraInformation: ['notAString']
+                  }
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            should.exist(error);
+            // how to throw OperationError not ValidationError here? necessary?
+            error.data.type.should.equal('ValidationError');
           });
         }
       });
