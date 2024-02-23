@@ -30,16 +30,31 @@ describe('issue APIs', () => {
       algorithm: 'Ed25519'
     },
     'eddsa-rdfc-2022': {
-      algorithm: 'Ed25519'
+      algorithm: 'Ed25519',
+      statusOptions: {
+        suiteName: 'eddsa-rdfc-2022'
+      }
     },
     'ecdsa-rdfc-2019': {
-      algorithm: ['P-256', 'P-384']
+      algorithm: ['P-256', 'P-384'],
+      statusOptions: {
+        suiteName: 'ecdsa-rdfc-2019'
+      }
     },
     'ecdsa-sd-2023': {
-      algorithm: ['P-256']
+      algorithm: ['P-256'],
+      statusOptions: {
+        suiteName: 'ecdsa-rdfc-2019'
+      }
     },
     'ecdsa-xi-2023': {
-      algorithm: ['P-256', 'P-384']
+      algorithm: ['P-256', 'P-384'],
+      issueOptions: {
+        extraInformation: 'abc'
+      },
+      statusOptions: {
+        suiteName: 'ecdsa-rdfc-2019'
+      }
     }
   };
   // list of suites to run the selective disclosure tests on
@@ -48,17 +63,22 @@ describe('issue APIs', () => {
   const xiSuites = new Set(['ecdsa-xi-2023']);
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
+    const {issueOptions, statusOptions} = suiteInfo;
     if(Array.isArray(suiteInfo.algorithm)) {
       for(const algorithm of suiteInfo.algorithm) {
-        describeSuite({suiteName, algorithm});
+        describeSuite({suiteName, algorithm, issueOptions, statusOptions});
       }
     } else {
-      describeSuite({suiteName, algorithm: suiteInfo.algorithm});
+      describeSuite({
+        suiteName, algorithm: suiteInfo.algorithm, issueOptions, statusOptions
+      });
     }
   }
-  function describeSuite({suiteName, algorithm}) {
+  function describeSuite({suiteName, algorithm, issueOptions, statusOptions}) {
     const testDescription = `${suiteName}, algorithm: ${algorithm}`;
-    const depOptions = {suiteOptions: {suiteName, algorithm}};
+    const depOptions = {
+      suiteOptions: {suiteName, algorithm, issueOptions, statusOptions}
+    };
     describe(testDescription, function() {
       let capabilityAgent;
       let noStatusListIssuerId;
@@ -292,7 +312,8 @@ describe('issue APIs', () => {
               url: `${noStatusListIssuerId}/credentials/issue`,
               capability: noStatusListIssuerRootZcap,
               json: {
-                credential
+                credential,
+                options: issueOptions
               }
             });
           } catch(e) {
@@ -326,6 +347,7 @@ describe('issue APIs', () => {
               json: {
                 credential,
                 options: {
+                  ...issueOptions,
                   mandatoryPointers: ['issuer']
                 }
               }
@@ -378,7 +400,7 @@ describe('issue APIs', () => {
             result = await httpClient.post(url, {
               agent,
               headers: {authorization: `Bearer ${accessToken}`},
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
           } catch(e) {
             error = e;
@@ -412,7 +434,7 @@ describe('issue APIs', () => {
               result = await httpClient.post(url, {
                 agent,
                 headers: {authorization: `Bearer ${accessToken}`},
-                json: {credential}
+                json: {credential, options: issueOptions}
               });
             } catch(e) {
               error = e;
@@ -445,7 +467,7 @@ describe('issue APIs', () => {
             result = await httpClient.post(url, {
               agent,
               headers: {authorization: `Bearer ${accessToken}`},
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
           } catch(e) {
             error = e;
@@ -479,7 +501,7 @@ describe('issue APIs', () => {
             result = await httpClient.post(url, {
               agent,
               headers: {authorization: `Bearer ${accessToken}`},
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
           } catch(e) {
             error = e;
@@ -509,7 +531,7 @@ describe('issue APIs', () => {
             result = await httpClient.post(url, {
               agent,
               headers: {authorization: `Bearer ${accessToken}`},
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
           } catch(e) {
             error = e;
@@ -537,7 +559,8 @@ describe('issue APIs', () => {
               url: `${sl2021SuspensionIssuerId}/credentials/issue`,
               capability: sl2021SuspensionRootZcap,
               json: {
-                credential
+                credential,
+                options: issueOptions
               }
             });
           } catch(e) {
@@ -570,7 +593,7 @@ describe('issue APIs', () => {
             result = await zcapClient.write({
               url: `${sl2021RevocationIssuerId}/credentials/issue`,
               capability: sl2021RevocationRootZcap,
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
           } catch(e) {
             error = e;
@@ -589,7 +612,7 @@ describe('issue APIs', () => {
             result = await zcapClient.write({
               url: `${sl2021RevocationIssuerId}/credentials/issue`,
               capability: sl2021RevocationRootZcap,
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
           } catch(e) {
             error = e;
@@ -612,6 +635,7 @@ describe('issue APIs', () => {
                   json: {
                     credential,
                     options: {
+                      ...issueOptions,
                       mandatoryPointers: ['/issuer']
                     }
                   }
@@ -647,6 +671,7 @@ describe('issue APIs', () => {
                 json: {
                   credential,
                   options: {
+                    ...issueOptions,
                     mandatoryPointers: ['/nonExistentPointer']
                   }
                 }
@@ -677,6 +702,7 @@ describe('issue APIs', () => {
                   json: {
                     credential,
                     options: {
+                      ...issueOptions,
                       extraInformation: extraInformationEncoded
                     }
                   }
@@ -712,6 +738,7 @@ describe('issue APIs', () => {
                 json: {
                   credential,
                   options: {
+                    ...issueOptions,
                     extraInformation: ['notAString']
                   }
                 }
@@ -737,7 +764,7 @@ describe('issue APIs', () => {
             const {data: {verifiableCredential}} = await zcapClient.write({
               url: `${sl2021RevocationIssuerId}/credentials/issue`,
               capability: sl2021RevocationRootZcap,
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
 
             // get VC status
@@ -783,7 +810,7 @@ describe('issue APIs', () => {
             const {data: {verifiableCredential}} = await zcapClient.write({
               url: `${sl2021SuspensionIssuerId}/credentials/issue`,
               capability: sl2021SuspensionRootZcap,
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
 
             // get VC status
@@ -838,7 +865,7 @@ describe('issue APIs', () => {
             const {data: {verifiableCredential}} = await zcapClient.write({
               url: `${smallStatusListIssuerId}/credentials/issue`,
               capability: smallStatusListRootZcap,
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
 
             // get VC status
@@ -894,7 +921,7 @@ describe('issue APIs', () => {
               ({data: {verifiableCredential}} = await zcapClient.write({
                 url: `${smallTerseStatusListIssuerId}/credentials/issue`,
                 capability: smallTerseStatusListRootZcap,
-                json: {credential}
+                json: {credential, options: issueOptions}
               }));
             } catch(e) {
               // max list count reached, expected at `listSize * 2` only
@@ -983,7 +1010,7 @@ describe('issue APIs', () => {
           const {data: {verifiableCredential: vc1}} = await zcapClient.write({
             url: `${sl2021RevocationIssuerId}/credentials/issue`,
             capability: sl2021RevocationRootZcap,
-            json: {credential: credential1}
+            json: {credential: credential1, options: issueOptions}
           });
 
           const vc1StatusId = vc1.credentialStatus.id;
@@ -994,7 +1021,7 @@ describe('issue APIs', () => {
           const {data: {verifiableCredential: vc2}} = await zcapClient.write({
             url: `${sl2021RevocationIssuerId}/credentials/issue`,
             capability: sl2021RevocationRootZcap,
-            json: {credential: credential2}
+            json: {credential: credential2, options: issueOptions}
           });
 
           const vc2StatusId = vc2.credentialStatus.id;
@@ -1019,7 +1046,7 @@ describe('issue APIs', () => {
             result = await zcapClient.write({
               url: `${sl2021RevocationIssuerId}/credentials/issue`,
               capability: sl2021RevocationRootZcap,
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
           } catch(e) {
             error = e;
@@ -1038,7 +1065,7 @@ describe('issue APIs', () => {
             result = await zcapClient.write({
               url: `${sl2021RevocationIssuerId}/credentials/issue`,
               capability: sl2021RevocationRootZcap,
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
           } catch(e) {
             error = e;
@@ -1061,7 +1088,7 @@ describe('issue APIs', () => {
             const {data: {verifiableCredential}} = await zcapClient.write({
               url: `${smallStatusListIssuerId}/credentials/issue`,
               capability: smallStatusListRootZcap,
-              json: {credential}
+              json: {credential, options: issueOptions}
             });
 
             // get VC status
@@ -1117,7 +1144,7 @@ describe('issue APIs', () => {
               ({data: {verifiableCredential}} = await zcapClient.write({
                 url: `${smallTerseStatusListIssuerId}/credentials/issue`,
                 capability: smallTerseStatusListRootZcap,
-                json: {credential}
+                json: {credential, options: issueOptions}
               }));
             } catch(e) {
               // max list count reached, expected at `listSize * 2` only

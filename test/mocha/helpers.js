@@ -342,7 +342,7 @@ export async function provisionIssuerForStatus({
   let assertionMethodKey;
   const publicAliasTemplate =
     'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
-  const {algorithm} = suiteOptions;
+  const {algorithm, statusOptions: {suiteName}} = suiteOptions;
   if(algorithm === 'P-256' || algorithm === 'P-384') {
     assertionMethodKey = await _generateMultikey({
       keystoreAgent,
@@ -399,7 +399,7 @@ export async function provisionIssuerForStatus({
 
   // create issuer instance w/ oauth2-based authz
   const issuerConfig = await createIssuerConfig(
-    {capabilityAgent, zcaps, oauth2: true});
+    {capabilityAgent, zcaps, suiteName, oauth2: true});
   const {id: issuerId} = issuerConfig;
   const issuerRootZcap = `urn:zcap:root:${encodeURIComponent(issuerId)}`;
 
