@@ -86,18 +86,22 @@ describe('issue APIs', () => {
       let capabilityAgent;
       let noStatusListIssuerId;
       let noStatusListIssuerRootZcap;
+      let sl2021RevocationIssuerConfig;
       let sl2021RevocationIssuerId;
       let sl2021RevocationRootZcap;
       let sl2021RevocationStatusId;
       let sl2021RevocationStatusRootZcap;
+      let sl2021SuspensionIssuerConfig;
       let sl2021SuspensionIssuerId;
       let sl2021SuspensionRootZcap;
       let sl2021SuspensionStatusId;
       let sl2021SuspensionStatusRootZcap;
+      let smallStatusListIssuerConfig;
       let smallStatusListIssuerId;
       let smallStatusListRootZcap;
       let smallStatusListStatusId;
       let smallStatusListStatusRootZcap;
+      let smallTerseStatusListIssuerConfig;
       let smallTerseStatusListIssuerId;
       let smallTerseStatusListRootZcap;
       let smallTerseStatusListStatusId;
@@ -197,6 +201,7 @@ describe('issue APIs', () => {
           const issuerConfig = await helpers.createIssuerConfig({
             capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
           });
+          sl2021RevocationIssuerConfig = issuerConfig;
           sl2021RevocationIssuerId = issuerConfig.id;
           sl2021RevocationRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -226,6 +231,7 @@ describe('issue APIs', () => {
           const issuerConfig = await helpers.createIssuerConfig({
             capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
           });
+          sl2021SuspensionIssuerConfig = issuerConfig;
           sl2021SuspensionIssuerId = issuerConfig.id;
           sl2021SuspensionRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -258,6 +264,7 @@ describe('issue APIs', () => {
           const issuerConfig = await helpers.createIssuerConfig({
             capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
           });
+          smallStatusListIssuerConfig = issuerConfig;
           smallStatusListIssuerId = issuerConfig.id;
           smallStatusListRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -292,6 +299,7 @@ describe('issue APIs', () => {
           const issuerConfig = await helpers.createIssuerConfig({
             capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
           });
+          smallTerseStatusListIssuerConfig = issuerConfig;
           smallTerseStatusListIssuerId = issuerConfig.id;
           smallTerseStatusListRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -756,8 +764,6 @@ describe('issue APIs', () => {
         }
       });
 
-      // FIXME: consider removal as only this tests the status service which is
-      // now separate
       describe('/credentials/status', () => {
         it('updates a StatusList2021 revocation credential status',
           async () => {
@@ -779,11 +785,14 @@ describe('issue APIs', () => {
             // then revoke VC
             let error;
             try {
+              const {statusListOptions: [{indexAllocator}]} =
+                sl2021RevocationIssuerConfig;
               await zcapClient.write({
                 url: `${sl2021RevocationStatusId}/credentials/status`,
                 capability: sl2021RevocationStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
+                  indexAllocator,
                   credentialStatus: verifiableCredential.credentialStatus,
                   status: true
                 }
@@ -825,11 +834,14 @@ describe('issue APIs', () => {
             // then revoke VC
             let error;
             try {
+              const {statusListOptions: [{indexAllocator}]} =
+                sl2021SuspensionIssuerConfig;
               await zcapClient.write({
                 url: `${sl2021SuspensionStatusId}/credentials/status`,
                 capability: sl2021SuspensionStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
+                  indexAllocator,
                   credentialStatus: verifiableCredential.credentialStatus,
                   status: true
                 }
@@ -880,11 +892,14 @@ describe('issue APIs', () => {
             // then revoke VC
             let error;
             try {
+              const {statusListOptions: [{indexAllocator}]} =
+                smallStatusListIssuerConfig;
               await zcapClient.write({
                 url: `${smallStatusListStatusId}/credentials/status`,
                 capability: smallStatusListStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
+                  indexAllocator,
                   credentialStatus: verifiableCredential.credentialStatus,
                   status: true
                 }
@@ -936,7 +951,6 @@ describe('issue APIs', () => {
             }
 
             // get VC status
-            // FIXME: needs to include `indexAllocator` as TBD property
             const statusInfo = await helpers.getCredentialStatus(
               {verifiableCredential});
             let {status} = statusInfo;
@@ -945,12 +959,14 @@ describe('issue APIs', () => {
             // then revoke VC
             let error;
             try {
+              const {statusListOptions: [{indexAllocator}]} =
+                smallTerseStatusListIssuerConfig;
               await zcapClient.write({
                 url: `${smallTerseStatusListStatusId}/credentials/status`,
                 capability: smallTerseStatusListStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
-                  // FIXME: needs to include `indexAllocator`
+                  indexAllocator,
                   // FIXME: `BitstringStatusListEntry`
                   credentialStatus: verifiableCredential.credentialStatus,
                   status: true
@@ -1103,11 +1119,14 @@ describe('issue APIs', () => {
             // then revoke VC
             let error;
             try {
+              const {statusListOptions: [{indexAllocator}]} =
+                smallStatusListIssuerConfig;
               await zcapClient.write({
                 url: `${smallStatusListStatusId}/credentials/status`,
                 capability: smallStatusListStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
+                  indexAllocator,
                   credentialStatus: verifiableCredential.credentialStatus,
                   status: true
                 }
@@ -1159,7 +1178,6 @@ describe('issue APIs', () => {
             }
 
             // get VC status
-            // FIXME: needs to include `indexAllocator` as TBD property
             const statusInfo = await helpers.getCredentialStatus(
               {verifiableCredential});
             let {status} = statusInfo;
@@ -1168,12 +1186,14 @@ describe('issue APIs', () => {
             // then revoke VC
             let error;
             try {
+              const {statusListOptions: [{indexAllocator}]} =
+                smallTerseStatusListIssuerConfig;
               await zcapClient.write({
                 url: `${smallTerseStatusListStatusId}/credentials/status`,
                 capability: smallTerseStatusListStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
-                  // FIXME: needs to include `indexAllocator`
+                  indexAllocator,
                   // FIXME: `BitstringStatusListEntry`
                   credentialStatus: verifiableCredential.credentialStatus,
                   status: true
