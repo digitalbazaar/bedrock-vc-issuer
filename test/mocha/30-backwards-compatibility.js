@@ -25,10 +25,12 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
     let capabilityAgent;
     let noStatusListIssuerId;
     let noStatusListIssuerRootZcap;
+    let sl2021RevocationIssuerConfig;
     let sl2021RevocationIssuerId;
     let sl2021RevocationRootZcap;
     let sl2021RevocationStatusId;
     let sl2021RevocationStatusRootZcap;
+    let sl2021SuspensionIssuerConfig;
     let sl2021SuspensionIssuerId;
     let sl2021SuspensionRootZcap;
     let sl2021SuspensionStatusId;
@@ -137,6 +139,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
         const issuerConfig = await helpers.createIssuerConfig({
           capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
         });
+        sl2021RevocationIssuerConfig = issuerConfig;
         sl2021RevocationIssuerId = issuerConfig.id;
         sl2021RevocationRootZcap =
           `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -178,6 +181,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
         const issuerConfig = await helpers.createIssuerConfig({
           capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
         });
+        sl2021SuspensionIssuerConfig = issuerConfig;
         sl2021SuspensionIssuerId = issuerConfig.id;
         sl2021SuspensionRootZcap =
           `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
@@ -391,11 +395,14 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
           // then revoke VC
           let error;
           try {
+            const {statusListOptions: [{indexAllocator}]} =
+              sl2021RevocationIssuerConfig;
             await zcapClient.write({
               url: `${sl2021RevocationStatusId}/credentials/status`,
               capability: sl2021RevocationStatusRootZcap,
               json: {
                 credentialId: verifiableCredential.id,
+                indexAllocator,
                 credentialStatus: verifiableCredential.credentialStatus,
                 status: true
               }
@@ -437,11 +444,14 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
           // then revoke VC
           let error;
           try {
+            const {statusListOptions: [{indexAllocator}]} =
+              sl2021SuspensionIssuerConfig;
             await zcapClient.write({
               url: `${sl2021SuspensionStatusId}/credentials/status`,
               capability: sl2021SuspensionStatusRootZcap,
               json: {
                 credentialId: verifiableCredential.id,
+                indexAllocator,
                 credentialStatus: verifiableCredential.credentialStatus,
                 status: true
               }
