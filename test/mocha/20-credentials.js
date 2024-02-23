@@ -27,7 +27,10 @@ const mockCredentialV2 = require('./mock-credential-v2.json');
 describe('issue APIs', () => {
   const suiteNames = {
     Ed25519Signature2020: {
-      algorithm: 'Ed25519'
+      algorithm: 'Ed25519',
+      statusOptions: {
+        suiteName: 'Ed25519Signature2020'
+      }
     },
     'eddsa-rdfc-2022': {
       algorithm: 'Ed25519',
