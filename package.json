@@ -69,7 +69,7 @@
     "@bedrock/service-context-store": "^11.0.0",
     "@bedrock/service-core": "^9.1.0",
     "@bedrock/validation": "^7.0.0",
-    "@bedrock/vc-status-list-context": "^5.0.0",
+    "@bedrock/vc-status-list-context": "digitalbazaar/bedrock-vc-status-list-context#bitstring-status-list",
     "@bedrock/veres-one-context": "^15.0.0"
   },
   "devDependencies": {

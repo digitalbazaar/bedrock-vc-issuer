@@ -8,7 +8,8 @@ import {KeystoreAgent, KmsClient} from '@digitalbazaar/webkms-client';
 import {agent} from '@bedrock/https-agent';
 import {AsymmetricKey} from '@digitalbazaar/webkms-client';
 import {CapabilityAgent} from '@digitalbazaar/webkms-client';
-import {decodeList} from '@digitalbazaar/vc-status-list';
+import {decodeList} from '@digitalbazaar/vc-bitstring-status-list';
+import {decodeList as decodeList2021} from '@digitalbazaar/vc-status-list';
 import {didIo} from '@bedrock/did-io';
 import {Ed25519Signature2020} from '@digitalbazaar/ed25519-signature-2020';
 import {EdvClient} from '@digitalbazaar/edv-client';
@@ -289,7 +290,12 @@ export async function getCredentialStatus({verifiableCredential}) {
     statusListCredential, {agent: httpsAgent});
 
   const {encodedList} = slc.credentialSubject;
-  const list = await decodeList({encodedList});
+  let list;
+  if(statusListCredential.type === 'StatusList2021Credential') {
+    list = await decodeList2021({encodedList});
+  } else {
+    list = await decodeList({encodedList});
+  }
   const statusListIndex = parseInt(
     credentialStatus.statusListIndex, 10);
   const status = list.getStatus(statusListIndex);
