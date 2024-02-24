@@ -86,21 +86,21 @@ describe('issue APIs', () => {
       let capabilityAgent;
       let noStatusListIssuerId;
       let noStatusListIssuerRootZcap;
-      let sl2021RevocationIssuerConfig;
-      let sl2021RevocationIssuerId;
-      let sl2021RevocationRootZcap;
-      let sl2021RevocationStatusId;
-      let sl2021RevocationStatusRootZcap;
-      let sl2021SuspensionIssuerConfig;
-      let sl2021SuspensionIssuerId;
-      let sl2021SuspensionRootZcap;
-      let sl2021SuspensionStatusId;
-      let sl2021SuspensionStatusRootZcap;
-      let smallStatusListIssuerConfig;
-      let smallStatusListIssuerId;
-      let smallStatusListRootZcap;
-      let smallStatusListStatusId;
-      let smallStatusListStatusRootZcap;
+      let bslRevocationIssuerConfig;
+      let bslRevocationIssuerId;
+      let bslRevocationRootZcap;
+      let bslRevocationStatusId;
+      let bslRevocationStatusRootZcap;
+      let bslSuspensionIssuerConfig;
+      let bslSuspensionIssuerId;
+      let bslSuspensionRootZcap;
+      let bslSuspensionStatusId;
+      let bslSuspensionStatusRootZcap;
+      let smallBslIssuerConfig;
+      let smallBslIssuerId;
+      let smallBslRootZcap;
+      let smallBslStatusId;
+      let smallBslStatusRootZcap;
       let smallTerseStatusListIssuerConfig;
       let smallTerseStatusListIssuerId;
       let smallTerseStatusListRootZcap;
@@ -188,7 +188,7 @@ describe('issue APIs', () => {
             issuerCreateStatusListZcap
           } = await helpers.provisionDependencies(depOptions);
           const statusListOptions = [{
-            type: 'StatusList2021',
+            type: 'BitstringStatusList',
             statusPurpose: 'revocation',
             zcapReferenceIds: {
               createCredentialStatusList: 'createCredentialStatusList'
@@ -201,12 +201,12 @@ describe('issue APIs', () => {
           const issuerConfig = await helpers.createIssuerConfig({
             capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
           });
-          sl2021RevocationIssuerConfig = issuerConfig;
-          sl2021RevocationIssuerId = issuerConfig.id;
-          sl2021RevocationRootZcap =
+          bslRevocationIssuerConfig = issuerConfig;
+          bslRevocationIssuerId = issuerConfig.id;
+          bslRevocationRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
-          sl2021RevocationStatusId = statusConfig.id;
-          sl2021RevocationStatusRootZcap =
+          bslRevocationStatusId = statusConfig.id;
+          bslRevocationStatusRootZcap =
             `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         }
 
@@ -218,7 +218,7 @@ describe('issue APIs', () => {
             issuerCreateStatusListZcap
           } = await helpers.provisionDependencies(depOptions);
           const statusListOptions = [{
-            type: 'StatusList2021',
+            type: 'BitstringStatusList',
             statusPurpose: 'suspension',
             zcapReferenceIds: {
               createCredentialStatusList: 'createCredentialStatusList'
@@ -231,12 +231,12 @@ describe('issue APIs', () => {
           const issuerConfig = await helpers.createIssuerConfig({
             capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
           });
-          sl2021SuspensionIssuerConfig = issuerConfig;
-          sl2021SuspensionIssuerId = issuerConfig.id;
-          sl2021SuspensionRootZcap =
+          bslSuspensionIssuerConfig = issuerConfig;
+          bslSuspensionIssuerId = issuerConfig.id;
+          bslSuspensionRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
-          sl2021SuspensionStatusId = statusConfig.id;
-          sl2021SuspensionStatusRootZcap =
+          bslSuspensionStatusId = statusConfig.id;
+          bslSuspensionStatusRootZcap =
             `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         }
 
@@ -247,7 +247,7 @@ describe('issue APIs', () => {
             issuerCreateStatusListZcap
           } = await helpers.provisionDependencies(depOptions);
           const statusListOptions = [{
-            type: 'StatusList2021',
+            type: 'BitstringStatusList',
             statusPurpose: 'revocation',
             options: {
               blockSize: 8,
@@ -264,12 +264,12 @@ describe('issue APIs', () => {
           const issuerConfig = await helpers.createIssuerConfig({
             capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
           });
-          smallStatusListIssuerConfig = issuerConfig;
-          smallStatusListIssuerId = issuerConfig.id;
-          smallStatusListRootZcap =
+          smallBslIssuerConfig = issuerConfig;
+          smallBslIssuerId = issuerConfig.id;
+          smallBslRootZcap =
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
-          smallStatusListStatusId = statusConfig.id;
-          smallStatusListStatusRootZcap =
+          smallBslStatusId = statusConfig.id;
+          smallBslStatusRootZcap =
             `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         }
 
@@ -281,7 +281,7 @@ describe('issue APIs', () => {
           } = await helpers.provisionDependencies(depOptions);
           const statusListOptions = [{
             // FIXME: `TerseBitstringStatusList`
-            type: 'StatusList2021',
+            type: 'BitstringStatusList',
             statusPurpose: 'revocation',
             options: {
               blockSize: 8,
@@ -559,7 +559,7 @@ describe('issue APIs', () => {
           should.exist(error.data.cause.details.claim);
           error.data.cause.details.claim.should.equal('scope');
         });
-        it('issues a valid credential w/ SL 2021 "credentialStatus" and ' +
+        it('issues a valid credential w/ "credentialStatus" and ' +
           'suspension status purpose', async () => {
           const credential = klona(mockCredential);
           let error;
@@ -567,8 +567,8 @@ describe('issue APIs', () => {
           try {
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             result = await zcapClient.write({
-              url: `${sl2021SuspensionIssuerId}/credentials/issue`,
-              capability: sl2021SuspensionRootZcap,
+              url: `${bslSuspensionIssuerId}/credentials/issue`,
+              capability: bslSuspensionRootZcap,
               json: {
                 credential,
                 options: issueOptions
@@ -602,8 +602,8 @@ describe('issue APIs', () => {
           let result;
           try {
             result = await zcapClient.write({
-              url: `${sl2021RevocationIssuerId}/credentials/issue`,
-              capability: sl2021RevocationRootZcap,
+              url: `${bslRevocationIssuerId}/credentials/issue`,
+              capability: bslRevocationRootZcap,
               json: {credential, options: issueOptions}
             });
           } catch(e) {
@@ -621,8 +621,8 @@ describe('issue APIs', () => {
           result = undefined;
           try {
             result = await zcapClient.write({
-              url: `${sl2021RevocationIssuerId}/credentials/issue`,
-              capability: sl2021RevocationRootZcap,
+              url: `${bslRevocationIssuerId}/credentials/issue`,
+              capability: bslRevocationRootZcap,
               json: {credential, options: issueOptions}
             });
           } catch(e) {
@@ -765,14 +765,14 @@ describe('issue APIs', () => {
       });
 
       describe('/credentials/status', () => {
-        it('updates a StatusList2021 revocation credential status',
+        it('updates a BitstringStatusList revocation credential status',
           async () => {
             // first issue VC
             const credential = klona(mockCredential);
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             const {data: {verifiableCredential}} = await zcapClient.write({
-              url: `${sl2021RevocationIssuerId}/credentials/issue`,
-              capability: sl2021RevocationRootZcap,
+              url: `${bslRevocationIssuerId}/credentials/issue`,
+              capability: bslRevocationRootZcap,
               json: {credential, options: issueOptions}
             });
 
@@ -786,10 +786,10 @@ describe('issue APIs', () => {
             let error;
             try {
               const {statusListOptions: [{indexAllocator}]} =
-                sl2021RevocationIssuerConfig;
+                bslRevocationIssuerConfig;
               await zcapClient.write({
-                url: `${sl2021RevocationStatusId}/credentials/status`,
-                capability: sl2021RevocationStatusRootZcap,
+                url: `${bslRevocationStatusId}/credentials/status`,
+                capability: bslRevocationStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
                   indexAllocator,
@@ -805,7 +805,7 @@ describe('issue APIs', () => {
             // force refresh of new SLC
             await zcapClient.write({
               url: `${statusInfo.statusListCredential}?refresh=true`,
-              capability: sl2021RevocationStatusRootZcap,
+              capability: bslRevocationStatusRootZcap,
               json: {}
             });
 
@@ -814,14 +814,14 @@ describe('issue APIs', () => {
               {verifiableCredential}));
             status.should.equal(true);
           });
-        it('updates a StatusList2021 suspension credential status',
+        it('updates a BitstringStatusList suspension credential status',
           async () => {
           // first issue VC
             const credential = klona(mockCredential);
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             const {data: {verifiableCredential}} = await zcapClient.write({
-              url: `${sl2021SuspensionIssuerId}/credentials/issue`,
-              capability: sl2021SuspensionRootZcap,
+              url: `${bslSuspensionIssuerId}/credentials/issue`,
+              capability: bslSuspensionRootZcap,
               json: {credential, options: issueOptions}
             });
 
@@ -835,10 +835,10 @@ describe('issue APIs', () => {
             let error;
             try {
               const {statusListOptions: [{indexAllocator}]} =
-                sl2021SuspensionIssuerConfig;
+                bslSuspensionIssuerConfig;
               await zcapClient.write({
-                url: `${sl2021SuspensionStatusId}/credentials/status`,
-                capability: sl2021SuspensionStatusRootZcap,
+                url: `${bslSuspensionStatusId}/credentials/status`,
+                capability: bslSuspensionStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
                   indexAllocator,
@@ -854,7 +854,7 @@ describe('issue APIs', () => {
             // force refresh of new SLC
             await zcapClient.write({
               url: `${statusInfo.statusListCredential}?refresh=true`,
-              capability: sl2021SuspensionStatusRootZcap,
+              capability: bslSuspensionStatusRootZcap,
               json: {}
             });
 
@@ -878,8 +878,8 @@ describe('issue APIs', () => {
             credential.id = `urn:uuid:${uuid()}`;
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             const {data: {verifiableCredential}} = await zcapClient.write({
-              url: `${smallStatusListIssuerId}/credentials/issue`,
-              capability: smallStatusListRootZcap,
+              url: `${smallBslIssuerId}/credentials/issue`,
+              capability: smallBslRootZcap,
               json: {credential, options: issueOptions}
             });
 
@@ -893,10 +893,10 @@ describe('issue APIs', () => {
             let error;
             try {
               const {statusListOptions: [{indexAllocator}]} =
-                smallStatusListIssuerConfig;
+                smallBslIssuerConfig;
               await zcapClient.write({
-                url: `${smallStatusListStatusId}/credentials/status`,
-                capability: smallStatusListStatusRootZcap,
+                url: `${smallBslStatusId}/credentials/status`,
+                capability: smallBslStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
                   indexAllocator,
@@ -912,7 +912,7 @@ describe('issue APIs', () => {
             // force refresh of new SLC
             await zcapClient.write({
               url: `${statusInfo.statusListCredential}?refresh=true`,
-              capability: smallStatusListStatusRootZcap,
+              capability: smallBslStatusRootZcap,
               json: {}
             });
 
@@ -1027,8 +1027,8 @@ describe('issue APIs', () => {
           const credential1 = klona(mockCredential);
           credential1.id = 'urn:id1';
           const {data: {verifiableCredential: vc1}} = await zcapClient.write({
-            url: `${sl2021RevocationIssuerId}/credentials/issue`,
-            capability: sl2021RevocationRootZcap,
+            url: `${bslRevocationIssuerId}/credentials/issue`,
+            capability: bslRevocationRootZcap,
             json: {credential: credential1, options: issueOptions}
           });
 
@@ -1038,8 +1038,8 @@ describe('issue APIs', () => {
           const credential2 = klona(mockCredential);
           credential2.id = 'urn:id2';
           const {data: {verifiableCredential: vc2}} = await zcapClient.write({
-            url: `${sl2021RevocationIssuerId}/credentials/issue`,
-            capability: sl2021RevocationRootZcap,
+            url: `${bslRevocationIssuerId}/credentials/issue`,
+            capability: bslRevocationRootZcap,
             json: {credential: credential2, options: issueOptions}
           });
 
@@ -1063,8 +1063,8 @@ describe('issue APIs', () => {
           let result;
           try {
             result = await zcapClient.write({
-              url: `${sl2021RevocationIssuerId}/credentials/issue`,
-              capability: sl2021RevocationRootZcap,
+              url: `${bslRevocationIssuerId}/credentials/issue`,
+              capability: bslRevocationRootZcap,
               json: {credential, options: issueOptions}
             });
           } catch(e) {
@@ -1082,8 +1082,8 @@ describe('issue APIs', () => {
           result = undefined;
           try {
             result = await zcapClient.write({
-              url: `${sl2021RevocationIssuerId}/credentials/issue`,
-              capability: sl2021RevocationRootZcap,
+              url: `${bslRevocationIssuerId}/credentials/issue`,
+              capability: bslRevocationRootZcap,
               json: {credential, options: issueOptions}
             });
           } catch(e) {
@@ -1105,8 +1105,8 @@ describe('issue APIs', () => {
             credential.id = `urn:uuid:${uuid()}`;
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             const {data: {verifiableCredential}} = await zcapClient.write({
-              url: `${smallStatusListIssuerId}/credentials/issue`,
-              capability: smallStatusListRootZcap,
+              url: `${smallBslIssuerId}/credentials/issue`,
+              capability: smallBslRootZcap,
               json: {credential, options: issueOptions}
             });
 
@@ -1120,10 +1120,10 @@ describe('issue APIs', () => {
             let error;
             try {
               const {statusListOptions: [{indexAllocator}]} =
-                smallStatusListIssuerConfig;
+                smallBslIssuerConfig;
               await zcapClient.write({
-                url: `${smallStatusListStatusId}/credentials/status`,
-                capability: smallStatusListStatusRootZcap,
+                url: `${smallBslStatusId}/credentials/status`,
+                capability: smallBslStatusRootZcap,
                 json: {
                   credentialId: verifiableCredential.id,
                   indexAllocator,
@@ -1139,7 +1139,7 @@ describe('issue APIs', () => {
             // force refresh of new SLC
             await zcapClient.write({
               url: `${statusInfo.statusListCredential}?refresh=true`,
-              capability: smallStatusListStatusRootZcap,
+              capability: smallBslStatusRootZcap,
               json: {}
             });
 
