@@ -291,7 +291,7 @@ export async function getCredentialStatus({verifiableCredential}) {
 
   const {encodedList} = slc.credentialSubject;
   let list;
-  if(statusListCredential.type === 'StatusList2021Credential') {
+  if(slc.type.includes('StatusList2021Credential')) {
     list = await decodeList2021({encodedList});
   } else {
     list = await decodeList({encodedList});
