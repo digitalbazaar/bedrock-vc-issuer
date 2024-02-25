@@ -60,7 +60,6 @@ export const statusListConfig = {
       type: 'string'
     },
     // note: scoped to `type`
-    // FIXME: support specifying multiple statuses (triggering multiple lists)
     statusPurpose: {
       // FIXME: also support array with multiple status purposes; triggers
       // creation of multiple lists
@@ -146,37 +145,4 @@ export const issueCredentialBody = {
       }
     }
   }
-};
-
-export const updateCredentialStatusBody = {
-  title: 'Update Credential Status',
-  type: 'object',
-  required: ['credentialId', 'credentialStatus'],
-  additionalProperties: false,
-  properties: {
-    credentialId: {
-      type: 'string'
-    },
-    credentialStatus: {
-      type: 'object',
-      required: ['type'],
-      additionalProperties: false,
-      properties: {
-        type: {
-          type: 'string'
-        },
-        statusPurpose: {
-          type: 'string'
-        }
-      }
-    }
-  }
-};
-
-export const publishSlcBody = {
-  title: 'Publish Status List Credential',
-  type: 'object',
-  additionalProperties: false,
-  // body must be empty
-  properties: {}
 };
