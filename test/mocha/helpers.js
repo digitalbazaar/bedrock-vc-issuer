@@ -276,15 +276,36 @@ export async function delegate({
   });
 }
 
-export async function getCredentialStatus({verifiableCredential}) {
+export async function getCredentialStatus({
+  verifiableCredential, statusPurpose, listLength
+}) {
   // get SLC for the VC
   const {credentialStatus} = verifiableCredential;
   if(Array.isArray(credentialStatus)) {
     throw new Error('Multiple credential statuses not supported.');
   }
-  const {statusListCredential} = credentialStatus;
-  if(!statusListCredential) {
-    throw new Error('Status list credential missing from credential status.');
+  let {statusListCredential} = credentialStatus;
+  let statusListIndex;
+  let expandedCredentialStatus;
+  if(statusListCredential) {
+    statusListIndex = parseInt(credentialStatus.statusListIndex, 10);
+  } else {
+    if(credentialStatus.type !== 'TerseBitstringStatusListEntry') {
+      throw new Error('Status list credential missing from credential status.');
+    }
+    // compute `statusListCredential` from other params
+    const listIndex = Math.floor(
+      credentialStatus.terseStatusListIndex / listLength);
+    statusListIndex = credentialStatus.terseStatusListIndex % listLength;
+    const {terseStatusListBaseUrl} = credentialStatus;
+    statusListCredential =
+      `${terseStatusListBaseUrl}/${statusPurpose}/${listIndex}`;
+    expandedCredentialStatus = {
+      type: 'BitstringStatusListEntry',
+      statusListCredential,
+      statusListIndex: `${statusListIndex}`,
+      statusPurpose
+    };
   }
   const {data: slc} = await httpClient.get(
     statusListCredential, {agent: httpsAgent});
@@ -296,10 +317,8 @@ export async function getCredentialStatus({verifiableCredential}) {
   } else {
     list = await decodeList({encodedList});
   }
-  const statusListIndex = parseInt(
-    credentialStatus.statusListIndex, 10);
   const status = list.getStatus(statusListIndex);
-  return {status, statusListCredential};
+  return {status, statusListCredential, expandedCredentialStatus};
 }
 
 export async function revokeDelegatedCapability({
