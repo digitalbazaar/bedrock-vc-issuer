@@ -1185,6 +1185,10 @@ describe('issue APIs', () => {
           this.timeout(1000 * 60 * 2);
 
           const statusPurpose = 'revocation';
+          let terseIssueOptions = issueOptions;
+          if(sdSuites.has(depOptions.suiteOptions.suiteName)) {
+            terseIssueOptions = {mandatoryPointers: ['issuer']};
+          }
 
           // list length is 8, do two rollovers to hit list count capacity of 2
           const listLength = 8;
@@ -1198,7 +1202,7 @@ describe('issue APIs', () => {
               ({data: {verifiableCredential}} = await zcapClient.write({
                 url: `${smallTerseStatusListIssuerId}/credentials/issue`,
                 capability: smallTerseStatusListRootZcap,
-                json: {credential, options: issueOptions}
+                json: {credential, options: terseIssueOptions}
               }));
             } catch(e) {
               // max list count reached, expected at `listLength * 2` only
