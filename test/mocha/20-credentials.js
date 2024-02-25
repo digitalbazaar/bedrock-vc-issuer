@@ -23,6 +23,7 @@ const serviceType = 'vc-issuer';
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
 const mockCredentialV2 = require('./mock-credential-v2.json');
+const mockTerseCredential = require('./mock-terse-credential.json');
 
 describe('issue APIs', () => {
   const suiteNames = {
@@ -280,8 +281,7 @@ describe('issue APIs', () => {
             issuerCreateStatusListZcap
           } = await helpers.provisionDependencies(depOptions);
           const statusListOptions = [{
-            // FIXME: `TerseBitstringStatusList`
-            type: 'BitstringStatusList',
+            type: 'TerseBitstringStatusList',
             statusPurpose: 'revocation',
             options: {
               blockSize: 8,
@@ -306,6 +306,21 @@ describe('issue APIs', () => {
           smallTerseStatusListStatusId = statusConfig.id;
           smallTerseStatusListStatusRootZcap =
             `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
+
+          // insert example context for issuing VCs w/terse status entries
+          const {
+            testBarcodeCredentialContextUrl,
+            testBarcodeCredentialContext
+          } = mockData;
+          const client = helpers.createZcapClient({capabilityAgent});
+          const url = `${smallTerseStatusListIssuerId}/contexts`;
+          await client.write({
+            url, json: {
+              id: testBarcodeCredentialContextUrl,
+              context: testBarcodeCredentialContext
+            },
+            capability: smallTerseStatusListRootZcap
+          });
         }
 
         // create issuer instance w/ oauth2-based authz
@@ -870,9 +885,9 @@ describe('issue APIs', () => {
           // two minutes to issue and rollover lists
           this.timeout(1000 * 60 * 2);
 
-          // list size is 8, do two rollovers
-          const listSize = 8;
-          for(let i = 0; i < (listSize * 2 + 1); ++i) {
+          // list length is 8, do two rollovers
+          const listLength = 8;
+          for(let i = 0; i < (listLength * 2 + 1); ++i) {
             // first issue VC
             const credential = klona(mockCredential);
             credential.id = `urn:uuid:${uuid()}`;
@@ -927,11 +942,13 @@ describe('issue APIs', () => {
           // two minutes to issue and rollover lists
           this.timeout(1000 * 60 * 2);
 
-          // list size is 8, do two rollovers to hit list count capacity of 2
-          const listSize = 8;
-          for(let i = 0; i < (listSize * 2 + 1); ++i) {
+          const statusPurpose = 'revocation';
+
+          // list length is 8, do two rollovers to hit list count capacity of 2
+          const listLength = 8;
+          for(let i = 0; i < (listLength * 2 + 1); ++i) {
             // first issue VC
-            const credential = klona(mockCredential);
+            const credential = klona(mockTerseCredential);
             credential.id = `urn:uuid:${uuid()}`;
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             let verifiableCredential;
@@ -942,17 +959,27 @@ describe('issue APIs', () => {
                 json: {credential, options: issueOptions}
               }));
             } catch(e) {
-              // max list count reached, expected at `listSize * 2` only
+              // max list count reached, expected at `listLength * 2` only
               if(e?.data?.name === 'QuotaExceededError') {
-                i.should.equal(listSize * 2);
+                i.should.equal(listLength * 2);
                 return;
               }
               throw e;
             }
 
+            // ensure TerseBitstringStatusEntry was added to VC
+            should.exist(verifiableCredential.credentialStatus);
+            verifiableCredential.credentialStatus.should.have.keys([
+              'type', 'terseStatusListBaseUrl', 'terseStatusListIndex'
+            ]);
+            verifiableCredential.credentialStatus.type.should.equal(
+              'TerseBitstringStatusListEntry');
+            verifiableCredential.credentialStatus.terseStatusListIndex
+              .should.be.a('number');
+
             // get VC status
             const statusInfo = await helpers.getCredentialStatus(
-              {verifiableCredential});
+              {verifiableCredential, statusPurpose, listLength});
             let {status} = statusInfo;
             status.should.equal(false);
 
@@ -967,8 +994,7 @@ describe('issue APIs', () => {
                 json: {
                   credentialId: verifiableCredential.id,
                   indexAllocator,
-                  // FIXME: `BitstringStatusListEntry`
-                  credentialStatus: verifiableCredential.credentialStatus,
+                  credentialStatus: statusInfo.expandedCredentialStatus,
                   status: true
                 }
               });
@@ -986,7 +1012,7 @@ describe('issue APIs', () => {
 
             // check status of VC has changed
             ({status} = await helpers.getCredentialStatus(
-              {verifiableCredential}));
+              {verifiableCredential, statusPurpose, listLength}));
             status.should.equal(true);
           }
         });
@@ -1097,9 +1123,9 @@ describe('issue APIs', () => {
           // two minutes to issue and rollover lists
           this.timeout(1000 * 60 * 2);
 
-          // list size is 8, do two rollovers
-          const listSize = 8;
-          for(let i = 0; i < (listSize * 2 + 1); ++i) {
+          // list length is 8, do two rollovers
+          const listLength = 8;
+          for(let i = 0; i < (listLength * 2 + 1); ++i) {
             // first issue VC
             const credential = klona(mockCredential);
             credential.id = `urn:uuid:${uuid()}`;
@@ -1154,11 +1180,13 @@ describe('issue APIs', () => {
           // two minutes to issue and rollover lists
           this.timeout(1000 * 60 * 2);
 
-          // list size is 8, do two rollovers to hit list count capacity of 2
-          const listSize = 8;
-          for(let i = 0; i < (listSize * 2 + 1); ++i) {
+          const statusPurpose = 'revocation';
+
+          // list length is 8, do two rollovers to hit list count capacity of 2
+          const listLength = 8;
+          for(let i = 0; i < (listLength * 2 + 1); ++i) {
             // first issue VC
-            const credential = klona(mockCredential);
+            const credential = klona(mockTerseCredential);
             credential.id = `urn:uuid:${uuid()}`;
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             let verifiableCredential;
@@ -1169,17 +1197,27 @@ describe('issue APIs', () => {
                 json: {credential, options: issueOptions}
               }));
             } catch(e) {
-              // max list count reached, expected at `listSize * 2` only
+              // max list count reached, expected at `listLength * 2` only
               if(e?.data?.name === 'QuotaExceededError') {
-                i.should.equal(listSize * 2);
+                i.should.equal(listLength * 2);
                 return;
               }
               throw e;
             }
 
+            // ensure TerseBitstringStatusEntry was added to VC
+            should.exist(verifiableCredential.credentialStatus);
+            verifiableCredential.credentialStatus.should.have.keys([
+              'type', 'terseStatusListBaseUrl', 'terseStatusListIndex'
+            ]);
+            verifiableCredential.credentialStatus.type.should.equal(
+              'TerseBitstringStatusListEntry');
+            verifiableCredential.credentialStatus.terseStatusListIndex
+              .should.be.a('number');
+
             // get VC status
             const statusInfo = await helpers.getCredentialStatus(
-              {verifiableCredential});
+              {verifiableCredential, listLength, statusPurpose});
             let {status} = statusInfo;
             status.should.equal(false);
 
@@ -1194,8 +1232,7 @@ describe('issue APIs', () => {
                 json: {
                   credentialId: verifiableCredential.id,
                   indexAllocator,
-                  // FIXME: `BitstringStatusListEntry`
-                  credentialStatus: verifiableCredential.credentialStatus,
+                  credentialStatus: statusInfo.expandedCredentialStatus,
                   status: true
                 }
               });
@@ -1213,7 +1250,7 @@ describe('issue APIs', () => {
 
             // check status of VC has changed
             ({status} = await helpers.getCredentialStatus(
-              {verifiableCredential}));
+              {verifiableCredential, listLength, statusPurpose}));
             status.should.equal(true);
           }
         });

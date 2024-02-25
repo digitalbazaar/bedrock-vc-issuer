@@ -72,3 +72,27 @@ mockData.jwks = {
     key_ops: ['verify']
   }]
 };
+
+/* eslint-disable */
+mockData.testBarcodeCredentialContextUrl = 'https://example.gov/test/v1';
+mockData.testBarcodeCredentialContext = {
+  "@context": {
+    "@protected": true,
+    "id": "@id",
+    "type": "@type",
+    "name": "https://schema.org/name",
+    "description": "https://schema.org/description",
+    "image": {
+      "@id": "https://schema.org/image",
+      "@type": "@id"
+    },
+    "url": {
+      "@id": "https://schema.org/url",
+      "@type": "@id"
+    },
+    "OpticalBarcodeCredential": "https://w3id.org/vdl#OpticalBarcodeCredential",
+    "TerseBitstringStatusListEntry": "https://w3id.org/vdl#TerseBitstringStatusListEntry",
+    "UsDriversLicenseWithMandatoryFieldsPdf417Barcode": "https://example.gov/test#UsDriversLicenseWithMandatoryFieldsPdf417Barcode"
+  }
+};
+/* eslint-enable */
