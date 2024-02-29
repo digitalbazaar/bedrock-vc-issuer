@@ -48,7 +48,7 @@
     "@digitalbazaar/edv-client": "^16.0.0",
     "@digitalbazaar/ezcap": "^4.0.0",
     "@digitalbazaar/http-client": "^4.0.0",
-    "@digitalbazaar/vc-bitstring-status-list": "github:digitalbazaar/vc-bitstring-status-list#main",
+    "@digitalbazaar/vc-bitstring-status-list": "github:digitalbazaar/vc-bitstring-status-list#update-vc-2.0",
     "@digitalbazaar/vc-status-list": "^7.1.0",
     "@digitalbazaar/webkms-client": "^14.0.0",
     "c8": "^9.1.0",
