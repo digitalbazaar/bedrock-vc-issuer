@@ -124,6 +124,9 @@ export const issueCredentialBody = {
       type: 'object',
       additionalProperties: false,
       properties: {
+        credentialId: {
+          type: 'string'
+        },
         mandatoryPointers: {
           type: 'array',
           minItems: 0,
