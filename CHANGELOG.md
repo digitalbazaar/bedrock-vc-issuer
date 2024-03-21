@@ -5,6 +5,8 @@
 ### Added
 - Allow setting the `blockSize` and `blockCount` for status lists via status
   list configuration options.
+- Allow passing `credentialId` when issuing a credential without an `id`
+  to allow referencing it later.
 
 ### Changed
 - **BREAKING**: Management of status list index allocation has been rewritten
