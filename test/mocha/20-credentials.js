@@ -1124,6 +1124,8 @@ describe('issue APIs', () => {
       });
 
       describe('status scaling /credentials/issue', () => {
+        // some of these tests take considerable time and do not change with
+        // different cryptosuites, so run them with just one suite
         if(depOptions.suiteOptions.suiteName !== 'eddsa-rdfc-2022') {
           return;
         }
@@ -1269,6 +1271,8 @@ describe('issue APIs', () => {
       });
 
       describe('/credential/issue crash recovery', () => {
+        // some of these tests take considerable time and do not change with
+        // different cryptosuites, so run them with just one suite
         if(depOptions.suiteOptions.suiteName !== 'eddsa-rdfc-2022') {
           return;
         }
