@@ -32,6 +32,9 @@ export const issueOptions = {
   }
 };
 
+// supported status purposes in this version
+const statusPurposes = ['revocation', 'suspension'];
+
 export const statusListConfig = {
   title: 'Status List Configuration',
   type: 'object',
@@ -61,11 +64,19 @@ export const statusListConfig = {
     },
     // note: scoped to `type`
     statusPurpose: {
-      // FIXME: also support array with multiple status purposes; triggers
-      // creation of multiple lists
-      type: 'string',
-      // supported status types in this version
-      enum: ['revocation', 'suspension']
+      oneOf: [{
+        type: 'string',
+        enum: statusPurposes
+      }, {
+        // array usage triggers creation of multiple lists
+        type: 'array',
+        minItems: 1,
+        items: {
+          type: 'string',
+          enum: statusPurposes
+        },
+        uniqueItems: true
+      }]
     },
     // note: scoped to `type`; will be auto-populated with defaults so not
     // required
