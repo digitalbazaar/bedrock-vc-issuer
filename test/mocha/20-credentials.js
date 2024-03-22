@@ -49,7 +49,8 @@ describe('issue APIs', () => {
       algorithm: ['P-256'],
       statusOptions: {
         suiteName: 'ecdsa-rdfc-2019'
-      }
+      },
+      terseIssueOptions: {mandatoryPointers: ['issuer']}
     },
     'ecdsa-xi-2023': {
       algorithm: ['P-256', 'P-384'],
@@ -67,21 +68,29 @@ describe('issue APIs', () => {
   const xiSuites = new Set(['ecdsa-xi-2023']);
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
-    const {issueOptions, statusOptions} = suiteInfo;
+    const {issueOptions, statusOptions, terseIssueOptions} = suiteInfo;
     if(Array.isArray(suiteInfo.algorithm)) {
       for(const algorithm of suiteInfo.algorithm) {
-        describeSuite({suiteName, algorithm, issueOptions, statusOptions});
+        describeSuite({
+          suiteName, algorithm, issueOptions, statusOptions, terseIssueOptions
+        });
       }
     } else {
       describeSuite({
-        suiteName, algorithm: suiteInfo.algorithm, issueOptions, statusOptions
+        suiteName, algorithm: suiteInfo.algorithm, issueOptions,
+        statusOptions, terseIssueOptions
       });
     }
   }
-  function describeSuite({suiteName, algorithm, issueOptions, statusOptions}) {
+  function describeSuite({
+    suiteName, algorithm, issueOptions, statusOptions,
+    terseIssueOptions = issueOptions
+  }) {
     const testDescription = `${suiteName}, algorithm: ${algorithm}`;
     const depOptions = {
-      suiteOptions: {suiteName, algorithm, issueOptions, statusOptions}
+      suiteOptions: {
+        suiteName, algorithm, issueOptions, statusOptions, terseIssueOptions
+      }
     };
     describe(testDescription, function() {
       let capabilityAgent;
@@ -656,7 +665,7 @@ describe('issue APIs', () => {
               capability: terseMultistatusRootZcap,
               json: {
                 credential,
-                options: issueOptions
+                options: terseIssueOptions
               }
             });
           } catch(e) {
@@ -1042,7 +1051,7 @@ describe('issue APIs', () => {
               capability: terseMultistatusRootZcap,
               json: {
                 credential,
-                options: {...issueOptions, credentialId}
+                options: {...terseIssueOptions, credentialId}
               }
             });
 
@@ -1191,10 +1200,6 @@ describe('issue APIs', () => {
           this.timeout(1000 * 60 * 2);
 
           const statusPurpose = 'revocation';
-          let terseIssueOptions = issueOptions;
-          if(sdSuites.has(depOptions.suiteOptions.suiteName)) {
-            terseIssueOptions = {mandatoryPointers: ['issuer']};
-          }
 
           // list length is 8, do two rollovers to hit list count capacity of 2
           const listLength = 8;
@@ -1520,10 +1525,6 @@ describe('issue APIs', () => {
           this.timeout(1000 * 60 * 2);
 
           const statusPurpose = 'revocation';
-          let terseIssueOptions = issueOptions;
-          if(sdSuites.has(depOptions.suiteOptions.suiteName)) {
-            terseIssueOptions = {mandatoryPointers: ['issuer']};
-          }
 
           // list length is 8, do two rollovers to hit list count capacity of 2
           const listLength = 8;
