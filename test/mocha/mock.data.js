@@ -1,5 +1,5 @@
 /*!
-* Copyright (c) 2019-2023 Digital Bazaar, Inc. All rights reserved.
+* Copyright (c) 2019-2024 Digital Bazaar, Inc. All rights reserved.
 */
 import {config} from '@bedrock/core';
 
@@ -13,6 +13,9 @@ mockData.productIdMap = new Map([
   // vc-issuer service
   ['vc-issuer', 'urn:uuid:66aad4d0-8ac1-11ec-856f-10bf48838a41'],
   ['urn:uuid:66aad4d0-8ac1-11ec-856f-10bf48838a41', 'vc-issuer'],
+  // vc-status service
+  ['vc-status', 'urn:uuid:083cf4b5-9a0d-490d-a4e2-02fa2878c286'],
+  ['urn:uuid:083cf4b5-9a0d-490d-a4e2-02fa2878c286', 'vc-status'],
   // webkms service
   ['webkms', 'urn:uuid:80a82316-e8c2-11eb-9570-10bf48838a41'],
   ['urn:uuid:80a82316-e8c2-11eb-9570-10bf48838a41', 'webkms']
@@ -69,3 +72,39 @@ mockData.jwks = {
     key_ops: ['verify']
   }]
 };
+
+/* eslint-disable */
+mockData.testBarcodeCredentialContextUrl = 'https://example.gov/test/v1';
+mockData.testBarcodeCredentialContext = {
+  "@context": {
+    "@protected": true,
+    "id": "@id",
+    "type": "@type",
+    "name": "https://schema.org/name",
+    "description": "https://schema.org/description",
+    "image": {
+      "@id": "https://schema.org/image",
+      "@type": "@id"
+    },
+    "url": {
+      "@id": "https://schema.org/url",
+      "@type": "@id"
+    },
+    "OpticalBarcodeCredential": "https://w3id.org/vdl#OpticalBarcodeCredential",
+    "TerseBitstringStatusListEntry": {
+      "@id": "https://w3id.org/vdl#TerseBitstringStatusListEntry",
+      "@context": {
+        "terseStatusListIndex": {
+          "@id": "https://w3id.org/vdl#terseStatusListIndex",
+          "@type": "http://www.w3.org/2001/XMLSchema#integer"
+        },
+        "terseStatusListBaseUrl": {
+          "@id": "https://w3id.org/vdl#terseStatusListBaseUrl",
+          "@type": "@id"
+        }
+      }
+    },
+    "UsDriversLicenseWithMandatoryFieldsPdf417Barcode": "https://example.gov/test#UsDriversLicenseWithMandatoryFieldsPdf417Barcode"
+  }
+};
+/* eslint-enable */

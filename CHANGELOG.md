@@ -1,5 +1,42 @@
 # bedrock-vc-issuer ChangeLog
 
+## 26.0.0 - 2024-mm-dd
+
+### Added
+- Allow setting the `blockSize` and `blockCount` for status lists via status
+  list configuration options.
+- Allow passing `credentialId` when issuing a credential without an `id`
+  to allow referencing it later.
+
+### Changed
+- **BREAKING**: Management of status list index allocation has been rewritten
+  in this version and is incompatible with previous versions. There is no
+  backwards compatibility code to transition deployments with issuer instances
+  that were configured to use VC status lists, so it is not possible to upgrade
+  any issuer services with such instances to this new version. This version
+  uses the `indexAllocator` ID specified in each status list configuration
+  (auto-generated if not given) to keep track of index allocation state.
+- **BREAKING**: Default status list block size has changed to `32`
+  (from `128`) to support greater concurrency and reduce the impact of unused
+  blocks (though all blocks should always be used with a correct
+  implementation and sufficient issuance calls). No changes are needed in new
+  deployments of this version given that no index allocation state will yet
+  exist (when following the above breaking changes requirements).
+- **BREAKING**: Change the unique index for credential status to use
+  `meta.credentialStatus.id` instead of what is in the VC itself, as
+  the credential status ID may not be present in a VC (with a credential
+  status).
+- **BREAKING**: Status lists and status list credentials are no longer served
+  by this module and must be provided by an external status service, such
+  as `@bedrock/vc-status`. Issuer configurations that use status lists must
+  include a zcap to create status lists on such a service.
+
+### Removed
+- **BREAKING**: Remove support for obsolete `RevocationList2020`.
+- **BREAKING**: `/credentials/status` API has been removed because status
+  list and status list credentials are served via an external service now
+  such as `@bedrock/vc-status`.
+
 ## 25.2.0 - 2024-02-02
 
 ### Added

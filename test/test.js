@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2016-2023 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2024 Digital Bazaar, Inc. All rights reserved.
  */
 import * as bedrock from '@bedrock/core';
 import {getServiceIdentities} from '@bedrock/app-identity';
@@ -13,6 +13,7 @@ import '@bedrock/server';
 import '@bedrock/kms-http';
 import '@bedrock/edv-storage';
 import '@bedrock/vc-issuer';
+import '@bedrock/vc-status';
 
 import {mockData} from './mocha/mock.data.js';
 

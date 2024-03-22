@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2020-2023 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
  */
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
@@ -18,24 +18,33 @@ const serviceType = 'vc-issuer';
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
 
-describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
+describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
   'compatibility test', () => {
   const zcaps = {};
   describe('Ed25519Signature2020', function() {
     let capabilityAgent;
     let noStatusListIssuerId;
     let noStatusListIssuerRootZcap;
-    let rl2020IssuerId;
-    let rl2020RootZcap;
+    let sl2021RevocationIssuerConfig;
     let sl2021RevocationIssuerId;
     let sl2021RevocationRootZcap;
+    let sl2021RevocationStatusId;
+    let sl2021RevocationStatusRootZcap;
+    let sl2021SuspensionIssuerConfig;
     let sl2021SuspensionIssuerId;
     let sl2021SuspensionRootZcap;
+    let sl2021SuspensionStatusId;
+    let sl2021SuspensionStatusRootZcap;
     let oauth2IssuerConfig;
     beforeEach(async () => {
       const suiteName = 'Ed25519Signature2020';
       const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
       const handle = 'test';
+      const depOptions = {
+        suiteOptions: {
+          suiteName, algorithm: 'Ed25519', statusOptions: {suiteName}
+        }
+      };
       capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
 
       // create keystore for capability agent
@@ -57,7 +66,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
 
       // get service agent to delegate to
       const serviceAgentUrl =
-          `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
+        `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
       const {data: serviceAgent} = await httpClient.get(
         serviceAgentUrl, {agent});
 
@@ -90,7 +99,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
         });
 
       // create issuer instance w/ no status list options
-      const noStatusListIssuerConfig = await helpers.createConfig(
+      const noStatusListIssuerConfig = await helpers.createIssuerConfig(
         {capabilityAgent, zcaps, suiteName: 'Ed25519Signature2020'});
       noStatusListIssuerId = noStatusListIssuerConfig.id;
       noStatusListIssuerRootZcap =
@@ -108,45 +117,35 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
       });
       should.exist(config);
       should.exist(config.zcaps['assertionMethod:ed25519']);
-      // create issuer instance w/ revocation list 2020 status list options
-      {
-        const statusListOptions = [{
-          type: 'RevocationList2020',
-          statusPurpose: 'revocation',
-          suiteName
-        }];
-        const issuerConfig = await helpers.createConfig(
-          {capabilityAgent, zcaps, statusListOptions, suiteName});
-        rl2020IssuerId = issuerConfig.id;
-        rl2020RootZcap =
-            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
-        // Intentionally change the referenceId of the assertion method zcap
-        // in the database to be uppercase
-        await helpers.updateConfig({
-          configId: rl2020IssuerId,
-          referenceId: 'assertionMethod:Ed25519'
-        });
-        // Check if assertion method zcap has been updated
-        const {config} = await helpers.findConfig({
-          configId: rl2020IssuerId
-        });
-        should.exist(config);
-        should.exist(config.zcaps['assertionMethod:Ed25519']);
-      }
 
       // create issuer instance w/ status list 2021 status list options
       // w/ revocation status purpose
       {
+        const {
+          statusConfig,
+          issuerCreateStatusListZcap
+        } = await helpers.provisionDependencies(depOptions);
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'revocation',
-          suiteName
+          zcapReferenceIds: {
+            createCredentialStatusList: 'createCredentialStatusList'
+          }
         }];
-        const issuerConfig = await helpers.createConfig(
-          {capabilityAgent, zcaps, statusListOptions, suiteName});
+        const newZcaps = {
+          ...zcaps,
+          createCredentialStatusList: issuerCreateStatusListZcap
+        };
+        const issuerConfig = await helpers.createIssuerConfig({
+          capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+        });
+        sl2021RevocationIssuerConfig = issuerConfig;
         sl2021RevocationIssuerId = issuerConfig.id;
         sl2021RevocationRootZcap =
-            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+        sl2021RevocationStatusId = statusConfig.id;
+        sl2021RevocationStatusRootZcap =
+          `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         // Intentionally change the referenceId of the assertion method zcap
         // in the database to be lowercase
         await helpers.updateConfig({
@@ -164,16 +163,31 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
       // create issuer instance w/ status list 2021 status list options
       // w/ suspension status purpose
       {
+        const {
+          statusConfig,
+          issuerCreateStatusListZcap
+        } = await helpers.provisionDependencies(depOptions);
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'suspension',
-          suiteName
+          zcapReferenceIds: {
+            createCredentialStatusList: 'createCredentialStatusList'
+          }
         }];
-        const issuerConfig = await helpers.createConfig(
-          {capabilityAgent, zcaps, statusListOptions, suiteName});
+        const newZcaps = {
+          ...zcaps,
+          createCredentialStatusList: issuerCreateStatusListZcap
+        };
+        const issuerConfig = await helpers.createIssuerConfig({
+          capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+        });
+        sl2021SuspensionIssuerConfig = issuerConfig;
         sl2021SuspensionIssuerId = issuerConfig.id;
         sl2021SuspensionRootZcap =
-            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+        sl2021SuspensionStatusId = statusConfig.id;
+        sl2021SuspensionStatusRootZcap =
+          `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         // Intentionally change the referenceId of the assertion method zcap
         // in the database to be uppercase
         await helpers.updateConfig({
@@ -189,7 +203,7 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
       }
 
       // create issuer instance w/ oauth2-based authz
-      oauth2IssuerConfig = await helpers.createConfig(
+      oauth2IssuerConfig = await helpers.createIssuerConfig(
         {capabilityAgent, zcaps, oauth2: true, suiteName});
     });
     describe('/credentials/issue', () => {
@@ -325,41 +339,8 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
         should.exist(verifiableCredential.proof);
         verifiableCredential.proof.should.be.an('object');
       });
-      it('issues a valid credential w/ RL 2020 "credentialStatus" and ' +
-          'revocation status purpose', async () => {
-        const credential = klona(mockCredential);
-        let error;
-        let result;
-        try {
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          result = await zcapClient.write({
-            url: `${rl2020IssuerId}/credentials/issue`,
-            capability: rl2020RootZcap,
-            json: {
-              credential
-            }
-          });
-        } catch(e) {
-          error = e;
-        }
-        assertNoError(error);
-        should.exist(result.data);
-        should.exist(result.data.verifiableCredential);
-        const {verifiableCredential} = result.data;
-        verifiableCredential.should.be.an('object');
-        should.exist(verifiableCredential['@context']);
-        should.exist(verifiableCredential.id);
-        should.exist(verifiableCredential.type);
-        should.exist(verifiableCredential.issuer);
-        should.exist(verifiableCredential.issuanceDate);
-        should.exist(verifiableCredential.credentialSubject);
-        verifiableCredential.credentialSubject.should.be.an('object');
-        should.exist(verifiableCredential.credentialStatus);
-        should.exist(verifiableCredential.proof);
-        verifiableCredential.proof.should.be.an('object');
-      });
       it('issues a valid credential w/ SL 2021 "credentialStatus" and ' +
-          'suspension status purpose', async () => {
+        'suspension status purpose', async () => {
         const credential = klona(mockCredential);
         let error;
         let result;
@@ -394,52 +375,6 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
     });
 
     describe('/credentials/status', () => {
-      it('updates a RevocationList2020 credential status', async () => {
-        // first issue VC
-        const credential = klona(mockCredential);
-        const zcapClient = helpers.createZcapClient({capabilityAgent});
-        const {data: {verifiableCredential}} = await zcapClient.write({
-          url: `${rl2020IssuerId}/credentials/issue`,
-          capability: rl2020RootZcap,
-          json: {credential}
-        });
-
-        // get VC status
-        const statusInfo = await helpers.getCredentialStatus(
-          {verifiableCredential});
-        let {status} = statusInfo;
-        status.should.equal(false);
-
-        // then revoke VC
-        let error;
-        try {
-          await zcapClient.write({
-            url: `${rl2020IssuerId}/credentials/status`,
-            capability: rl2020RootZcap,
-            json: {
-              credentialId: verifiableCredential.id,
-              credentialStatus: {
-                type: 'RevocationList2020Status'
-              }
-            }
-          });
-        } catch(e) {
-          error = e;
-        }
-        assertNoError(error);
-
-        // force publication of new SLC
-        await zcapClient.write({
-          url: `${statusInfo.statusListCredential}/publish`,
-          capability: rl2020RootZcap,
-          json: {}
-        });
-
-        // check status of VC has changed
-        ({status} = await helpers.getCredentialStatus(
-          {verifiableCredential}));
-        status.should.equal(true);
-      });
       it('updates a StatusList2021 revocation credential status',
         async () => {
           // first issue VC
@@ -460,15 +395,16 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           // then revoke VC
           let error;
           try {
+            const {statusListOptions: [{indexAllocator}]} =
+              sl2021RevocationIssuerConfig;
             await zcapClient.write({
-              url: `${sl2021RevocationIssuerId}/credentials/status`,
-              capability: sl2021RevocationRootZcap,
+              url: `${sl2021RevocationStatusId}/credentials/status`,
+              capability: sl2021RevocationStatusRootZcap,
               json: {
                 credentialId: verifiableCredential.id,
-                credentialStatus: {
-                  type: 'StatusList2021Entry',
-                  statusPurpose: 'revocation'
-                }
+                indexAllocator,
+                credentialStatus: verifiableCredential.credentialStatus,
+                status: true
               }
             });
           } catch(e) {
@@ -476,10 +412,10 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           }
           assertNoError(error);
 
-          // force publication of new SLC
+          // force refresh of new SLC
           await zcapClient.write({
-            url: `${statusInfo.statusListCredential}/publish`,
-            capability: sl2021RevocationRootZcap,
+            url: `${statusInfo.statusListCredential}?refresh=true`,
+            capability: sl2021RevocationStatusRootZcap,
             json: {}
           });
 
@@ -508,15 +444,16 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           // then revoke VC
           let error;
           try {
+            const {statusListOptions: [{indexAllocator}]} =
+              sl2021SuspensionIssuerConfig;
             await zcapClient.write({
-              url: `${sl2021SuspensionIssuerId}/credentials/status`,
-              capability: sl2021SuspensionRootZcap,
+              url: `${sl2021SuspensionStatusId}/credentials/status`,
+              capability: sl2021SuspensionStatusRootZcap,
               json: {
                 credentialId: verifiableCredential.id,
-                credentialStatus: {
-                  type: 'StatusList2021Entry',
-                  statusPurpose: 'suspension'
-                }
+                indexAllocator,
+                credentialStatus: verifiableCredential.credentialStatus,
+                status: true
               }
             });
           } catch(e) {
@@ -524,10 +461,10 @@ describe('issue APIs - Reference id `assertionMethod:foo` backwards ' +
           }
           assertNoError(error);
 
-          // force publication of new SLC
+          // force refresh of new SLC
           await zcapClient.write({
-            url: `${statusInfo.statusListCredential}/publish`,
-            capability: sl2021SuspensionRootZcap,
+            url: `${statusInfo.statusListCredential}?refresh=true`,
+            capability: sl2021SuspensionStatusRootZcap,
             json: {}
           });
 
