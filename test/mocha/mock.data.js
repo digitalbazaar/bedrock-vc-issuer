@@ -91,7 +91,19 @@ mockData.testBarcodeCredentialContext = {
       "@type": "@id"
     },
     "OpticalBarcodeCredential": "https://w3id.org/vdl#OpticalBarcodeCredential",
-    "TerseBitstringStatusListEntry": "https://w3id.org/vdl#TerseBitstringStatusListEntry",
+    "TerseBitstringStatusListEntry": {
+      "@id": "https://w3id.org/vdl#TerseBitstringStatusListEntry",
+      "@context": {
+        "terseStatusListIndex": {
+          "@id": "https://w3id.org/vdl#terseStatusListIndex",
+          "@type": "http://www.w3.org/2001/XMLSchema#integer"
+        },
+        "terseStatusListBaseUrl": {
+          "@id": "https://w3id.org/vdl#terseStatusListBaseUrl",
+          "@type": "@id"
+        }
+      }
+    },
     "UsDriversLicenseWithMandatoryFieldsPdf417Barcode": "https://example.gov/test#UsDriversLicenseWithMandatoryFieldsPdf417Barcode"
   }
 };
