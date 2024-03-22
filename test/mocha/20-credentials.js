@@ -734,7 +734,7 @@ describe('issue APIs', () => {
                 capability: bslRevocationRootZcap,
                 json: {
                   credential,
-                  options: {issueOptions}
+                  options: issueOptions
                 }
               });
             } catch(e) {
@@ -1124,6 +1124,9 @@ describe('issue APIs', () => {
       });
 
       describe('status scaling /credentials/issue', () => {
+        if(depOptions.suiteOptions.suiteName !== 'eddsa-rdfc-2022') {
+          return;
+        }
         it('issues VCs with list rollover', async function() {
           // two minutes to issue and rollover lists
           this.timeout(1000 * 60 * 2);
@@ -1266,6 +1269,10 @@ describe('issue APIs', () => {
       });
 
       describe('/credential/issue crash recovery', () => {
+        if(depOptions.suiteOptions.suiteName !== 'eddsa-rdfc-2022') {
+          return;
+        }
+
         // stub modules in order to simulate failure conditions
         let credentialStatusWriterStub;
         let mathRandomStub;
