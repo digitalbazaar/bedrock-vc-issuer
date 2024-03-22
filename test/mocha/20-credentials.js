@@ -107,6 +107,11 @@ describe('issue APIs', () => {
       let smallTerseStatusListRootZcap;
       let smallTerseStatusListStatusId;
       let smallTerseStatusListStatusRootZcap;
+      let terseMultistatusIssuerConfig;
+      let terseMultistatusIssuerId;
+      let terseMultistatusRootZcap;
+      let terseMultistatusStatusId;
+      let terseMultistatusStatusRootZcap;
       let oauth2IssuerConfig;
       const zcaps = {};
       beforeEach(async () => {
@@ -181,7 +186,7 @@ describe('issue APIs', () => {
         noStatusListIssuerRootZcap =
           `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
 
-        // create issuer instance w/ status list 2021 status list options
+        // create issuer instance w/ bitstring status list options
         // w/ revocation status purpose
         {
           const {
@@ -211,7 +216,7 @@ describe('issue APIs', () => {
             `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         }
 
-        // create issuer instance w/ status list 2021 status list options
+        // create issuer instance w/ bitstring status list status list options
         // w/ suspension status purpose
         {
           const {
@@ -321,6 +326,37 @@ describe('issue APIs', () => {
             },
             capability: smallTerseStatusListRootZcap
           });
+        }
+
+        // create issuer instance w/ terse bitstring status list options
+        // w/ revocation AND suspension status purpose
+        {
+          const {
+            statusConfig,
+            issuerCreateStatusListZcap
+          } = await helpers.provisionDependencies(depOptions);
+          const statusListOptions = [{
+            type: 'TerseBitstringStatusList',
+            statusPurpose: ['revocation', 'suspension'],
+            zcapReferenceIds: {
+              createCredentialStatusList: 'createCredentialStatusList'
+            }
+          }];
+
+          const newZcaps = {
+            ...zcaps,
+            createCredentialStatusList: issuerCreateStatusListZcap
+          };
+          const issuerConfig = await helpers.createIssuerConfig({
+            capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+          });
+          terseMultistatusIssuerConfig = issuerConfig;
+          terseMultistatusIssuerId = issuerConfig.id;
+          terseMultistatusRootZcap =
+            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          terseMultistatusStatusId = statusConfig.id;
+          terseMultistatusStatusRootZcap =
+            `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         }
 
         // create issuer instance w/ oauth2-based authz
@@ -608,6 +644,42 @@ describe('issue APIs', () => {
           should.exist(verifiableCredential.proof);
           verifiableCredential.proof.should.be.an('object');
         });
+        it('issues a valid credential w/ terse "credentialStatus" for ' +
+          'both revocation and suspension status purpose', async () => {
+          const credential = klona(mockTerseCredential);
+          let error;
+          let result;
+          try {
+            const zcapClient = helpers.createZcapClient({capabilityAgent});
+            result = await zcapClient.write({
+              url: `${terseMultistatusIssuerId}/credentials/issue`,
+              capability: terseMultistatusRootZcap,
+              json: {
+                credential,
+                options: issueOptions
+              }
+            });
+          } catch(e) {
+            error = e;
+          }
+          assertNoError(error);
+          should.exist(result.data);
+          should.exist(result.data.verifiableCredential);
+          const {verifiableCredential} = result.data;
+          verifiableCredential.should.be.an('object');
+          should.exist(verifiableCredential['@context']);
+          should.exist(verifiableCredential.type);
+          should.exist(verifiableCredential.credentialStatus);
+          verifiableCredential.credentialStatus.should.have.keys([
+            'type', 'terseStatusListBaseUrl', 'terseStatusListIndex'
+          ]);
+          verifiableCredential.credentialStatus.type.should.equal(
+            'TerseBitstringStatusListEntry');
+          verifiableCredential.credentialStatus.terseStatusListIndex
+            .should.be.a('number');
+          should.exist(verifiableCredential.proof);
+          verifiableCredential.proof.should.be.an('object');
+        });
         it('fails when trying to issue a duplicate credential', async () => {
           const zcapClient = helpers.createZcapClient({capabilityAgent});
 
@@ -645,6 +717,86 @@ describe('issue APIs', () => {
           }
           should.exist(error);
           error.data.type.should.equal('DuplicateError');
+        });
+        it('fails to issue with a duplicate "credentialId"', async () => {
+          const zcapClient = helpers.createZcapClient({capabilityAgent});
+
+          // issue VC without `id` and no `credentialId` option
+          // (should succeed)
+          {
+            const credential = klona(mockCredential);
+            delete credential.id;
+            let error;
+            let result;
+            try {
+              result = await zcapClient.write({
+                url: `${bslRevocationIssuerId}/credentials/issue`,
+                capability: bslRevocationRootZcap,
+                json: {
+                  credential,
+                  options: {issueOptions}
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            assertNoError(error);
+            should.exist(result.data);
+            should.exist(result.data.verifiableCredential);
+            const {verifiableCredential} = result.data;
+            const {proof} = verifiableCredential;
+            should.exist(proof);
+          }
+
+          // issue VC with "credentialId" option only (should succeed)
+          const credentialId = `urn:uuid:${uuid()}`;
+          {
+            const credential = klona(mockCredential);
+            delete credential.id;
+            let error;
+            let result;
+            try {
+              result = await zcapClient.write({
+                url: `${bslRevocationIssuerId}/credentials/issue`,
+                capability: bslRevocationRootZcap,
+                json: {
+                  credential,
+                  options: {...issueOptions, credentialId}
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            assertNoError(error);
+            should.exist(result.data);
+            should.exist(result.data.verifiableCredential);
+            const {verifiableCredential} = result.data;
+            const {proof} = verifiableCredential;
+            should.exist(proof);
+          }
+
+          // issue VC with the same "credentialId" again (should fail)
+          {
+            const credential = klona(mockCredential);
+            delete credential.id;
+            let error;
+            let result;
+            try {
+              result = await zcapClient.write({
+                url: `${bslRevocationIssuerId}/credentials/issue`,
+                capability: bslRevocationRootZcap,
+                json: {
+                  credential,
+                  options: {...issueOptions, credentialId}
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            should.exist(error);
+            error.data.type.should.equal('DuplicateError');
+            should.not.exist(result);
+          }
         });
         // selective disclosure specific tests here
         if(sdSuites.has(suiteName)) {
@@ -831,7 +983,7 @@ describe('issue APIs', () => {
           });
         it('updates a BitstringStatusList suspension credential status',
           async () => {
-          // first issue VC
+            // first issue VC
             const credential = klona(mockCredential);
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             const {data: {verifiableCredential}} = await zcapClient.write({
@@ -877,6 +1029,97 @@ describe('issue APIs', () => {
             ({status} = await helpers.getCredentialStatus(
               {verifiableCredential}));
             status.should.equal(true);
+          });
+
+        it('updates multiple TerseBitstringStatusList statuses',
+          async () => {
+            // first issue VC
+            const credential = klona(mockTerseCredential);
+            const credentialId = `urn:uuid:${uuid()}`;
+            const zcapClient = helpers.createZcapClient({capabilityAgent});
+            const {data: {verifiableCredential}} = await zcapClient.write({
+              url: `${terseMultistatusIssuerId}/credentials/issue`,
+              capability: terseMultistatusRootZcap,
+              json: {
+                credential,
+                options: {...issueOptions, credentialId}
+              }
+            });
+
+            // get VC statuses
+            const listLength = 131072;
+            const revocationStatusInfo = await helpers.getCredentialStatus(
+              {verifiableCredential, statusPurpose: 'revocation', listLength});
+            revocationStatusInfo.status.should.equal(false);
+            const suspensionStatusInfo = await helpers.getCredentialStatus(
+              {verifiableCredential, statusPurpose: 'suspension', listLength});
+            suspensionStatusInfo.status.should.equal(false);
+
+            // then revoke VC
+            {
+              let error;
+              try {
+                const {statusListOptions: [{indexAllocator}]} =
+                  terseMultistatusIssuerConfig;
+                await zcapClient.write({
+                  url: `${terseMultistatusStatusId}/credentials/status`,
+                  capability: terseMultistatusStatusRootZcap,
+                  json: {
+                    credentialId,
+                    indexAllocator,
+                    credentialStatus: revocationStatusInfo
+                      .expandedCredentialStatus,
+                    status: true
+                  }
+                });
+              } catch(e) {
+                error = e;
+              }
+              assertNoError(error);
+            }
+
+            // then suspend VC
+            {
+              let error;
+              try {
+                const {statusListOptions: [{indexAllocator}]} =
+                  terseMultistatusIssuerConfig;
+                await zcapClient.write({
+                  url: `${terseMultistatusStatusId}/credentials/status`,
+                  capability: terseMultistatusStatusRootZcap,
+                  json: {
+                    credentialId,
+                    indexAllocator,
+                    credentialStatus: suspensionStatusInfo
+                      .expandedCredentialStatus,
+                    status: true
+                  }
+                });
+              } catch(e) {
+                error = e;
+              }
+              assertNoError(error);
+            }
+
+            // force refresh of new SLCs
+            await zcapClient.write({
+              url: `${revocationStatusInfo.statusListCredential}?refresh=true`,
+              capability: terseMultistatusStatusRootZcap,
+              json: {}
+            });
+            await zcapClient.write({
+              url: `${suspensionStatusInfo.statusListCredential}?refresh=true`,
+              capability: terseMultistatusStatusRootZcap,
+              json: {}
+            });
+
+            // check statuses of VC have changed
+            const newRevocationStatus = await helpers.getCredentialStatus(
+              {verifiableCredential, statusPurpose: 'revocation', listLength});
+            newRevocationStatus.status.should.equal(true);
+            const newSuspensionStatus = await helpers.getCredentialStatus(
+              {verifiableCredential, statusPurpose: 'revocation', listLength});
+            newSuspensionStatus.status.should.equal(true);
           });
       });
 
