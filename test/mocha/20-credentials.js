@@ -1123,6 +1123,87 @@ describe('issue APIs', () => {
           error.data.type.should.equal('DuplicateError');
         });
 
+        it('fails to issue with a duplicate "credentialId"', async () => {
+          const zcapClient = helpers.createZcapClient({capabilityAgent});
+
+          // issue VC without `id` and no `credentialId` option
+          // (should succeed)
+          {
+            const credential = klona(mockCredential);
+            delete credential.id;
+            let error;
+            let result;
+            try {
+              result = await zcapClient.write({
+                url: `${bslRevocationIssuerId}/credentials/issue`,
+                capability: bslRevocationRootZcap,
+                json: {
+                  credential,
+                  options: {issueOptions}
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            assertNoError(error);
+            should.exist(result.data);
+            should.exist(result.data.verifiableCredential);
+            const {verifiableCredential} = result.data;
+            const {proof} = verifiableCredential;
+            should.exist(proof);
+          }
+
+          // issue VC with "credentialId" option only (should succeed)
+          const credentialId = `urn:uuid:${uuid()}`;
+          {
+            const credential = klona(mockCredential);
+            delete credential.id;
+            let error;
+            let result;
+            try {
+              result = await zcapClient.write({
+                url: `${bslRevocationIssuerId}/credentials/issue`,
+                capability: bslRevocationRootZcap,
+                json: {
+                  credential,
+                  options: {...issueOptions, credentialId}
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            assertNoError(error);
+            should.exist(result.data);
+            should.exist(result.data.verifiableCredential);
+            const {verifiableCredential} = result.data;
+            const {proof} = verifiableCredential;
+            should.exist(proof);
+          }
+
+          // issue VC with the same "credentialId" again (should fail)
+          {
+            const credential = klona(mockCredential);
+            delete credential.id;
+            let error;
+            let result;
+            try {
+              result = await zcapClient.write({
+                url: `${bslRevocationIssuerId}/credentials/issue`,
+                capability: bslRevocationRootZcap,
+                json: {
+                  credential,
+                  options: {...issueOptions, credentialId}
+                }
+              });
+            } catch(e) {
+              error = e;
+            }
+            should.exist(error);
+            error.data.type.should.equal('DuplicateError');
+            should.not.exist(result);
+          }
+        });
+
         it('issues VCs with list rollover', async function() {
           // two minutes to issue and rollover lists
           this.timeout(1000 * 60 * 2);
