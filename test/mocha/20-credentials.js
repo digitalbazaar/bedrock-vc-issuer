@@ -60,6 +60,15 @@ describe('issue APIs', () => {
       statusOptions: {
         suiteName: 'ecdsa-rdfc-2019'
       }
+    },
+    'bbs-2023': {
+      algorithm: ['Bls12381G2'],
+      statusOptions: {
+        // sign status list with simple ECDSA
+        algorithm: 'P-256',
+        suiteName: 'ecdsa-rdfc-2019'
+      },
+      terseIssueOptions: {mandatoryPointers: ['issuer']}
     }
   };
   // list of suites to run the selective disclosure tests on
@@ -134,7 +143,7 @@ describe('issue APIs', () => {
         let assertionMethodKey;
         const publicAliasTemplate =
           'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
-        if(algorithm === 'P-256' || algorithm === 'P-384') {
+        if(['P-256', 'P-384', 'Bls12381G2'].includes(algorithm)) {
           assertionMethodKey = await helpers._generateMultikey({
             keystoreAgent,
             type: `urn:webkms:multikey:${algorithm}`,
