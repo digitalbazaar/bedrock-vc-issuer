@@ -367,8 +367,10 @@ export async function provisionIssuerForStatus({
   let assertionMethodKey;
   const publicAliasTemplate =
     'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
-  const {algorithm, statusOptions: {suiteName}} = suiteOptions;
-  if(algorithm === 'P-256' || algorithm === 'P-384') {
+  const {statusOptions} = suiteOptions;
+  const algorithm = statusOptions.algorithm ?? suiteOptions.algorithm;
+  const {suiteName} = statusOptions;
+  if(['P-256', 'P-384'].includes(algorithm)) {
     assertionMethodKey = await _generateMultikey({
       keystoreAgent,
       type: `urn:webkms:multikey:${algorithm}`,

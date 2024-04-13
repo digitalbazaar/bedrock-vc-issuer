@@ -26,7 +26,8 @@ export const issueOptions = {
       // supported default suites in this version
       enum: [
         'ecdsa-rdfc-2019', 'eddsa-rdfc-2022', 'Ed25519Signature2020',
-        'Ed25519Signature2018', 'ecdsa-sd-2023', 'ecdsa-xi-2023'
+        'Ed25519Signature2018', 'ecdsa-sd-2023', 'ecdsa-xi-2023',
+        'bbs-2023'
       ]
     }
   }
