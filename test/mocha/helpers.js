@@ -340,10 +340,13 @@ async function keyResolver({id}) {
   return data;
 }
 
-export async function provisionDependencies({suiteOptions}) {
+export async function provisionDependencies({suiteOptions, status = true}) {
   const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
   const handle = 'test';
   const capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
+  if(!status) {
+    return {capabilityAgent};
+  }
 
   // create keystore for capability agent
   const keystoreAgent = await createKeystoreAgent({capabilityAgent});
@@ -351,13 +354,9 @@ export async function provisionDependencies({suiteOptions}) {
   const {
     statusConfig,
     issuerCreateStatusListZcap
-  } = await provisionStatus({
-    capabilityAgent, keystoreAgent, suiteOptions
-  });
+  } = await provisionStatus({capabilityAgent, keystoreAgent, suiteOptions});
 
-  return {
-    statusConfig, issuerCreateStatusListZcap, capabilityAgent
-  };
+  return {statusConfig, issuerCreateStatusListZcap, capabilityAgent};
 }
 
 export async function provisionIssuerForStatus({
