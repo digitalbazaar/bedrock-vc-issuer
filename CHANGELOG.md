@@ -7,6 +7,11 @@
   list configuration options.
 - Allow passing `credentialId` when issuing a credential without an `id`
   to allow referencing it later.
+- Allow passing `issuer` and `cryptosuites` instead of `suiteName` to provide
+  `issuer` (to eliminate the need for the instance to retrieve it during
+  issuance), to provide additional cryptosuite-specific options, and to allow
+  the use of multiple cryptosuites when issuing (generating a proof set
+  instead of a single proof on a credential).
 
 ### Changed
 - **BREAKING**: Management of status list index allocation has been rewritten
