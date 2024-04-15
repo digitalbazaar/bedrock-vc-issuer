@@ -15,12 +15,66 @@ const context = {
   }
 };
 
+const cryptosuite = {
+  title: 'Cryptosuite Options',
+  type: 'object',
+  required: ['name', 'zcapReferenceIds'],
+  additionalProperties: false,
+  properties: {
+    name: {
+      type: 'string',
+      // supported default suites in this version
+      enum: [
+        'ecdsa-rdfc-2019', 'eddsa-rdfc-2022', 'Ed25519Signature2020',
+        'Ed25519Signature2018', 'ecdsa-sd-2023', 'ecdsa-xi-2023',
+        'bbs-2023'
+      ]
+    },
+    zcapReferenceIds: {
+      type: 'object',
+      required: ['assertionMethod'],
+      additionalProperties: false,
+      properties: {
+        assertionMethod: {
+          type: 'string'
+        }
+      }
+    }
+  }
+};
+
+const cryptosuites = {
+  title: 'Cryptosuites',
+  type: 'array',
+  additionalItems: false,
+  minItems: 1,
+  items: cryptosuite
+};
+
 export const issueOptions = {
   title: 'Issue Options',
   type: 'object',
-  required: ['suiteName'],
+  oneOf: [{
+    // preferred mechanism for specifying issuer and cryptosuites to sign with
+    required: ['issuer', 'cryptosuites'],
+    not: {
+      required: ['suiteName']
+    }
+  }, {
+    // legacy; for backwards compatibility only
+    required: ['suiteName'],
+    not: {
+      required: ['issuer', 'cryptosuites']
+    }
+  }],
   additionalProperties: false,
   properties: {
+    // modern
+    issuer: {
+      type: 'string'
+    },
+    cryptosuites,
+    // legacy
     suiteName: {
       type: 'string',
       // supported default suites in this version
