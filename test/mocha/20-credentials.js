@@ -131,7 +131,6 @@ describe('issue APIs', () => {
       let terseMultistatusStatusId;
       let terseMultistatusStatusRootZcap;
       let oauth2IssuerConfig;
-      const zcaps = {};
       beforeEach(async () => {
         // provision dependencies
         ({capabilityAgent} = await helpers.provisionDependencies(depOptions));
@@ -171,6 +170,7 @@ describe('issue APIs', () => {
 
         // delegate edv, hmac, and key agreement key zcaps to service agent
         const {id: edvId} = edvConfig;
+        const zcaps = {};
         zcaps.edv = await helpers.delegate({
           controller: serviceAgent.id,
           delegator: capabilityAgent,
