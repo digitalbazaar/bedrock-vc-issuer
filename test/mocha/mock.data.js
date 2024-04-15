@@ -5,6 +5,8 @@ import {config} from '@bedrock/core';
 
 export const mockData = {};
 
+mockData.didWebDocuments = new Map();
+
 // mock product IDs and reverse lookup for service products
 mockData.productIdMap = new Map([
   // edv service

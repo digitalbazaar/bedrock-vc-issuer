@@ -17,6 +17,8 @@ import '@bedrock/vc-status';
 
 import {mockData} from './mocha/mock.data.js';
 
+const {util: {BedrockError}} = bedrock;
+
 bedrock.events.on('bedrock.init', async () => {
   /* Handlers need to be added before `bedrock.start` is called. These are
   no-op handlers to enable meter usage without restriction */
@@ -45,6 +47,24 @@ bedrock.events.on('bedrock-express.configure.routes', app => {
   });
   app.get('/oauth2/jwks', (req, res) => {
     res.json(mockData.jwks);
+  });
+});
+
+// mock DID web server routes
+bedrock.events.on('bedrock-express.configure.routes', app => {
+  app.get('/did-web/:localId/did.json', (req, res) => {
+    const {localId} = req.params;
+    const didDocument = mockData.didWebDocuments.get(localId);
+    if(!didDocument) {
+      throw new BedrockError('DID document not found.', {
+        name: 'NotFoundError',
+        details: {
+          httpStatusCode: 404,
+          public: true
+        }
+      });
+    }
+    res.json(didDocument);
   });
 });
 
