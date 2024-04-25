@@ -35,6 +35,8 @@
   by this module and must be provided by an external status service, such
   as `@bedrock/vc-status`. Issuer configurations that use status lists must
   include a zcap to create status lists on such a service.
+- **BREAKING**: `mandatoryPointers` for `ecdsa-sd-2023` & `bbs-2023` now default
+  to `[]`.
 
 ### Removed
 - **BREAKING**: Remove support for obsolete `RevocationList2020`.
