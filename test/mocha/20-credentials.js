@@ -451,7 +451,7 @@ describe('issue APIs', () => {
           verifiableCredential.proof.should.be.an('object');
         });
 
-        it('fails to issue a valid credential', async () => {
+        it('fails to issue an empty credential', async () => {
           let error;
           try {
             const zcapClient = helpers.createZcapClient({capabilityAgent});
