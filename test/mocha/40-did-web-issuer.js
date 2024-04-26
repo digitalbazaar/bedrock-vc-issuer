@@ -216,7 +216,7 @@ describe('issue using "did:web" issuer', () => {
             credential,
             options: {
               extraInformation: 'abc',
-              mandatoryPointers: ['issuer']
+              mandatoryPointers: ['/issuer']
             }
           }
         });
