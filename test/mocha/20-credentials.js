@@ -50,7 +50,7 @@ describe('issue APIs', () => {
       statusOptions: {
         suiteName: 'ecdsa-rdfc-2019'
       },
-      terseIssueOptions: {mandatoryPointers: ['issuer']}
+      terseIssueOptions: {mandatoryPointers: ['/issuer']}
     },
     'ecdsa-xi-2023': {
       algorithm: ['P-256', 'P-384'],
@@ -68,7 +68,7 @@ describe('issue APIs', () => {
         algorithm: 'P-256',
         suiteName: 'ecdsa-rdfc-2019'
       },
-      terseIssueOptions: {mandatoryPointers: ['issuer']}
+      terseIssueOptions: {mandatoryPointers: ['/issuer']}
     }
   };
   // list of suites to run the selective disclosure tests on
@@ -428,7 +428,7 @@ describe('issue APIs', () => {
                 credential,
                 options: {
                   ...issueOptions,
-                  mandatoryPointers: ['issuer']
+                  mandatoryPointers: ['/issuer']
                 }
               }
             });
