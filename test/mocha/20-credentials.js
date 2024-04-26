@@ -72,7 +72,7 @@ describe('issue APIs', () => {
     }
   };
   // list of suites to run the selective disclosure tests on
-  const sdSuites = new Set(['ecdsa-sd-2023']);
+  const sdSuites = new Set(['ecdsa-sd-2023', 'bbs-2023']);
   // list of suites to run extra information tests on
   const xiSuites = new Set(['ecdsa-xi-2023']);
   for(const suiteName in suiteNames) {
