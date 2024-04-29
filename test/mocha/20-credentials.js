@@ -427,8 +427,7 @@ describe('issue APIs', () => {
               json: {
                 credential,
                 options: {
-                  ...issueOptions,
-                  mandatoryPointers: ['/issuer']
+                  ...issueOptions
                 }
               }
             });
