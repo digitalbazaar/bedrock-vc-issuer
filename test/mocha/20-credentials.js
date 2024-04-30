@@ -857,6 +857,7 @@ describe('issue APIs', () => {
           it('fails to issue a valid credential w/ invalid ' +
             '"options.mandatoryPointers"', async () => {
             let error;
+            const missingPointer = '/nonExistentPointer';
             try {
               const credential = klona(mockCredential);
               const zcapClient = helpers.createZcapClient({capabilityAgent});
@@ -867,7 +868,7 @@ describe('issue APIs', () => {
                   credential,
                   options: {
                     ...issueOptions,
-                    mandatoryPointers: ['/nonExistentPointer']
+                    mandatoryPointers: [missingPointer]
                   }
                 }
               });
@@ -875,7 +876,10 @@ describe('issue APIs', () => {
               error = e;
             }
             should.exist(error);
-            error.data.type.should.equal('OperationError');
+            error.data.type.should.equal('DataError');
+            error.status.should.equal(400);
+            error.data.message.should.equal(
+              `JSON pointer "${missingPointer}" does not match document.`);
           });
         }
         // extra information tests
