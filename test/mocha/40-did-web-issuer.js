@@ -71,32 +71,17 @@ describe('issue using "did:web" issuer', () => {
     const {data: serviceAgent} = await httpClient.get(serviceAgentUrl, {agent});
 
     // delegate edv, hmac, and key agreement key zcaps to service agent
-    const {id: edvId} = edvConfig;
-    const zcaps = {};
-    zcaps.edv = await helpers.delegate({
-      controller: serviceAgent.id,
-      delegator: capabilityAgent,
-      invocationTarget: edvId
-    });
-    const {keystoreId} = keystoreAgent;
-    zcaps.hmac = await helpers.delegate({
-      capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-      controller: serviceAgent.id,
-      invocationTarget: hmac.id,
-      delegator: capabilityAgent
-    });
-    zcaps.keyAgreementKey = await helpers.delegate({
-      capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-      controller: serviceAgent.id,
-      invocationTarget: keyAgreementKey.kmsId,
-      delegator: capabilityAgent
+    const zcaps = await helpers.delegateEdvZcaps({
+      edvConfig, hmac, keyAgreementKey, serviceAgent,
+      capabilityAgent
     });
 
     // delegate assertion method keys
     for(const suite of suites) {
       const {assertionMethodKey} = suite;
       const zcap = await helpers.delegate({
-        capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
+        capability: 'urn:zcap:root:' +
+          encodeURIComponent(helpers.parseKeystoreId(assertionMethodKey.kmsId)),
         controller: serviceAgent.id,
         invocationTarget: assertionMethodKey.kmsId,
         delegator: capabilityAgent
