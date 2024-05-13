@@ -201,6 +201,33 @@ export async function createEdv({
   return {edvClient, edvConfig, hmac, keyAgreementKey};
 }
 
+export async function delegateEdvZcaps({
+  edvConfig, hmac, keyAgreementKey, serviceAgent, capabilityAgent
+} = {}) {
+  const {id: edvId} = edvConfig;
+  const zcaps = {};
+  zcaps.edv = await delegate({
+    controller: serviceAgent.id,
+    delegator: capabilityAgent,
+    invocationTarget: edvId
+  });
+  zcaps.hmac = await delegate({
+    capability: 'urn:zcap:root:' +
+      encodeURIComponent(parseKeystoreId(hmac.id)),
+    controller: serviceAgent.id,
+    invocationTarget: hmac.id,
+    delegator: capabilityAgent
+  });
+  zcaps.keyAgreementKey = await delegate({
+    capability: 'urn:zcap:root:' +
+      encodeURIComponent(parseKeystoreId(keyAgreementKey.kmsId)),
+    controller: serviceAgent.id,
+    invocationTarget: keyAgreementKey.kmsId,
+    delegator: capabilityAgent
+  });
+  return zcaps;
+}
+
 export async function createKeystore({
   capabilityAgent, ipAllowList, meterId,
   kmsModule = 'ssm-v1'
@@ -353,10 +380,14 @@ export async function provisionDependencies({suiteOptions, status = true}) {
 
   const {
     statusConfig,
-    issuerCreateStatusListZcap
+    issuerCreateStatusListZcap,
+    assertionMethodKey
   } = await provisionStatus({capabilityAgent, keystoreAgent, suiteOptions});
 
-  return {statusConfig, issuerCreateStatusListZcap, capabilityAgent};
+  return {
+    statusConfig, issuerCreateStatusListZcap, capabilityAgent,
+    assertionMethodKey
+  };
 }
 
 export async function provisionIssuerForStatus({
@@ -368,7 +399,6 @@ export async function provisionIssuerForStatus({
     'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
   const {statusOptions} = suiteOptions;
   const algorithm = statusOptions.algorithm ?? suiteOptions.algorithm;
-  const {suiteName} = statusOptions;
   if(['P-256', 'P-384'].includes(algorithm)) {
     assertionMethodKey = await _generateMultikey({
       keystoreAgent,
@@ -396,36 +426,23 @@ export async function provisionIssuerForStatus({
     issuerServiceAgentUrl, {agent});
 
   // delegate edv, hmac, and key agreement key zcaps to service agent
-  const {id: edvId} = edvConfig;
-  const zcaps = {};
-  zcaps.edv = await delegate({
-    controller: issuerServiceAgent.id,
-    delegator: capabilityAgent,
-    invocationTarget: edvId
+  const zcaps = await delegateEdvZcaps({
+    edvConfig, hmac, keyAgreementKey, serviceAgent: issuerServiceAgent,
+    capabilityAgent
   });
-  const {keystoreId} = keystoreAgent;
-  zcaps.hmac = await delegate({
-    capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-    controller: issuerServiceAgent.id,
-    invocationTarget: hmac.id,
-    delegator: capabilityAgent
-  });
-  zcaps.keyAgreementKey = await delegate({
-    capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-    controller: issuerServiceAgent.id,
-    invocationTarget: keyAgreementKey.kmsId,
-    delegator: capabilityAgent
-  });
+  // delegate assertion method zcap to service agent
   zcaps.assertionMethod = await delegate({
-    capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
+    capability: 'urn:zcap:root:' +
+      encodeURIComponent(parseKeystoreId(assertionMethodKey.kmsId)),
     controller: issuerServiceAgent.id,
     invocationTarget: assertionMethodKey.kmsId,
     delegator: capabilityAgent
   });
 
   // create issuer instance w/ oauth2-based authz
+  const {suiteName, issuerOptions} = statusOptions;
   const issuerConfig = await createIssuerConfig(
-    {capabilityAgent, zcaps, suiteName, oauth2: true});
+    {capabilityAgent, zcaps, suiteName, issuerOptions, oauth2: true});
   const {id: issuerId} = issuerConfig;
   const issuerRootZcap = `urn:zcap:root:${encodeURIComponent(issuerId)}`;
 
@@ -443,7 +460,7 @@ export async function provisionIssuerForStatus({
     delegator: capabilityAgent
   });
 
-  return {issuerConfig, statusIssueZcap};
+  return {issuerConfig, statusIssueZcap, assertionMethodKey};
 }
 
 export async function provisionStatus({
@@ -451,7 +468,8 @@ export async function provisionStatus({
 }) {
   const {
     issuerConfig,
-    statusIssueZcap
+    statusIssueZcap,
+    assertionMethodKey
   } = await provisionIssuerForStatus({
     capabilityAgent, keystoreAgent, suiteOptions
   });
@@ -480,7 +498,10 @@ export async function provisionStatus({
     delegator: capabilityAgent
   });
 
-  return {issuerConfig, statusConfig, issuerCreateStatusListZcap};
+  return {
+    issuerConfig, statusConfig, issuerCreateStatusListZcap,
+    assertionMethodKey
+  };
 }
 
 export async function _generateMultikey({
@@ -519,4 +540,13 @@ export async function findConfig({configId}) {
   return serviceCoreConfigCollection.findOne({
     'config.id': configId,
   });
+}
+
+export function parseKeystoreId(keyId) {
+  // key ID format: <baseUrl>/<keystores-path>/<keystore-id>/keys/<key-id>
+  const idx = keyId.lastIndexOf('/keys/');
+  if(idx === -1) {
+    throw new Error(`Invalid key ID "${keyId}".`);
+  }
+  return keyId.slice(0, idx);
 }

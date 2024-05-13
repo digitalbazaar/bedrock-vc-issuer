@@ -15,7 +15,7 @@ const serviceType = 'vc-issuer';
 
 describe('provision API', () => {
   let capabilityAgent;
-  const zcaps = {};
+  let zcaps = {};
   beforeEach(async () => {
     const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
     const handle = 'test';
@@ -45,32 +45,20 @@ describe('provision API', () => {
       serviceAgentUrl, {agent});
 
     // delegate edv, hmac, and key agreement key zcaps to service agent
-    const {id: edvId} = edvConfig;
-    zcaps.edv = await helpers.delegate({
+    zcaps = {
+      ...await helpers.delegateEdvZcaps({
+        edvConfig, hmac, keyAgreementKey, serviceAgent,
+        capabilityAgent
+      })
+    };
+    // delegate assertion method zcap to service agent
+    zcaps.assertionMethod = await helpers.delegate({
+      capability: 'urn:zcap:root:' +
+        encodeURIComponent(helpers.parseKeystoreId(assertionMethodKey.kmsId)),
       controller: serviceAgent.id,
-      delegator: capabilityAgent,
-      invocationTarget: edvId
-    });
-    const {keystoreId} = keystoreAgent;
-    zcaps.hmac = await helpers.delegate({
-      capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-      controller: serviceAgent.id,
-      invocationTarget: hmac.id,
+      invocationTarget: assertionMethodKey.kmsId,
       delegator: capabilityAgent
     });
-    zcaps.keyAgreementKey = await helpers.delegate({
-      capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-      controller: serviceAgent.id,
-      invocationTarget: keyAgreementKey.kmsId,
-      delegator: capabilityAgent
-    });
-    zcaps.assertionMethod = await helpers
-      .delegate({
-        capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-        controller: serviceAgent.id,
-        invocationTarget: assertionMethodKey.kmsId,
-        delegator: capabilityAgent
-      });
   });
   describe('create config', () => {
     it('throws error on missing zcaps', async () => {

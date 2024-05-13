@@ -169,33 +169,18 @@ describe('issue APIs', () => {
           serviceAgentUrl, {agent});
 
         // delegate edv, hmac, and key agreement key zcaps to service agent
-        const {id: edvId} = edvConfig;
-        const zcaps = {};
-        zcaps.edv = await helpers.delegate({
-          controller: serviceAgent.id,
-          delegator: capabilityAgent,
-          invocationTarget: edvId
+        const zcaps = await helpers.delegateEdvZcaps({
+          edvConfig, hmac, keyAgreementKey, serviceAgent,
+          capabilityAgent
         });
-        const {keystoreId} = keystoreAgent;
-        zcaps.hmac = await helpers.delegate({
-          capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
+        // delegate assertion method zcap to service agent
+        zcaps.assertionMethod = await helpers.delegate({
+          capability: 'urn:zcap:root:' + encodeURIComponent(
+            helpers.parseKeystoreId(assertionMethodKey.kmsId)),
           controller: serviceAgent.id,
-          invocationTarget: hmac.id,
+          invocationTarget: assertionMethodKey.kmsId,
           delegator: capabilityAgent
         });
-        zcaps.keyAgreementKey = await helpers.delegate({
-          capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-          controller: serviceAgent.id,
-          invocationTarget: keyAgreementKey.kmsId,
-          delegator: capabilityAgent
-        });
-        zcaps.assertionMethod = await helpers
-          .delegate({
-            capability: `urn:zcap:root:${encodeURIComponent(keystoreId)}`,
-            controller: serviceAgent.id,
-            invocationTarget: assertionMethodKey.kmsId,
-            delegator: capabilityAgent
-          });
 
         // create issuer instance w/ no status list options
         const noStatusListIssuerConfig = await helpers.createIssuerConfig(
