@@ -367,36 +367,64 @@ async function keyResolver({id}) {
   return data;
 }
 
-export async function provisionDependencies({suiteOptions, status = true}) {
+export async function provisionDependencies({
+  did, cryptosuites, suiteOptions, status = true
+} = {}) {
   const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
   const handle = 'test';
   const capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
-  if(!status) {
-    return {capabilityAgent};
-  }
 
   // create keystore for capability agent
   const keystoreAgent = await createKeystoreAgent({capabilityAgent});
+
+  if(did && cryptosuites) {
+    // generate an assertion method key for each suite to use
+    for(const suite of cryptosuites) {
+      const {algorithm} = suite;
+      let assertionMethodKey;
+      const publicAliasTemplate = `${did}#{publicKeyMultibase}`;
+      if(['P-256', 'P-384', 'Bls12381G2'].includes(algorithm)) {
+        assertionMethodKey = await _generateMultikey({
+          keystoreAgent,
+          type: `urn:webkms:multikey:${algorithm}`,
+          publicAliasTemplate
+        });
+      } else {
+        assertionMethodKey = await keystoreAgent.generateKey({
+          type: 'asymmetric',
+          publicAliasTemplate
+        });
+      }
+      suite.assertionMethodKey = assertionMethodKey;
+    }
+  }
+
+  if(!status) {
+    return {capabilityAgent, keystoreAgent};
+  }
 
   const {
     statusConfig,
     issuerCreateStatusListZcap,
     assertionMethodKey
-  } = await provisionStatus({capabilityAgent, keystoreAgent, suiteOptions});
+  } = await provisionStatus({
+    did, capabilityAgent, keystoreAgent, suiteOptions
+  });
 
   return {
-    statusConfig, issuerCreateStatusListZcap, capabilityAgent,
+    statusConfig, issuerCreateStatusListZcap, capabilityAgent, keystoreAgent,
     assertionMethodKey
   };
 }
 
 export async function provisionIssuerForStatus({
-  capabilityAgent, keystoreAgent, suiteOptions
+  did, capabilityAgent, keystoreAgent, suiteOptions
 }) {
-  // generate key for signing VCs (make it a did:key DID for simplicity)
+  // generate key for signing VCs (make it a did:key DID for simplicity if
+  // no DID is given)
   let assertionMethodKey;
-  const publicAliasTemplate =
-    'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
+  const didTemplate = did ?? 'did:key:{publicKeyMultibase}';
+  const publicAliasTemplate = didTemplate + '#{publicKeyMultibase}';
   const {statusOptions} = suiteOptions;
   const algorithm = statusOptions.algorithm ?? suiteOptions.algorithm;
   if(['P-256', 'P-384'].includes(algorithm)) {
@@ -464,14 +492,14 @@ export async function provisionIssuerForStatus({
 }
 
 export async function provisionStatus({
-  capabilityAgent, keystoreAgent, suiteOptions
+  did, capabilityAgent, keystoreAgent, suiteOptions
 }) {
   const {
     issuerConfig,
     statusIssueZcap,
     assertionMethodKey
   } = await provisionIssuerForStatus({
-    capabilityAgent, keystoreAgent, suiteOptions
+    did, capabilityAgent, keystoreAgent, suiteOptions
   });
 
   const zcaps = {

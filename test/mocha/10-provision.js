@@ -15,15 +15,12 @@ const serviceType = 'vc-issuer';
 
 describe('provision API', () => {
   let capabilityAgent;
+  let keystoreAgent;
   let zcaps = {};
   beforeEach(async () => {
-    const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
-    const handle = 'test';
-    capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
-
-    // create keystore for capability agent
-    const keystoreAgent = await helpers.createKeystoreAgent(
-      {capabilityAgent});
+    // provision dependencies
+    ({capabilityAgent, keystoreAgent} = await helpers.provisionDependencies(
+      {status: false}));
 
     // generate key for signing VCs (make it a did:key DID for simplicity)
     const assertionMethodKey = await keystoreAgent.generateKey({
