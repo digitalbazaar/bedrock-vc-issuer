@@ -23,6 +23,7 @@ const mockCredentialV2 = require('./mock-credential-v2.json');
 describe('issue using "did:web" issuer', () => {
   let suites;
   let capabilityAgent;
+  let keystoreAgent;
   let noStatusListIssuerId;
   let noStatusListIssuerRootZcap;
   beforeEach(async () => {
@@ -47,36 +48,15 @@ describe('issue using "did:web" issuer', () => {
       algorithm: 'Bls12381G2'
     }];
 
-    // provision dependencies
-    ({capabilityAgent} = await helpers.provisionDependencies({status: false}));
-
-    // create keystore for capability agent
-    const keystoreAgent = await helpers.createKeystoreAgent({capabilityAgent});
-
     // generate a `did:web` DID for the issuer
     const {host} = bedrock.config.server;
     const localId = uuid();
     const did = `did:web:${encodeURIComponent(host)}:did-web:${localId}`;
 
-    // generate an assertion method key for each suite to use
-    for(const suite of suites) {
-      const {algorithm} = suite;
-      let assertionMethodKey;
-      const publicAliasTemplate = `${did}#{publicKeyMultibase}`;
-      if(['P-256', 'P-384', 'Bls12381G2'].includes(algorithm)) {
-        assertionMethodKey = await helpers._generateMultikey({
-          keystoreAgent,
-          type: `urn:webkms:multikey:${algorithm}`,
-          publicAliasTemplate
-        });
-      } else {
-        assertionMethodKey = await keystoreAgent.generateKey({
-          type: 'asymmetric',
-          publicAliasTemplate
-        });
-      }
-      suite.assertionMethodKey = assertionMethodKey;
-    }
+    // provision dependencies
+    ({capabilityAgent, keystoreAgent} = await helpers.provisionDependencies({
+      did, cryptosuites: suites, status: false
+    }));
 
     // create EDV for storage (creating hmac and kak in the process)
     const {
