@@ -3,7 +3,6 @@
  */
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
-import {CapabilityAgent} from '@digitalbazaar/webkms-client';
 import {createRequire} from 'node:module';
 import {httpClient} from '@digitalbazaar/http-client';
 import {klona} from 'klona';
@@ -23,6 +22,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
   const zcaps = {};
   describe('Ed25519Signature2020', function() {
     let capabilityAgent;
+    let keystoreAgent;
     let noStatusListIssuerId;
     let noStatusListIssuerRootZcap;
     let sl2021RevocationIssuerConfig;
@@ -38,18 +38,16 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
     let oauth2IssuerConfig;
     beforeEach(async () => {
       const suiteName = 'Ed25519Signature2020';
-      const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
-      const handle = 'test';
       const depOptions = {
         suiteOptions: {
           suiteName, algorithm: 'Ed25519', statusOptions: {suiteName}
         }
       };
-      capabilityAgent = await CapabilityAgent.fromSecret({secret, handle});
 
-      // create keystore for capability agent
-      const keystoreAgent = await helpers.createKeystoreAgent(
-        {capabilityAgent});
+      // provision dependencies
+      ({capabilityAgent, keystoreAgent} = await helpers.provisionDependencies(
+        {status: false}));
+
       // generate key for signing VCs (make it a did:key DID for simplicity)
       const assertionMethodKey = await keystoreAgent.generateKey({
         type: 'asymmetric',

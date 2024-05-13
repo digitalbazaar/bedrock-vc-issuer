@@ -103,6 +103,7 @@ describe('issue APIs', () => {
     };
     describe(testDescription, function() {
       let capabilityAgent;
+      let keystoreAgent;
       let noStatusListIssuerId;
       let noStatusListIssuerRootZcap;
       let bslRevocationIssuerConfig;
@@ -133,11 +134,9 @@ describe('issue APIs', () => {
       let oauth2IssuerConfig;
       beforeEach(async () => {
         // provision dependencies
-        ({capabilityAgent} = await helpers.provisionDependencies(depOptions));
+        ({capabilityAgent, keystoreAgent} = await helpers.provisionDependencies(
+          depOptions));
 
-        // create keystore for capability agent
-        const keystoreAgent = await helpers.createKeystoreAgent(
-          {capabilityAgent});
         // generate key for signing VCs (make it a did:key DID for simplicity)
         let assertionMethodKey;
         const publicAliasTemplate =
