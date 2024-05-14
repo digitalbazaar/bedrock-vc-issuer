@@ -81,7 +81,7 @@ describe.skip('issue using VC-JWT format w/status list support', () => {
       issuer: did,
       envelope: {
         format: envelope.format,
-        zcapReferenceId: envelope.zcapReferenceId
+        zcapReferenceIds: envelope.zcapReferenceIds
       }
     };
 
