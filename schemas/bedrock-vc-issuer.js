@@ -15,6 +15,18 @@ const context = {
   }
 };
 
+const zcapReferenceIds = {
+  title: 'Authorization Capability Reference IDs',
+  type: 'object',
+  required: ['assertionMethod'],
+  additionalProperties: false,
+  properties: {
+    assertionMethod: {
+      type: 'string'
+    }
+  }
+};
+
 const cryptosuite = {
   title: 'Cryptosuite Options',
   type: 'object',
@@ -30,16 +42,7 @@ const cryptosuite = {
         'bbs-2023'
       ]
     },
-    zcapReferenceIds: {
-      type: 'object',
-      required: ['assertionMethod'],
-      additionalProperties: false,
-      properties: {
-        assertionMethod: {
-          type: 'string'
-        }
-      }
-    }
+    zcapReferenceIds
   }
 };
 
@@ -49,6 +52,23 @@ const cryptosuites = {
   additionalItems: false,
   minItems: 1,
   items: cryptosuite
+};
+
+const envelope = {
+  title: 'Envelope Options',
+  type: 'object',
+  required: ['format', 'zcapReferenceIds'],
+  additionalProperties: false,
+  properties: {
+    format: {
+      type: 'string',
+      // supported default envelope formats in this version
+      enum: [
+        'VC-JWT'
+      ]
+    },
+    zcapReferenceIds
+  }
 };
 
 export const issueOptions = {
@@ -61,10 +81,16 @@ export const issueOptions = {
       required: ['suiteName']
     }
   }, {
+    // preferred mechanism for specifying issuer and envelope to use
+    required: ['issuer', 'envelope'],
+    not: {
+      required: ['suiteName']
+    }
+  }, {
     // legacy; for backwards compatibility only
     required: ['suiteName'],
     not: {
-      required: ['issuer', 'cryptosuites']
+      required: ['issuer', 'cryptosuites', 'envelope']
     }
   }],
   additionalProperties: false,
@@ -73,7 +99,10 @@ export const issueOptions = {
     issuer: {
       type: 'string'
     },
+    // embedded proof security
     cryptosuites,
+    // envelope security
+    envelope,
     // legacy
     suiteName: {
       type: 'string',
