@@ -73,13 +73,13 @@ export async function createStatusConfig({
 }
 
 export async function createIssuerConfig({
-  capabilityAgent, ipAllowList, meterId, zcaps, issuerOptions,
+  capabilityAgent, ipAllowList, meterId, zcaps, issueOptions,
   suiteName = 'Ed25519Signature2020', statusListOptions, oauth2 = false
 } = {}) {
   const url = `${mockData.baseUrl}/issuers`;
   // issuer-specific options
   const configOptions = {
-    issueOptions: issuerOptions ?? {suiteName}
+    issueOptions: issueOptions ?? {suiteName}
   };
   if(statusListOptions) {
     configOptions.statusListOptions = statusListOptions;
@@ -496,7 +496,7 @@ export async function provisionIssuerForStatus({
 
   // create issuer instance w/ oauth2-based authz
   const {suiteName} = statusOptions;
-  let issuerOptions;
+  let issueOptions;
   if(statusOptions.cryptosuites) {
     // delegate assertion method keys
     await delegateAssertionMethodZcaps({
@@ -504,15 +504,15 @@ export async function provisionIssuerForStatus({
       serviceAgent: issuerServiceAgent, capabilityAgent, zcaps
     });
 
-    // generate issuer options based on given cryptosuites
-    issuerOptions = {
+    // generate issue options based on given cryptosuites
+    issueOptions = {
       issuer: did,
       cryptosuites: statusOptions.cryptosuites.map(
         ({name, zcapReferenceIds}) => ({name, zcapReferenceIds}))
     };
   }
   const issuerConfig = await createIssuerConfig(
-    {capabilityAgent, zcaps, suiteName, issuerOptions, oauth2: true});
+    {capabilityAgent, zcaps, suiteName, issueOptions, oauth2: true});
   const {id: issuerId} = issuerConfig;
   const issuerRootZcap = `urn:zcap:root:${encodeURIComponent(issuerId)}`;
 
