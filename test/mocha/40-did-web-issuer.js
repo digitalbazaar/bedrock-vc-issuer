@@ -81,8 +81,8 @@ describe('issue using "did:web" issuer', () => {
       cryptosuites: suites, serviceAgent, capabilityAgent, zcaps
     });
 
-    // create issuer options
-    const issuerOptions = {
+    // create issue options
+    const issueOptions = {
       issuer: did,
       cryptosuites: suites.map(
         ({name, zcapReferenceIds}) => ({name, zcapReferenceIds}))
@@ -110,7 +110,7 @@ describe('issue using "did:web" issuer', () => {
 
     // create issuer instance w/ no status list options
     const noStatusListIssuerConfig = await helpers.createIssuerConfig({
-      capabilityAgent, zcaps, issuerOptions
+      capabilityAgent, zcaps, issueOptions
     });
     noStatusListIssuerId = noStatusListIssuerConfig.id;
     noStatusListIssuerRootZcap =
