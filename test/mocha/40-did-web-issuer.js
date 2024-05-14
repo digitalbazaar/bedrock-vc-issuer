@@ -77,20 +77,9 @@ describe('issue using "did:web" issuer', () => {
     });
 
     // delegate assertion method keys
-    for(const suite of suites) {
-      const {assertionMethodKey} = suite;
-      const zcap = await helpers.delegate({
-        capability: 'urn:zcap:root:' +
-          encodeURIComponent(helpers.parseKeystoreId(assertionMethodKey.kmsId)),
-        controller: serviceAgent.id,
-        invocationTarget: assertionMethodKey.kmsId,
-        delegator: capabilityAgent
-      });
-      suite.zcapReferenceIds = {
-        assertionMethod: uuid()
-      };
-      zcaps[suite.zcapReferenceIds.assertionMethod] = zcap;
-    }
+    await helpers.delegateAssertionMethodZcaps({
+      cryptosuites: suites, serviceAgent, capabilityAgent, zcaps
+    });
 
     // create issuer options
     const issuerOptions = {
