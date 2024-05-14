@@ -67,6 +67,7 @@ const envelope = {
         'VC-JWT'
       ]
     },
+    // FIXME: `algorithm` / similar required
     zcapReferenceIds
   }
 };
