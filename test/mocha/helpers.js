@@ -390,7 +390,7 @@ async function keyResolver({id}) {
 }
 
 export async function provisionDependencies({
-  did, cryptosuites, suiteOptions, status = true
+  did, cryptosuites = [], envelope, suiteOptions, status = true
 } = {}) {
   const secret = '53ad64ce-8e1d-11ec-bb12-10bf48838a41';
   const handle = 'test';
@@ -399,9 +399,13 @@ export async function provisionDependencies({
   // create keystore for capability agent
   const keystoreAgent = await createKeystoreAgent({capabilityAgent});
 
-  if(did && cryptosuites) {
-    // generate an assertion method key for each suite to use
-    for(const suite of cryptosuites) {
+  if(did) {
+    // generate an assertion method key for each cryptosuite and / or envelope
+    const suites = cryptosuites.slice();
+    if(envelope) {
+      suites.push(envelope);
+    }
+    for(const suite of suites) {
       const {algorithm} = suite;
       let assertionMethodKey;
       const publicAliasTemplate = `${did}#{publicKeyMultibase}`;
@@ -435,6 +439,8 @@ export async function provisionDependencies({
 
   return {
     statusConfig, issuerCreateStatusListZcap, capabilityAgent, keystoreAgent,
+    // legacy `assertionMethodKey` only generated when not using status
+    // `cryptosuites` nor status `envelope`
     assertionMethodKey
   };
 }
@@ -463,9 +469,10 @@ export async function provisionIssuerForStatus({
 
   const {statusOptions} = suiteOptions;
 
-  // if status cryptosuites not provided, generate assertion method key
+  // if neither status cryptosuites nor envelope are provided, then generate
+  // assertion method key for status VC issuer
   let assertionMethodKey;
-  if(!statusOptions.cryptosuites) {
+  if(!(statusOptions.cryptosuites || statusOptions.envelope)) {
     // generate key for signing VCs (make it a did:key DID for simplicity if
     // no DID is given)
     const didTemplate = did ?? 'did:key:{publicKeyMultibase}';
@@ -497,19 +504,33 @@ export async function provisionIssuerForStatus({
   // create issuer instance w/ oauth2-based authz
   const {suiteName} = statusOptions;
   let issueOptions;
-  if(statusOptions.cryptosuites) {
+  if(statusOptions.cryptosuites || statusOptions.envelope) {
+    // can treat any envelope input as a cryptosuite here
+    const suites = (statusOptions.cryptosuites || []).slice();
+    if(statusOptions.envelope) {
+      suites.push(statusOptions.envelope);
+    }
+
     // delegate assertion method keys
     await delegateAssertionMethodZcaps({
-      cryptosuites: statusOptions.cryptosuites,
+      cryptosuites: suites,
       serviceAgent: issuerServiceAgent, capabilityAgent, zcaps
     });
 
-    // generate issue options based on given cryptosuites
+    // generate issue options based on given cryptosuites and envelope
     issueOptions = {
-      issuer: did,
-      cryptosuites: statusOptions.cryptosuites.map(
-        ({name, zcapReferenceIds}) => ({name, zcapReferenceIds}))
+      issuer: did
     };
+    if(statusOptions.cryptosuites) {
+      issueOptions.cryptosuites = statusOptions.cryptosuites.map(
+        ({name, zcapReferenceIds}) => ({name, zcapReferenceIds}));
+    }
+    if(statusOptions.envelope) {
+      issueOptions.envelope = {
+        format: statusOptions.envelope.format,
+        zcapReferenceIds: statusOptions.envelope.zcapReferenceIds
+      };
+    }
   }
   const issuerConfig = await createIssuerConfig(
     {capabilityAgent, zcaps, suiteName, issueOptions, oauth2: true});
