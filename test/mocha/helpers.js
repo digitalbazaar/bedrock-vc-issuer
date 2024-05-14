@@ -16,6 +16,7 @@ import {EdvClient} from '@digitalbazaar/edv-client';
 import {getAppIdentity} from '@bedrock/app-identity';
 import {httpClient} from '@digitalbazaar/http-client';
 import {httpsAgent} from '@bedrock/https-agent';
+import {v4 as uuid} from 'uuid';
 import {ZcapClient} from '@digitalbazaar/ezcap';
 
 import {mockData} from './mock.data.js';
@@ -202,10 +203,10 @@ export async function createEdv({
 }
 
 export async function delegateEdvZcaps({
-  edvConfig, hmac, keyAgreementKey, serviceAgent, capabilityAgent
+  edvConfig, hmac, keyAgreementKey, serviceAgent, capabilityAgent,
+  zcaps = {}
 } = {}) {
   const {id: edvId} = edvConfig;
-  const zcaps = {};
   zcaps.edv = await delegate({
     controller: serviceAgent.id,
     delegator: capabilityAgent,
@@ -225,6 +226,27 @@ export async function delegateEdvZcaps({
     invocationTarget: keyAgreementKey.kmsId,
     delegator: capabilityAgent
   });
+  return zcaps;
+}
+
+export async function delegateAssertionMethodZcaps({
+  cryptosuites, serviceAgent, capabilityAgent, zcaps = {}
+} = {}) {
+  // delegate assertion method keys
+  for(const suite of cryptosuites) {
+    const {assertionMethodKey} = suite;
+    const zcap = await delegate({
+      capability: 'urn:zcap:root:' +
+        encodeURIComponent(parseKeystoreId(assertionMethodKey.kmsId)),
+      controller: serviceAgent.id,
+      invocationTarget: assertionMethodKey.kmsId,
+      delegator: capabilityAgent
+    });
+    suite.zcapReferenceIds = {
+      assertionMethod: uuid()
+    };
+    zcaps[suite.zcapReferenceIds.assertionMethod] = zcap;
+  }
   return zcaps;
 }
 
@@ -420,26 +442,6 @@ export async function provisionDependencies({
 export async function provisionIssuerForStatus({
   did, capabilityAgent, keystoreAgent, suiteOptions
 }) {
-  // generate key for signing VCs (make it a did:key DID for simplicity if
-  // no DID is given)
-  let assertionMethodKey;
-  const didTemplate = did ?? 'did:key:{publicKeyMultibase}';
-  const publicAliasTemplate = didTemplate + '#{publicKeyMultibase}';
-  const {statusOptions} = suiteOptions;
-  const algorithm = statusOptions.algorithm ?? suiteOptions.algorithm;
-  if(['P-256', 'P-384'].includes(algorithm)) {
-    assertionMethodKey = await _generateMultikey({
-      keystoreAgent,
-      type: `urn:webkms:multikey:${algorithm}`,
-      publicAliasTemplate
-    });
-  } else {
-    assertionMethodKey = await keystoreAgent.generateKey({
-      type: 'asymmetric',
-      publicAliasTemplate
-    });
-  }
-
   // create EDV for storage (creating hmac and kak in the process)
   const {
     edvConfig,
@@ -458,17 +460,57 @@ export async function provisionIssuerForStatus({
     edvConfig, hmac, keyAgreementKey, serviceAgent: issuerServiceAgent,
     capabilityAgent
   });
-  // delegate assertion method zcap to service agent
-  zcaps.assertionMethod = await delegate({
-    capability: 'urn:zcap:root:' +
-      encodeURIComponent(parseKeystoreId(assertionMethodKey.kmsId)),
-    controller: issuerServiceAgent.id,
-    invocationTarget: assertionMethodKey.kmsId,
-    delegator: capabilityAgent
-  });
+
+  const {statusOptions} = suiteOptions;
+
+  // if status cryptosuites not provided, generate assertion method key
+  let assertionMethodKey;
+  if(!statusOptions.cryptosuites) {
+    // generate key for signing VCs (make it a did:key DID for simplicity if
+    // no DID is given)
+    const didTemplate = did ?? 'did:key:{publicKeyMultibase}';
+    const publicAliasTemplate = didTemplate + '#{publicKeyMultibase}';
+    const algorithm = statusOptions.algorithm ?? suiteOptions.algorithm;
+    if(['P-256', 'P-384'].includes(algorithm)) {
+      assertionMethodKey = await _generateMultikey({
+        keystoreAgent,
+        type: `urn:webkms:multikey:${algorithm}`,
+        publicAliasTemplate
+      });
+    } else {
+      assertionMethodKey = await keystoreAgent.generateKey({
+        type: 'asymmetric',
+        publicAliasTemplate
+      });
+    }
+
+    // delegate assertion method zcap to service agent
+    zcaps.assertionMethod = await delegate({
+      capability: 'urn:zcap:root:' +
+        encodeURIComponent(parseKeystoreId(assertionMethodKey.kmsId)),
+      controller: issuerServiceAgent.id,
+      invocationTarget: assertionMethodKey.kmsId,
+      delegator: capabilityAgent
+    });
+  }
 
   // create issuer instance w/ oauth2-based authz
-  const {suiteName, issuerOptions} = statusOptions;
+  const {suiteName} = statusOptions;
+  let issuerOptions;
+  if(statusOptions.cryptosuites) {
+    // delegate assertion method keys
+    await delegateAssertionMethodZcaps({
+      cryptosuites: statusOptions.cryptosuites,
+      serviceAgent: issuerServiceAgent, capabilityAgent, zcaps
+    });
+
+    // generate issuer options based on given cryptosuites
+    issuerOptions = {
+      issuer: did,
+      cryptosuites: statusOptions.cryptosuites.map(
+        ({name, zcapReferenceIds}) => ({name, zcapReferenceIds}))
+    };
+  }
   const issuerConfig = await createIssuerConfig(
     {capabilityAgent, zcaps, suiteName, issuerOptions, oauth2: true});
   const {id: issuerId} = issuerConfig;
