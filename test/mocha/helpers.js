@@ -230,10 +230,16 @@ export async function delegateEdvZcaps({
 }
 
 export async function delegateAssertionMethodZcaps({
-  cryptosuites, serviceAgent, capabilityAgent, zcaps = {}
+  envelope, cryptosuites = [], serviceAgent, capabilityAgent, zcaps = {}
 } = {}) {
+  // can treat any envelope input as a cryptosuite here
+  const suites = (cryptosuites || []).slice();
+  if(envelope) {
+    suites.push(envelope);
+  }
+
   // delegate assertion method keys
-  for(const suite of cryptosuites) {
+  for(const suite of suites) {
     const {assertionMethodKey} = suite;
     const zcap = await delegate({
       capability: 'urn:zcap:root:' +
