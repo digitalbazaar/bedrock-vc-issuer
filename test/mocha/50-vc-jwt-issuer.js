@@ -19,7 +19,7 @@ const serviceType = 'vc-issuer';
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
 
-describe.skip('issue using VC-JWT format', () => {
+describe.only('issue using VC-JWT format', () => {
   let capabilityAgent;
   let keystoreAgent;
   let noStatusListIssuerId;
@@ -28,7 +28,10 @@ describe.skip('issue using VC-JWT format', () => {
     // use envelope-based security
     const envelope = {
       format: 'VC-JWT',
-      algorithm: 'P-256'
+      algorithm: 'P-256',
+      options: {
+        alg: 'ES256'
+      }
     };
 
     // generate a `did:web` DID for the issuer
@@ -63,11 +66,12 @@ describe.skip('issue using VC-JWT format', () => {
       envelope, serviceAgent, capabilityAgent, zcaps
     });
 
-    // create issuer options
-    const issuerOptions = {
+    // create issue options
+    const issueOptions = {
       issuer: did,
       envelope: {
         format: envelope.format,
+        options: envelope.options,
         zcapReferenceIds: envelope.zcapReferenceIds
       }
     };
@@ -94,7 +98,7 @@ describe.skip('issue using VC-JWT format', () => {
 
     // create issuer instance w/ no status list options
     const noStatusListIssuerConfig = await helpers.createIssuerConfig({
-      capabilityAgent, zcaps, issuerOptions
+      capabilityAgent, zcaps, issueOptions
     });
     noStatusListIssuerId = noStatusListIssuerConfig.id;
     noStatusListIssuerRootZcap =

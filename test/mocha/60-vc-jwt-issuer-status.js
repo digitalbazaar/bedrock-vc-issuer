@@ -76,8 +76,8 @@ describe.skip('issue using VC-JWT format w/status list support', () => {
       envelope, serviceAgent, capabilityAgent, zcaps
     });
 
-    // create issuer options
-    const issuerOptions = {
+    // create issue options
+    const issueOptions = {
       issuer: did,
       envelope: {
         format: envelope.format,
@@ -119,7 +119,7 @@ describe.skip('issue using VC-JWT format w/status list support', () => {
       createCredentialStatusList: issuerCreateStatusListZcap
     };
     ({issuerConfig} = await helpers.createIssuerConfig({
-      capabilityAgent, zcaps: newZcaps, statusListOptions, issuerOptions
+      capabilityAgent, zcaps: newZcaps, statusListOptions, issueOptions
     }));
     issuerId = issuerConfig.id;
     issuerRootZcap = `urn:zcap:root:${encodeURIComponent(issuerId)}`;
