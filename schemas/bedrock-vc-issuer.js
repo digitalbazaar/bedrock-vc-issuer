@@ -27,6 +27,14 @@ const zcapReferenceIds = {
   }
 };
 
+const mandatoryPointers = {
+  type: 'array',
+  minItems: 0,
+  items: {
+    type: 'string'
+  }
+};
+
 const cryptosuite = {
   title: 'Cryptosuite Options',
   type: 'object',
@@ -41,6 +49,14 @@ const cryptosuite = {
         'Ed25519Signature2018', 'ecdsa-sd-2023', 'ecdsa-xi-2023',
         'bbs-2023'
       ]
+    },
+    options: {
+      title: 'Cryptosuite options',
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        mandatoryPointers
+      }
     },
     zcapReferenceIds
   }
@@ -223,13 +239,7 @@ export const issueCredentialBody = {
         credentialId: {
           type: 'string'
         },
-        mandatoryPointers: {
-          type: 'array',
-          minItems: 0,
-          items: {
-            type: 'string'
-          }
-        },
+        mandatoryPointers,
         extraInformation: {
           type: 'string'
         }

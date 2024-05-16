@@ -36,7 +36,11 @@ describe('issue using "did:web" issuer', () => {
       algorithm: 'Ed25519'
     }, {
       name: 'ecdsa-rdfc-2019',
-      algorithm: 'P-256'
+      algorithm: 'P-256',
+      // require these options (do not allow client to override)
+      options: {
+        mandatoryPointers: ['/issuer']
+      }
     }, {
       name: 'ecdsa-sd-2023',
       algorithm: 'P-256'
@@ -45,7 +49,11 @@ describe('issue using "did:web" issuer', () => {
       algorithm: 'P-256'
     }, {
       name: 'bbs-2023',
-      algorithm: 'Bls12381G2'
+      algorithm: 'Bls12381G2',
+      // require these options (do not allow client to override)
+      options: {
+        mandatoryPointers: ['/issuer']
+      }
     }];
 
     // generate a `did:web` DID for the issuer
@@ -84,8 +92,14 @@ describe('issue using "did:web" issuer', () => {
     // create issue options
     const issueOptions = {
       issuer: did,
-      cryptosuites: suites.map(
-        ({name, zcapReferenceIds}) => ({name, zcapReferenceIds}))
+      cryptosuites: suites.map(suite => {
+        const {name, options, zcapReferenceIds} = suite;
+        const cryptosuite = {name, zcapReferenceIds};
+        if(options) {
+          cryptosuite.options = options;
+        }
+        return cryptosuite;
+      })
     };
 
     // create `did:web` DID document for issuer
@@ -169,8 +183,7 @@ describe('issue using "did:web" issuer', () => {
           json: {
             credential,
             options: {
-              extraInformation: 'abc',
-              mandatoryPointers: ['/issuer']
+              extraInformation: 'abc'
             }
           }
         });

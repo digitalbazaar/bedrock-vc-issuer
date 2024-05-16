@@ -11,7 +11,9 @@
   `issuer` (to eliminate the need for the instance to retrieve it during
   issuance), to provide additional cryptosuite-specific options, and to allow
   the use of multiple cryptosuites when issuing (generating a proof set
-  instead of a single proof on a credential).
+  instead of a single proof on a credential). Each cryptosuite can also have
+  `options` passed and doing so will additionally prevent clients from overriding
+  them (e.g., `options.mandatoryPointers`).
 
 ### Changed
 - **BREAKING**: Management of status list index allocation has been rewritten
