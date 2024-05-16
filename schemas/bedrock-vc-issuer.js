@@ -83,7 +83,17 @@ const envelope = {
         'VC-JWT'
       ]
     },
-    // FIXME: `algorithm` / similar required
+    options: {
+      title: 'Envelope options',
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        alg: {
+          type: 'string',
+          enum: ['ES256', 'EdDSA', 'Ed25519']
+        }
+      }
+    },
     zcapReferenceIds
   }
 };
