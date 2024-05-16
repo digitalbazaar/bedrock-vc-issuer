@@ -19,7 +19,7 @@ const serviceType = 'vc-issuer';
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
 
-describe.only('issue using VC-JWT format', () => {
+describe('issue using VC-JWT format', () => {
   let capabilityAgent;
   let keystoreAgent;
   let noStatusListIssuerId;
