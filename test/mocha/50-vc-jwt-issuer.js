@@ -1,6 +1,7 @@
 /*!
  * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
  */
+import * as base64url from 'base64url-universal';
 import * as bedrock from '@bedrock/core';
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
@@ -20,7 +21,9 @@ const serviceType = 'vc-issuer';
 const mockCredential = require('./mock-credential.json');
 
 describe('issue using VC-JWT format', () => {
+  let assertionMethodKeyId;
   let capabilityAgent;
+  let did;
   let keystoreAgent;
   let noStatusListIssuerId;
   let noStatusListIssuerRootZcap;
@@ -29,15 +32,16 @@ describe('issue using VC-JWT format', () => {
     const envelope = {
       format: 'VC-JWT',
       algorithm: 'P-256',
-      options: {
+      // works with or without options
+      /*options: {
         alg: 'ES256'
-      }
+      }*/
     };
 
     // generate a `did:web` DID for the issuer
     const {host} = bedrock.config.server;
     const localId = uuid();
-    const did = `did:web:${encodeURIComponent(host)}:did-web:${localId}`;
+    did = `did:web:${encodeURIComponent(host)}:did-web:${localId}`;
 
     // provision dependencies
     ({capabilityAgent, keystoreAgent} = await helpers.provisionDependencies(
@@ -92,6 +96,7 @@ describe('issue using VC-JWT format', () => {
       delete description['@context'];
       didDocument.verificationMethod.push(description);
       didDocument.assertionMethod.push(description.id);
+      assertionMethodKeyId = description.id;
     }
     // add DID doc to map with DID docs to be served
     mockData.didWebDocuments.set(localId, didDocument);
@@ -133,11 +138,29 @@ describe('issue using VC-JWT format', () => {
       should.exist(verifiableCredential.id);
       should.exist(verifiableCredential.type);
       verifiableCredential.type.should.equal('EnvelopedVerifiableCredential');
-      // FIXME: verify JWT-formatted envelope
-      // FIXME: decode and verify no credential status
-      // should.exist(verifiableCredential.credentialSubject);
-      // verifiableCredential.credentialSubject.should.be.an('object');
-      // should.not.exist(verifiableCredential.credentialStatus);
+      verifiableCredential.id.should.be.a('string');
+      verifiableCredential.id.should.include('data:application/jwt,');
+
+      // assert JWT contents
+      const jwt = verifiableCredential.id.slice('data:application/jwt,'.length);
+      const split = jwt.split('.');
+      split.length.should.equal(3);
+      const header = JSON.parse(
+        new TextDecoder().decode(base64url.decode(split[0])));
+      const payload = JSON.parse(
+        new TextDecoder().decode(base64url.decode(split[1])));
+      header.kid.should.equal(assertionMethodKeyId);
+      header.alg.should.equal('ES256');
+      payload.iss.should.equal(did);
+      payload.jti.should.equal(credential.id);
+      payload.sub.should.equal(credential.credentialSubject.id);
+      should.exist(payload.vc);
+      const expectedCredential = {
+        ...credential,
+        issuer: did,
+        issuanceDate: payload.vc.issuanceDate ?? 'error: missing date'
+      };
+      payload.vc.should.deep.equal(expectedCredential);
     });
   });
 });
