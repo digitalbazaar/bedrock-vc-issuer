@@ -20,7 +20,7 @@ const serviceType = 'vc-issuer';
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
 
-describe.skip('issue using VC-JWT format w/status list support', () => {
+describe('issue using VC-JWT format w/status list support', () => {
   let assertionMethodKeyId;
   let capabilityAgent;
   let did;
@@ -170,8 +170,6 @@ describe.skip('issue using VC-JWT format w/status list support', () => {
         new TextDecoder().decode(base64url.decode(split[0])));
       const payload = JSON.parse(
         new TextDecoder().decode(base64url.decode(split[1])));
-      console.log('header', header);
-      console.log('payload', payload);
       header.kid.should.equal(assertionMethodKeyId);
       header.alg.should.equal('ES256');
       payload.iss.should.equal(did);
@@ -201,11 +199,16 @@ describe.skip('issue using VC-JWT format w/status list support', () => {
         // first issue VC
         const credential = klona(mockCredential);
         const zcapClient = helpers.createZcapClient({capabilityAgent});
-        const {data: {verifiableCredential}} = await zcapClient.write({
+        let {data: {verifiableCredential}} = await zcapClient.write({
           url: `${issuerId}/credentials/issue`,
           capability: issuerRootZcap,
           json: {credential}
         });
+
+        // parse enveloped VC as needed
+        if(verifiableCredential.type === 'EnvelopedVerifiableCredential') {
+          verifiableCredential = helpers.parseEnvelope({verifiableCredential});
+        }
 
         // get VC status
         const statusInfo = await helpers.getCredentialStatus(
