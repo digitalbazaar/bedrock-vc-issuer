@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019-2024 Digital Bazaar, Inc. All rights reserved.
  */
+import * as base64url from 'base64url-universal';
 import * as bedrock from '@bedrock/core';
 import * as database from '@bedrock/mongodb';
 import {importJWK, SignJWT} from 'jose';
@@ -362,8 +363,13 @@ export async function getCredentialStatus({
       statusPurpose
     };
   }
-  const {data: slc} = await httpClient.get(
+  let {data: slc} = await httpClient.get(
     statusListCredential, {agent: httpsAgent});
+
+  // parse enveloped VC as needed
+  if(slc.type === 'EnvelopedVerifiableCredential') {
+    slc = parseEnvelope({verifiableCredential: slc});
+  }
 
   const {encodedList} = slc.credentialSubject;
   let list;
@@ -646,4 +652,21 @@ export function parseKeystoreId(keyId) {
     throw new Error(`Invalid key ID "${keyId}".`);
   }
   return keyId.slice(0, idx);
+}
+
+export function parseEnvelope({verifiableCredential}) {
+  const {id} = verifiableCredential;
+  const commaIndex = id.indexOf(',');
+  const format = id.slice('data:'.length, commaIndex);
+
+  // VC-JWT envelope
+  if(format === 'application/jwt') {
+    const data = id.slice(commaIndex + 1);
+    // FIXME: consider adding verification of `data` (JWT)
+    const split = data.split('.');
+    const claimSet = JSON.parse(
+      new TextDecoder().decode(base64url.decode(split[1])));
+    return claimSet.vc;
+  }
+  throw new Error(`Unknown envelope format "${format}".`);
 }
