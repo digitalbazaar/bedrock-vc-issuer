@@ -40,7 +40,7 @@
     "@bedrock/test": "^8.0.5",
     "@bedrock/validation": "^7.0.0",
     "@bedrock/vc-issuer": "file:..",
-    "@bedrock/vc-status": "digitalbazaar/bedrock-vc-status#envelope",
+    "@bedrock/vc-status": "digitalbazaar/bedrock-vc-status#initial",
     "@bedrock/vc-status-list-context": "digitalbazaar/bedrock-vc-status-list-context#bitstring-status-list",
     "@bedrock/veres-one-context": "^15.0.0",
     "@bedrock/zcap-storage": "^8.0.0",
