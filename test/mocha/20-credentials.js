@@ -116,6 +116,11 @@ describe('issue APIs', () => {
       let bslSuspensionRootZcap;
       let bslSuspensionStatusId;
       let bslSuspensionStatusRootZcap;
+      let bslRevocationSuspensionIssuerConfig;
+      let bslRevocationSuspensionIssuerId;
+      let bslRevocationSuspensionRootZcap;
+      let bslRevocationSuspensionStatusId;
+      let bslRevocationSuspensionStatusRootZcap;
       let smallBslIssuerConfig;
       let smallBslIssuerId;
       let smallBslRootZcap;
@@ -245,6 +250,36 @@ describe('issue APIs', () => {
             `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
           bslSuspensionStatusId = statusConfig.id;
           bslSuspensionStatusRootZcap =
+            `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
+        }
+
+        // create issuer instance w/ bitstring status list options
+        // w/ both revocation and suspension status purposes
+        {
+          const {
+            statusConfig,
+            issuerCreateStatusListZcap
+          } = await helpers.provisionDependencies(depOptions);
+          const statusListOptions = [{
+            type: 'BitstringStatusList',
+            statusPurpose: ['revocation', 'suspension'],
+            zcapReferenceIds: {
+              createCredentialStatusList: 'createCredentialStatusList'
+            }
+          }];
+          const newZcaps = {
+            ...zcaps,
+            createCredentialStatusList: issuerCreateStatusListZcap
+          };
+          const issuerConfig = await helpers.createIssuerConfig({
+            capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+          });
+          bslRevocationSuspensionIssuerConfig = issuerConfig;
+          bslRevocationSuspensionIssuerId = issuerConfig.id;
+          bslRevocationSuspensionRootZcap =
+            `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
+          bslRevocationSuspensionStatusId = statusConfig.id;
+          bslRevocationSuspensionStatusRootZcap =
             `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
         }
 
@@ -1034,6 +1069,97 @@ describe('issue APIs', () => {
             ({status} = await helpers.getCredentialStatus(
               {verifiableCredential}));
             status.should.equal(true);
+          });
+        it('updates BitstringStatusList revocation+suspension status',
+          async () => {
+            // first issue VC
+            const credential = klona(mockCredential);
+            const zcapClient = helpers.createZcapClient({capabilityAgent});
+            const {data: {verifiableCredential}} = await zcapClient.write({
+              url: `${bslRevocationSuspensionIssuerId}/credentials/issue`,
+              capability: bslRevocationSuspensionRootZcap,
+              json: {credential, options: issueOptions}
+            });
+
+            {
+              // get VC suspension status
+              const statusInfo = await helpers.getCredentialStatus(
+                {verifiableCredential, statusPurpose: 'suspension'});
+              let {status} = statusInfo;
+              status.should.equal(false);
+
+              // then suspend VC
+              let error;
+              try {
+                const {statusListOptions: [{indexAllocator}]} =
+                  bslRevocationSuspensionIssuerConfig;
+                await zcapClient.write({
+                  url: `${bslRevocationSuspensionStatusId}/credentials/status`,
+                  capability: bslRevocationSuspensionStatusRootZcap,
+                  json: {
+                    credentialId: verifiableCredential.id,
+                    indexAllocator,
+                    credentialStatus: statusInfo.credentialStatus,
+                    status: true
+                  }
+                });
+              } catch(e) {
+                error = e;
+              }
+              assertNoError(error);
+
+              // force refresh of new SLC
+              await zcapClient.write({
+                url: `${statusInfo.statusListCredential}?refresh=true`,
+                capability: bslRevocationSuspensionStatusRootZcap,
+                json: {}
+              });
+
+              // check status of VC has changed
+              ({status} = await helpers.getCredentialStatus(
+                {verifiableCredential, statusPurpose: 'suspension'}));
+              status.should.equal(true);
+            }
+
+            {
+              // get VC revocation status
+              const statusInfo = await helpers.getCredentialStatus(
+                {verifiableCredential, statusPurpose: 'revocation'});
+              let {status} = statusInfo;
+              status.should.equal(false);
+
+              // then revoke VC
+              let error;
+              try {
+                const {statusListOptions: [{indexAllocator}]} =
+                  bslRevocationSuspensionIssuerConfig;
+                await zcapClient.write({
+                  url: `${bslRevocationSuspensionStatusId}/credentials/status`,
+                  capability: bslRevocationSuspensionStatusRootZcap,
+                  json: {
+                    credentialId: verifiableCredential.id,
+                    indexAllocator,
+                    credentialStatus: statusInfo.credentialStatus,
+                    status: true
+                  }
+                });
+              } catch(e) {
+                error = e;
+              }
+              assertNoError(error);
+
+              // force refresh of new SLC
+              await zcapClient.write({
+                url: `${statusInfo.statusListCredential}?refresh=true`,
+                capability: bslRevocationSuspensionStatusRootZcap,
+                json: {}
+              });
+
+              // check status of VC has changed
+              ({status} = await helpers.getCredentialStatus(
+                {verifiableCredential, statusPurpose: 'revocation'}));
+              status.should.equal(true);
+            }
           });
 
         it('updates multiple TerseBitstringStatusList statuses',
