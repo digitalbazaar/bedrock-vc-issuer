@@ -336,9 +336,16 @@ export async function getCredentialStatus({
   verifiableCredential, statusPurpose, listLength
 }) {
   // get SLC for the VC
-  const {credentialStatus} = verifiableCredential;
+  let {credentialStatus} = verifiableCredential;
   if(Array.isArray(credentialStatus)) {
-    throw new Error('Multiple credential statuses not supported.');
+    // find matching status purpose
+    credentialStatus = credentialStatus.find(
+      cs => cs.statusPurpose === statusPurpose);
+    if(!credentialStatus) {
+      throw new Error(
+        `Credential status with matching status purpose "${statusPurpose}" ` +
+        'not found.');
+    }
   }
   let {statusListCredential} = credentialStatus;
   let statusListIndex;
@@ -379,7 +386,9 @@ export async function getCredentialStatus({
     list = await decodeList({encodedList});
   }
   const status = list.getStatus(statusListIndex);
-  return {status, statusListCredential, expandedCredentialStatus};
+  return {
+    status, statusListCredential, expandedCredentialStatus, credentialStatus
+  };
 }
 
 export async function revokeDelegatedCapability({
