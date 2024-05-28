@@ -1249,7 +1249,7 @@ describe('issue APIs', () => {
               {verifiableCredential, statusPurpose: 'revocation', listLength});
             newRevocationStatus.status.should.equal(true);
             const newSuspensionStatus = await helpers.getCredentialStatus(
-              {verifiableCredential, statusPurpose: 'revocation', listLength});
+              {verifiableCredential, statusPurpose: 'suspension', listLength});
             newSuspensionStatus.status.should.equal(true);
           });
       });
