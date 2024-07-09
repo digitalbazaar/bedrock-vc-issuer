@@ -36,14 +36,14 @@ describe('issue using "did:web" issuer', () => {
       algorithm: 'Ed25519'
     }, {
       name: 'ecdsa-rdfc-2019',
+      algorithm: 'P-256'
+    }, {
+      name: 'ecdsa-sd-2023',
       algorithm: 'P-256',
       // require these options (do not allow client to override)
       options: {
         mandatoryPointers: ['/issuer']
       }
-    }, {
-      name: 'ecdsa-sd-2023',
-      algorithm: 'P-256'
     }, {
       name: 'ecdsa-xi-2023',
       algorithm: 'P-256'
