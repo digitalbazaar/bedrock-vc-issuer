@@ -1,6 +1,7 @@
 /*!
  * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
  */
+import * as assertions from './assertions.js';
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
 import {createRequire} from 'node:module';
@@ -648,11 +649,11 @@ describe('issue APIs', () => {
         });
         it('issues a valid credential w/ "credentialStatus" and ' +
           'suspension status purpose', async () => {
+          const zcapClient = helpers.createZcapClient({capabilityAgent});
           const credential = klona(mockCredential);
           let error;
           let result;
           try {
-            const zcapClient = helpers.createZcapClient({capabilityAgent});
             result = await zcapClient.write({
               url: `${bslSuspensionIssuerId}/credentials/issue`,
               capability: bslSuspensionRootZcap,
@@ -679,6 +680,14 @@ describe('issue APIs', () => {
           should.exist(verifiableCredential.credentialStatus);
           should.exist(verifiableCredential.proof);
           verifiableCredential.proof.should.be.an('object');
+
+          await assertions.assertStoredCredential({
+            configId: bslSuspensionIssuerId,
+            credentialId: verifiableCredential.id,
+            zcapClient,
+            capability: bslSuspensionRootZcap,
+            expectedCredential: verifiableCredential
+          });
         });
         it('issues a valid credential w/ terse "credentialStatus" for ' +
           'both revocation and suspension status purpose', async () => {
