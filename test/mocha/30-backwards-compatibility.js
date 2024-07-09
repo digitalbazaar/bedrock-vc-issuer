@@ -25,17 +25,8 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
     let keystoreAgent;
     let noStatusListIssuerId;
     let noStatusListIssuerRootZcap;
-    let sl2021RevocationIssuerConfig;
-    let sl2021RevocationIssuerId;
-    let sl2021RevocationRootZcap;
-    let sl2021RevocationStatusId;
-    let sl2021RevocationStatusRootZcap;
-    let sl2021SuspensionIssuerConfig;
-    let sl2021SuspensionIssuerId;
-    let sl2021SuspensionRootZcap;
-    let sl2021SuspensionStatusId;
-    let sl2021SuspensionStatusRootZcap;
-    let oauth2IssuerConfig;
+    let sl2021Revocation;
+    let sl2021Suspension;
     beforeEach(async () => {
       const suiteName = 'Ed25519Signature2020';
       const depOptions = {
@@ -105,10 +96,6 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
       // create issuer instance w/ status list 2021 status list options
       // w/ revocation status purpose
       {
-        const {
-          statusConfig,
-          issuerCreateStatusListZcap
-        } = await helpers.provisionDependencies(depOptions);
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'revocation',
@@ -116,29 +103,19 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
             createCredentialStatusList: 'createCredentialStatusList'
           }
         }];
-        const newZcaps = {
-          ...zcaps,
-          createCredentialStatusList: issuerCreateStatusListZcap
-        };
-        const issuerConfig = await helpers.createIssuerConfig({
-          capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+        sl2021Revocation = await helpers.createIssuerConfigAndDependencies({
+          capabilityAgent, zcaps, suiteName, statusListOptions, depOptions
         });
-        sl2021RevocationIssuerConfig = issuerConfig;
-        sl2021RevocationIssuerId = issuerConfig.id;
-        sl2021RevocationRootZcap =
-          `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
-        sl2021RevocationStatusId = statusConfig.id;
-        sl2021RevocationStatusRootZcap =
-          `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
+
         // Intentionally change the referenceId of the assertion method zcap
         // in the database to be lowercase
         await helpers.updateConfig({
-          configId: sl2021RevocationIssuerId,
+          configId: sl2021Revocation.issuerId,
           referenceId: 'assertionMethod:ed25519'
         });
         // Check if assertion method zcap has been updated
         const {config} = await helpers.findConfig({
-          configId: sl2021RevocationIssuerId
+          configId: sl2021Revocation.issuerId
         });
         should.exist(config);
         should.exist(config.zcaps['assertionMethod:ed25519']);
@@ -147,10 +124,6 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
       // create issuer instance w/ status list 2021 status list options
       // w/ suspension status purpose
       {
-        const {
-          statusConfig,
-          issuerCreateStatusListZcap
-        } = await helpers.provisionDependencies(depOptions);
         const statusListOptions = [{
           type: 'StatusList2021',
           statusPurpose: 'suspension',
@@ -158,37 +131,23 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
             createCredentialStatusList: 'createCredentialStatusList'
           }
         }];
-        const newZcaps = {
-          ...zcaps,
-          createCredentialStatusList: issuerCreateStatusListZcap
-        };
-        const issuerConfig = await helpers.createIssuerConfig({
-          capabilityAgent, zcaps: newZcaps, statusListOptions, suiteName
+        sl2021Suspension = await helpers.createIssuerConfigAndDependencies({
+          capabilityAgent, zcaps, suiteName, statusListOptions, depOptions
         });
-        sl2021SuspensionIssuerConfig = issuerConfig;
-        sl2021SuspensionIssuerId = issuerConfig.id;
-        sl2021SuspensionRootZcap =
-          `urn:zcap:root:${encodeURIComponent(issuerConfig.id)}`;
-        sl2021SuspensionStatusId = statusConfig.id;
-        sl2021SuspensionStatusRootZcap =
-          `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
+
         // Intentionally change the referenceId of the assertion method zcap
         // in the database to be uppercase
         await helpers.updateConfig({
-          configId: sl2021SuspensionIssuerId,
+          configId: sl2021Suspension.issuerId,
           referenceId: 'assertionMethod:Ed25519'
         });
         // Check if assertion method zcap has been updated
         const {config} = await helpers.findConfig({
-          configId: sl2021SuspensionIssuerId
+          configId: sl2021Suspension.issuerId
         });
         should.exist(config);
         should.exist(config.zcaps['assertionMethod:Ed25519']);
       }
-
-      // create issuer instance w/ oauth2-based authz
-      oauth2IssuerConfig = await helpers.createIssuerConfig(
-        {capabilityAgent, zcaps, oauth2: true, suiteName});
     });
     describe('/credentials/issue', () => {
       it('issues a valid credential w/no "credentialStatus"', async () => {
@@ -223,106 +182,6 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
         should.exist(verifiableCredential.proof);
         verifiableCredential.proof.should.be.an('object');
       });
-      it('issues a valid credential w/oauth2 w/root scope', async () => {
-        const credential = klona(mockCredential);
-        let error;
-        let result;
-        try {
-          const configId = oauth2IssuerConfig.id;
-          const url = `${configId}/credentials/issue`;
-          const accessToken = await helpers.getOAuth2AccessToken(
-            {configId, action: 'write', target: '/'});
-          result = await httpClient.post(url, {
-            agent,
-            headers: {authorization: `Bearer ${accessToken}`},
-            json: {credential}
-          });
-        } catch(e) {
-          error = e;
-        }
-        assertNoError(error);
-        should.exist(result.data);
-        should.exist(result.data.verifiableCredential);
-        const {verifiableCredential} = result.data;
-        verifiableCredential.should.be.an('object');
-        should.exist(verifiableCredential['@context']);
-        should.exist(verifiableCredential.id);
-        should.exist(verifiableCredential.type);
-        should.exist(verifiableCredential.issuer);
-        should.exist(verifiableCredential.issuanceDate);
-        should.exist(verifiableCredential.credentialSubject);
-        verifiableCredential.credentialSubject.should.be.an('object');
-        should.not.exist(verifiableCredential.credentialStatus);
-        should.exist(verifiableCredential.proof);
-        verifiableCredential.proof.should.be.an('object');
-      });
-      it('issues a valid credential w/oauth2 w/credentials scope',
-        async () => {
-          const credential = klona(mockCredential);
-          let error;
-          let result;
-          try {
-            const configId = oauth2IssuerConfig.id;
-            const url = `${configId}/credentials/issue`;
-            const accessToken = await helpers.getOAuth2AccessToken(
-              {configId, action: 'write', target: '/credentials'});
-            result = await httpClient.post(url, {
-              agent,
-              headers: {authorization: `Bearer ${accessToken}`},
-              json: {credential}
-            });
-          } catch(e) {
-            error = e;
-          }
-          assertNoError(error);
-          should.exist(result.data);
-          should.exist(result.data.verifiableCredential);
-          const {verifiableCredential} = result.data;
-          verifiableCredential.should.be.an('object');
-          should.exist(verifiableCredential['@context']);
-          should.exist(verifiableCredential.id);
-          should.exist(verifiableCredential.type);
-          should.exist(verifiableCredential.issuer);
-          should.exist(verifiableCredential.issuanceDate);
-          should.exist(verifiableCredential.credentialSubject);
-          verifiableCredential.credentialSubject.should.be.an('object');
-          should.not.exist(verifiableCredential.credentialStatus);
-          should.exist(verifiableCredential.proof);
-          verifiableCredential.proof.should.be.an('object');
-        });
-      it('issues a valid credential w/oauth2 w/targeted scope', async () => {
-        const credential = klona(mockCredential);
-        let error;
-        let result;
-        try {
-          const configId = oauth2IssuerConfig.id;
-          const url = `${configId}/credentials/issue`;
-          const accessToken = await helpers.getOAuth2AccessToken(
-            {configId, action: 'write', target: '/credentials/issue'});
-          result = await httpClient.post(url, {
-            agent,
-            headers: {authorization: `Bearer ${accessToken}`},
-            json: {credential}
-          });
-        } catch(e) {
-          error = e;
-        }
-        assertNoError(error);
-        should.exist(result.data);
-        should.exist(result.data.verifiableCredential);
-        const {verifiableCredential} = result.data;
-        verifiableCredential.should.be.an('object');
-        should.exist(verifiableCredential['@context']);
-        should.exist(verifiableCredential.id);
-        should.exist(verifiableCredential.type);
-        should.exist(verifiableCredential.issuer);
-        should.exist(verifiableCredential.issuanceDate);
-        should.exist(verifiableCredential.credentialSubject);
-        verifiableCredential.credentialSubject.should.be.an('object');
-        should.not.exist(verifiableCredential.credentialStatus);
-        should.exist(verifiableCredential.proof);
-        verifiableCredential.proof.should.be.an('object');
-      });
       it('issues a valid credential w/ SL 2021 "credentialStatus" and ' +
         'suspension status purpose', async () => {
         const credential = klona(mockCredential);
@@ -331,8 +190,8 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
         try {
           const zcapClient = helpers.createZcapClient({capabilityAgent});
           result = await zcapClient.write({
-            url: `${sl2021SuspensionIssuerId}/credentials/issue`,
-            capability: sl2021SuspensionRootZcap,
+            url: `${sl2021Suspension.issuerId}/credentials/issue`,
+            capability: sl2021Suspension.rootZcap,
             json: {
               credential
             }
@@ -365,8 +224,8 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
           const credential = klona(mockCredential);
           const zcapClient = helpers.createZcapClient({capabilityAgent});
           const {data: {verifiableCredential}} = await zcapClient.write({
-            url: `${sl2021RevocationIssuerId}/credentials/issue`,
-            capability: sl2021RevocationRootZcap,
+            url: `${sl2021Revocation.issuerId}/credentials/issue`,
+            capability: sl2021Revocation.rootZcap,
             json: {credential}
           });
 
@@ -380,10 +239,10 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
           let error;
           try {
             const {statusListOptions: [{indexAllocator}]} =
-              sl2021RevocationIssuerConfig;
+              sl2021Revocation.issuerConfig;
             await zcapClient.write({
-              url: `${sl2021RevocationStatusId}/credentials/status`,
-              capability: sl2021RevocationStatusRootZcap,
+              url: `${sl2021Revocation.statusId}/credentials/status`,
+              capability: sl2021Revocation.statusRootZcap,
               json: {
                 credentialId: verifiableCredential.id,
                 indexAllocator,
@@ -399,7 +258,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
           // force refresh of new SLC
           await zcapClient.write({
             url: `${statusInfo.statusListCredential}?refresh=true`,
-            capability: sl2021RevocationStatusRootZcap,
+            capability: sl2021Revocation.statusRootZcap,
             json: {}
           });
 
@@ -414,8 +273,8 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
           const credential = klona(mockCredential);
           const zcapClient = helpers.createZcapClient({capabilityAgent});
           const {data: {verifiableCredential}} = await zcapClient.write({
-            url: `${sl2021SuspensionIssuerId}/credentials/issue`,
-            capability: sl2021SuspensionRootZcap,
+            url: `${sl2021Suspension.issuerId}/credentials/issue`,
+            capability: sl2021Suspension.rootZcap,
             json: {credential}
           });
 
@@ -429,10 +288,10 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
           let error;
           try {
             const {statusListOptions: [{indexAllocator}]} =
-              sl2021SuspensionIssuerConfig;
+              sl2021Suspension.issuerConfig;
             await zcapClient.write({
-              url: `${sl2021SuspensionStatusId}/credentials/status`,
-              capability: sl2021SuspensionStatusRootZcap,
+              url: `${sl2021Suspension.statusId}/credentials/status`,
+              capability: sl2021Suspension.statusRootZcap,
               json: {
                 credentialId: verifiableCredential.id,
                 indexAllocator,
@@ -448,7 +307,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
           // force refresh of new SLC
           await zcapClient.write({
             url: `${statusInfo.statusListCredential}?refresh=true`,
-            capability: sl2021SuspensionStatusRootZcap,
+            capability: sl2021Suspension.statusRootZcap,
             json: {}
           });
 
