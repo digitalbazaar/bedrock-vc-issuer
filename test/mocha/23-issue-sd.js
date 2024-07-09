@@ -17,27 +17,11 @@ const serviceType = 'vc-issuer';
 // NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
-const mockCredentialV2 = require('./mock-credential-v2.json');
 
-describe('issue w/o status APIs', () => {
+describe('issue w/selective disclosure options', () => {
   const suiteNames = {
-    Ed25519Signature2020: {
-      algorithm: 'Ed25519'
-    },
-    'eddsa-rdfc-2022': {
-      algorithm: 'Ed25519'
-    },
-    'ecdsa-rdfc-2019': {
-      algorithm: ['P-256', 'P-384']
-    },
     'ecdsa-sd-2023': {
       algorithm: ['P-256']
-    },
-    'ecdsa-xi-2023': {
-      algorithm: ['P-256', 'P-384'],
-      issueOptions: {
-        extraInformation: 'abc'
-      }
     },
     'bbs-2023': {
       algorithm: ['Bls12381G2']
@@ -73,21 +57,13 @@ describe('issue w/o status APIs', () => {
           depOptions));
 
         // generate key for signing VCs (make it a did:key DID for simplicity)
-        let assertionMethodKey;
         const publicAliasTemplate =
           'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
-        if(['P-256', 'P-384', 'Bls12381G2'].includes(algorithm)) {
-          assertionMethodKey = await helpers._generateMultikey({
-            keystoreAgent,
-            type: `urn:webkms:multikey:${algorithm}`,
-            publicAliasTemplate
-          });
-        } else {
-          assertionMethodKey = await keystoreAgent.generateKey({
-            type: 'asymmetric',
-            publicAliasTemplate
-          });
-        }
+        const assertionMethodKey = await helpers._generateMultikey({
+          keystoreAgent,
+          type: `urn:webkms:multikey:${algorithm}`,
+          publicAliasTemplate
+        });
 
         // create EDV for storage (creating hmac and kak in the process)
         const {
@@ -126,49 +102,49 @@ describe('issue w/o status APIs', () => {
         });
       });
       describe('/credentials/issue', () => {
-        it('issues a valid credential w/no "credentialStatus"', async () => {
-          const credential = klona(mockCredential);
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          const {verifiableCredential} = await assertions.issueAndAssert({
-            configId: noStatusListIssuerId,
-            credential,
-            issueOptions,
-            zcapClient,
-            capability: noStatusListIssuerRootZcap
+        it('issues a valid credential w/ "options.mandatoryPointers"',
+          async () => {
+            const credential = klona(mockCredential);
+            const zcapClient = helpers.createZcapClient({capabilityAgent});
+            const {verifiableCredential} = await assertions.issueAndAssert({
+              configId: noStatusListIssuerId,
+              credential,
+              issueOptions: {
+                ...issueOptions,
+                mandatoryPointers: ['/issuer']
+              },
+              zcapClient,
+              capability: noStatusListIssuerRootZcap
+            });
+            should.exist(verifiableCredential.id);
+            should.not.exist(verifiableCredential.credentialStatus);
           });
-          should.exist(verifiableCredential.id);
-          should.not.exist(verifiableCredential.credentialStatus);
-        });
-        it('issues a VC 2.0 credential w/no "credentialStatus"', async () => {
-          const credential = klona(mockCredentialV2);
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          const {verifiableCredential} = await assertions.issueAndAssert({
-            configId: noStatusListIssuerId,
-            credential,
-            issueOptions,
-            zcapClient,
-            capability: noStatusListIssuerRootZcap
-          });
-          should.exist(verifiableCredential.id);
-          should.not.exist(verifiableCredential.credentialStatus);
-        });
-
-        it('fails to issue an empty credential', async () => {
+        it('fails to issue a valid credential w/ invalid ' +
+          '"options.mandatoryPointers"', async () => {
           let error;
+          const missingPointer = '/nonExistentPointer';
           try {
+            const credential = klona(mockCredential);
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             await zcapClient.write({
               url: `${noStatusListIssuerId}/credentials/issue`,
               capability: noStatusListIssuerRootZcap,
               json: {
-                credential: {}
+                credential,
+                options: {
+                  ...issueOptions,
+                  mandatoryPointers: [missingPointer]
+                }
               }
             });
           } catch(e) {
             error = e;
           }
           should.exist(error);
-          error.data.type.should.equal('ValidationError');
+          error.data.type.should.equal('DataError');
+          error.status.should.equal(400);
+          error.data.message.should.equal(
+            `JSON pointer "${missingPointer}" does not match document.`);
         });
       });
     });
