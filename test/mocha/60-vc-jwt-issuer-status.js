@@ -4,17 +4,12 @@
 import * as base64url from 'base64url-universal';
 import * as bedrock from '@bedrock/core';
 import * as helpers from './helpers.js';
-import {agent} from '@bedrock/https-agent';
 import {createRequire} from 'node:module';
-import {httpClient} from '@digitalbazaar/http-client';
 import {klona} from 'klona';
 import {mockData} from './mock.data.js';
 import {v4 as uuid} from 'uuid';
 
 const require = createRequire(import.meta.url);
-
-const {baseUrl} = mockData;
-const serviceType = 'vc-issuer';
 
 // NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
@@ -24,7 +19,7 @@ describe('issue using VC-JWT format w/status list support', () => {
   let assertionMethodKeyId;
   let capabilityAgent;
   let did;
-  let keystoreAgent;
+  let zcaps;
   let issuerCreateStatusListZcap;
   let issuerConfig;
   let issuerId;
@@ -46,38 +41,16 @@ describe('issue using VC-JWT format w/status list support', () => {
 
     // provision dependencies
     ({
-      capabilityAgent, keystoreAgent,
+      capabilityAgent, zcaps,
       statusConfig, issuerCreateStatusListZcap
     } = await helpers.provisionDependencies({
       did, envelope, suiteOptions: {
         statusOptions: {
           envelope
         }
-      }
+      },
+      zcaps: true
     }));
-
-    // create EDV for storage (creating hmac and kak in the process)
-    const {
-      edvConfig,
-      hmac,
-      keyAgreementKey
-    } = await helpers.createEdv({capabilityAgent, keystoreAgent});
-
-    // get service agent to delegate to
-    const serviceAgentUrl =
-      `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
-    const {data: serviceAgent} = await httpClient.get(serviceAgentUrl, {agent});
-
-    // delegate edv, hmac, and key agreement key zcaps to service agent
-    const zcaps = await helpers.delegateEdvZcaps({
-      edvConfig, hmac, keyAgreementKey, serviceAgent,
-      capabilityAgent
-    });
-
-    // delegate assertion method keys
-    await helpers.delegateAssertionMethodZcaps({
-      envelope, serviceAgent, capabilityAgent, zcaps
-    });
 
     // create issue options
     const issueOptions = {
