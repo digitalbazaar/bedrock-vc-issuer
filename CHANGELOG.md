@@ -14,6 +14,8 @@
   instead of a single proof on a credential). Each cryptosuite can also have
   `options` passed and doing so will additionally prevent clients from overriding
   them (e.g., `options.mandatoryPointers`).
+- Add `<issuer-instance>/credentials/<credentialId>` endpoint for retrieving
+  previously issued VCs, provided that those VCs included `credentialStatus`.
 
 ### Changed
 - **BREAKING**: Management of status list index allocation has been rewritten
