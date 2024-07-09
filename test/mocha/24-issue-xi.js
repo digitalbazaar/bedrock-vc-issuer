@@ -5,6 +5,7 @@ import * as assertions from './assertions.js';
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
 import {createRequire} from 'node:module';
+import {encode} from 'base64url-universal';
 import {httpClient} from '@digitalbazaar/http-client';
 import {klona} from 'klona';
 import {mockData} from './mock.data.js';
@@ -17,30 +18,14 @@ const serviceType = 'vc-issuer';
 // NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
-const mockCredentialV2 = require('./mock-credential-v2.json');
 
-describe('issue w/o status APIs', () => {
+describe('issue w/extra information options', () => {
   const suiteNames = {
-    Ed25519Signature2020: {
-      algorithm: 'Ed25519'
-    },
-    'eddsa-rdfc-2022': {
-      algorithm: 'Ed25519'
-    },
-    'ecdsa-rdfc-2019': {
-      algorithm: ['P-256', 'P-384']
-    },
-    'ecdsa-sd-2023': {
-      algorithm: ['P-256']
-    },
     'ecdsa-xi-2023': {
       algorithm: ['P-256', 'P-384'],
       issueOptions: {
         extraInformation: 'abc'
       }
-    },
-    'bbs-2023': {
-      algorithm: ['Bls12381G2']
     }
   };
   for(const suiteName in suiteNames) {
@@ -126,49 +111,49 @@ describe('issue w/o status APIs', () => {
         });
       });
       describe('/credentials/issue', () => {
-        it('issues a valid credential w/no "credentialStatus"', async () => {
-          const credential = klona(mockCredential);
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          const {verifiableCredential} = await assertions.issueAndAssert({
-            configId: noStatusListIssuerId,
-            credential,
-            issueOptions,
-            zcapClient,
-            capability: noStatusListIssuerRootZcap
+        it('issues a valid credential w/ "options.extraInformation"',
+          async () => {
+            const credential = klona(mockCredential);
+            const zcapClient = helpers.createZcapClient({capabilityAgent});
+            const extraInformationBytes = new Uint8Array([
+              12, 52, 75, 63, 74, 85, 21, 5, 62, 10
+            ]);
+            const extraInformationEncoded = encode(extraInformationBytes);
+            const {verifiableCredential} = await assertions.issueAndAssert({
+              configId: noStatusListIssuerId,
+              credential,
+              issueOptions: {
+                ...issueOptions,
+                extraInformation: extraInformationEncoded
+              },
+              zcapClient,
+              capability: noStatusListIssuerRootZcap
+            });
+            should.exist(verifiableCredential.id);
+            should.not.exist(verifiableCredential.credentialStatus);
           });
-          should.exist(verifiableCredential.id);
-          should.not.exist(verifiableCredential.credentialStatus);
-        });
-        it('issues a VC 2.0 credential w/no "credentialStatus"', async () => {
-          const credential = klona(mockCredentialV2);
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          const {verifiableCredential} = await assertions.issueAndAssert({
-            configId: noStatusListIssuerId,
-            credential,
-            issueOptions,
-            zcapClient,
-            capability: noStatusListIssuerRootZcap
-          });
-          should.exist(verifiableCredential.id);
-          should.not.exist(verifiableCredential.credentialStatus);
-        });
-
-        it('fails to issue an empty credential', async () => {
+        it('fails to issue a valid credential w/ invalid ' +
+          '"options.extraInformation"', async () => {
           let error;
           try {
+            const credential = klona(mockCredential);
             const zcapClient = helpers.createZcapClient({capabilityAgent});
             await zcapClient.write({
               url: `${noStatusListIssuerId}/credentials/issue`,
               capability: noStatusListIssuerRootZcap,
               json: {
-                credential: {}
+                credential,
+                options: {
+                  ...issueOptions,
+                  extraInformation: ['notAString']
+                }
               }
             });
           } catch(e) {
             error = e;
           }
           should.exist(error);
-          error.data.type.should.equal('ValidationError');
+          error.data.name.should.equal('ValidationError');
         });
       });
     });
