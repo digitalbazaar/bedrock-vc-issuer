@@ -250,15 +250,13 @@ export async function delegateEdvZcaps({
     invocationTarget: edvId
   });
   zcaps.hmac = await delegate({
-    capability: 'urn:zcap:root:' +
-      encodeURIComponent(parseKeystoreId(hmac.id)),
+    capability: createRootZcap({url: parseKeystoreId(hmac.id)}),
     controller: serviceAgent.id,
     invocationTarget: hmac.id,
     delegator: capabilityAgent
   });
   zcaps.keyAgreementKey = await delegate({
-    capability: 'urn:zcap:root:' +
-      encodeURIComponent(parseKeystoreId(keyAgreementKey.kmsId)),
+    capability: createRootZcap({url: parseKeystoreId(keyAgreementKey.kmsId)}),
     controller: serviceAgent.id,
     invocationTarget: keyAgreementKey.kmsId,
     delegator: capabilityAgent
@@ -283,8 +281,9 @@ export async function delegateAssertionMethodZcaps({
     if(!referenceId) {
       const {assertionMethodKey} = suite;
       const zcap = await delegate({
-        capability: 'urn:zcap:root:' +
-          encodeURIComponent(parseKeystoreId(assertionMethodKey.kmsId)),
+        capability: createRootZcap({
+          url: parseKeystoreId(assertionMethodKey.kmsId)
+        }),
         controller: serviceAgent.id,
         invocationTarget: assertionMethodKey.kmsId,
         delegator: capabilityAgent
@@ -647,7 +646,7 @@ export async function provisionIssuerForStatus({
   const issuerConfig = await createIssuerConfig(
     {capabilityAgent, zcaps, suiteName, issueOptions, oauth2: true});
   const {id: issuerId} = issuerConfig;
-  const issuerRootZcap = `urn:zcap:root:${encodeURIComponent(issuerId)}`;
+  const issuerRootZcap = createRootZcap({url: issuerId});
 
   // delegate issuer root zcap to status service
   const statusServiceAgentUrl =
@@ -685,7 +684,7 @@ export async function provisionStatus({
   const statusConfig = await createStatusConfig(
     {capabilityAgent, zcaps, oauth2: true});
   const {id: statusId} = statusConfig;
-  const statusRootZcap = `urn:zcap:root:${encodeURIComponent(statusId)}`;
+  const statusRootZcap = createRootZcap({url: statusId});
 
   // delegate status root zcap to issuer service
   const issuerServiceAgentUrl =
