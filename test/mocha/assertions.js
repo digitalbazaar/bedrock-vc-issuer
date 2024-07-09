@@ -48,9 +48,6 @@ export async function assertStoredCredential({
 export async function issueAndAssert({
   configId, credential, issueOptions, zcapClient, capability
 }) {
-  const version1 = credential['@context'].includes(VC_CONTEXT_V1);
-  const version2 = credential['@context'].includes(VC_CONTEXT_V2);
-
   let error;
   let result;
   try {
@@ -69,22 +66,38 @@ export async function issueAndAssert({
   should.exist(result.data);
   should.exist(result.data.verifiableCredential);
   const {verifiableCredential} = result.data;
+
+  assertVerifiableCredential({verifiableCredential});
+
+  return {result, verifiableCredential};
+}
+
+export function assertVerifiableCredential({verifiableCredential} = {}) {
+  let version1;
+  let version2;
+
+  should.exist(verifiableCredential);
   verifiableCredential.should.be.an('object');
   should.exist(verifiableCredential['@context']);
-  should.exist(verifiableCredential.id);
+  if(Array.isArray(verifiableCredential['@context'])) {
+    should.exist(verifiableCredential['@context'][0]);
+    version1 = verifiableCredential['@context'][0] === VC_CONTEXT_V1;
+    version2 = verifiableCredential['@context'][0] === VC_CONTEXT_V2;
+  } else if(typeof verifiableCredential['@context'] === 'string') {
+    version1 = verifiableCredential['@context'] === VC_CONTEXT_V1;
+    version2 = verifiableCredential['@context'] === VC_CONTEXT_V2;
+  }
+
+  version1.should.not.equal(version2);
+
+  should.exist(version1, '"@context" must be a string or array.');
   should.exist(verifiableCredential.type);
   should.exist(verifiableCredential.issuer);
   if(version1) {
-    verifiableCredential['@context'].includes(VC_CONTEXT_V1).should.equal(true);
     should.exist(verifiableCredential.issuanceDate);
-  }
-  if(version2) {
-    verifiableCredential['@context'].includes(VC_CONTEXT_V2).should.equal(true);
   }
   should.exist(verifiableCredential.credentialSubject);
   verifiableCredential.credentialSubject.should.be.an('object');
   should.exist(verifiableCredential.proof);
   verifiableCredential.proof.should.be.an('object');
-
-  return {result, verifiableCredential};
 }
