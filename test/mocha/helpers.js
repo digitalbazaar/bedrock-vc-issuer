@@ -63,6 +63,10 @@ export async function createConfig({
   return response.data;
 }
 
+export function createRootZcap({url}) {
+  return `urn:zcap:root:${encodeURIComponent(url)}`;
+}
+
 export async function createStatusConfig({
   capabilityAgent, ipAllowList, meterId, zcaps, oauth2 = false
 } = {}) {
@@ -89,6 +93,39 @@ export async function createIssuerConfig({
     serviceType: 'vc-issuer',
     url, capabilityAgent, ipAllowList, meterId, zcaps, configOptions, oauth2
   });
+}
+
+export async function createIssuerConfigAndDependencies({
+  capabilityAgent, ipAllowList, meterId, zcaps, issueOptions,
+  suiteName = 'Ed25519Signature2020', statusListOptions, oauth2 = false,
+  depOptions
+}) {
+  let statusConfig;
+  let issuerCreateStatusListZcap;
+  if(statusListOptions) {
+    ({
+      statusConfig,
+      issuerCreateStatusListZcap
+    } = await provisionDependencies(depOptions));
+    zcaps = {
+      ...zcaps
+    };
+    for(const {zcapReferenceIds} of statusListOptions) {
+      zcaps[zcapReferenceIds.createCredentialStatusList] =
+        issuerCreateStatusListZcap;
+    }
+  }
+  const issuerConfig = await createIssuerConfig({
+    capabilityAgent, ipAllowList, meterId, zcaps, issueOptions,
+    suiteName, statusListOptions, oauth2
+  });
+  return {
+    issuerConfig,
+    issuerId: issuerConfig.id,
+    rootZcap: createRootZcap({url: issuerConfig.id}),
+    statusId: statusConfig?.id,
+    statusRootZcap: statusConfig && createRootZcap({url: statusConfig.id})
+  };
 }
 
 export async function createMeter({capabilityAgent, serviceType} = {}) {
