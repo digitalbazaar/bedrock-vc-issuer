@@ -18,9 +18,8 @@ const serviceType = 'vc-issuer';
 // NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
-const mockTerseCredential = require('./mock-terse-credential.json');
 
-describe('issue w/status APIs', () => {
+describe('issue with BitstringStatusList', () => {
   const suiteNames = {
     Ed25519Signature2020: {
       algorithm: 'Ed25519',
@@ -44,8 +43,7 @@ describe('issue w/status APIs', () => {
       algorithm: ['P-256'],
       statusOptions: {
         suiteName: 'ecdsa-rdfc-2019'
-      },
-      terseIssueOptions: {mandatoryPointers: ['/issuer']}
+      }
     },
     'ecdsa-xi-2023': {
       algorithm: ['P-256', 'P-384'],
@@ -62,44 +60,36 @@ describe('issue w/status APIs', () => {
         // sign status list with simple ECDSA
         algorithm: 'P-256',
         suiteName: 'ecdsa-rdfc-2019'
-      },
-      terseIssueOptions: {mandatoryPointers: ['/issuer']}
+      }
     }
   };
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
-    const {issueOptions, statusOptions, terseIssueOptions} = suiteInfo;
-    if(Array.isArray(suiteInfo.algorithm)) {
-      for(const algorithm of suiteInfo.algorithm) {
-        describeSuite({
-          suiteName, algorithm, issueOptions, statusOptions, terseIssueOptions
-        });
-      }
-    } else {
+    const {issueOptions, statusOptions} = suiteInfo;
+    const algorithms = Array.isArray(suiteInfo.algorithm) ?
+      suiteInfo.algorithm : [suiteInfo.algorithm];
+    for(const algorithm of algorithms) {
       describeSuite({
-        suiteName, algorithm: suiteInfo.algorithm, issueOptions,
-        statusOptions, terseIssueOptions
+        suiteName, algorithm, issueOptions, statusOptions
       });
     }
   }
   function describeSuite({
-    suiteName, algorithm, issueOptions, statusOptions,
-    terseIssueOptions = issueOptions
+    suiteName, algorithm, issueOptions, statusOptions
   }) {
     const testDescription = `${suiteName}, algorithm: ${algorithm}`;
     const depOptions = {
       suiteOptions: {
-        suiteName, algorithm, issueOptions, statusOptions, terseIssueOptions
+        suiteName, algorithm, issueOptions, statusOptions
       }
     };
     describe(testDescription, function() {
       let capabilityAgent;
       let keystoreAgent;
+      // FIXME: convert to loop based on params
       let bslRevocation;
       let bslSuspension;
       let bslRevocationSuspension;
-      let smallTerseStatusList;
-      let terseMultistatus;
       beforeEach(async () => {
         // provision dependencies
         ({capabilityAgent, keystoreAgent} = await helpers.provisionDependencies(
@@ -195,57 +185,6 @@ describe('issue w/status APIs', () => {
               capabilityAgent, zcaps, suiteName, statusListOptions, depOptions
             });
         }
-
-        // create issuer instance w/ small terse status list
-        {
-          const statusListOptions = [{
-            type: 'TerseBitstringStatusList',
-            statusPurpose: 'revocation',
-            options: {
-              blockSize: 8,
-              blockCount: 1,
-              listCount: 2
-            },
-            zcapReferenceIds: {
-              createCredentialStatusList: 'createCredentialStatusList'
-            }
-          }];
-          smallTerseStatusList = await helpers
-            .createIssuerConfigAndDependencies({
-              capabilityAgent, zcaps, suiteName, statusListOptions, depOptions
-            });
-
-          // insert example context for issuing VCs w/terse status entries
-          const {
-            testBarcodeCredentialContextUrl,
-            testBarcodeCredentialContext
-          } = mockData;
-          const client = helpers.createZcapClient({capabilityAgent});
-          const url = `${smallTerseStatusList.issuerId}/contexts`;
-          await client.write({
-            url, json: {
-              id: testBarcodeCredentialContextUrl,
-              context: testBarcodeCredentialContext
-            },
-            capability: smallTerseStatusList.rootZcap
-          });
-        }
-
-        // create issuer instance w/ terse bitstring status list options
-        // w/ revocation AND suspension status purpose
-        {
-          const statusListOptions = [{
-            type: 'TerseBitstringStatusList',
-            statusPurpose: ['revocation', 'suspension'],
-            zcapReferenceIds: {
-              createCredentialStatusList: 'createCredentialStatusList'
-            }
-          }];
-          terseMultistatus = await helpers
-            .createIssuerConfigAndDependencies({
-              capabilityAgent, zcaps, suiteName, statusListOptions, depOptions
-            });
-        }
       });
       describe('/credentials/issue', () => {
         it('issues a valid credential w/ "credentialStatus" and ' +
@@ -289,42 +228,6 @@ describe('issue w/status APIs', () => {
             capability: bslSuspension.rootZcap,
             expectedCredential: verifiableCredential
           });
-        });
-        it('issues a valid credential w/ terse "credentialStatus" for ' +
-          'both revocation and suspension status purpose', async () => {
-          const credential = klona(mockTerseCredential);
-          let error;
-          let result;
-          try {
-            const zcapClient = helpers.createZcapClient({capabilityAgent});
-            result = await zcapClient.write({
-              url: `${terseMultistatus.issuerId}/credentials/issue`,
-              capability: terseMultistatus.rootZcap,
-              json: {
-                credential,
-                options: terseIssueOptions
-              }
-            });
-          } catch(e) {
-            error = e;
-          }
-          assertNoError(error);
-          should.exist(result.data);
-          should.exist(result.data.verifiableCredential);
-          const {verifiableCredential} = result.data;
-          verifiableCredential.should.be.an('object');
-          should.exist(verifiableCredential['@context']);
-          should.exist(verifiableCredential.type);
-          should.exist(verifiableCredential.credentialStatus);
-          verifiableCredential.credentialStatus.should.have.keys([
-            'type', 'terseStatusListBaseUrl', 'terseStatusListIndex'
-          ]);
-          verifiableCredential.credentialStatus.type.should.equal(
-            'TerseBitstringStatusListEntry');
-          verifiableCredential.credentialStatus.terseStatusListIndex
-            .should.be.a('number');
-          should.exist(verifiableCredential.proof);
-          verifiableCredential.proof.should.be.an('object');
         });
         it('fails when trying to issue a duplicate credential', async () => {
           const zcapClient = helpers.createZcapClient({capabilityAgent});
@@ -635,97 +538,6 @@ describe('issue w/status APIs', () => {
                 {verifiableCredential, statusPurpose: 'revocation'}));
               status.should.equal(true);
             }
-          });
-
-        it('updates multiple TerseBitstringStatusList statuses',
-          async () => {
-            // first issue VC
-            const credential = klona(mockTerseCredential);
-            const credentialId = `urn:uuid:${uuid()}`;
-            const zcapClient = helpers.createZcapClient({capabilityAgent});
-            const {data: {verifiableCredential}} = await zcapClient.write({
-              url: `${terseMultistatus.issuerId}/credentials/issue`,
-              capability: terseMultistatus.rootZcap,
-              json: {
-                credential,
-                options: {...terseIssueOptions, credentialId}
-              }
-            });
-
-            // get VC statuses
-            const listLength = 131072;
-            const revocationStatusInfo = await helpers.getCredentialStatus(
-              {verifiableCredential, statusPurpose: 'revocation', listLength});
-            revocationStatusInfo.status.should.equal(false);
-            const suspensionStatusInfo = await helpers.getCredentialStatus(
-              {verifiableCredential, statusPurpose: 'suspension', listLength});
-            suspensionStatusInfo.status.should.equal(false);
-
-            // then revoke VC
-            {
-              let error;
-              try {
-                const {statusListOptions: [{indexAllocator}]} =
-                  terseMultistatus.issuerConfig;
-                await zcapClient.write({
-                  url: `${terseMultistatus.statusId}/credentials/status`,
-                  capability: terseMultistatus.statusRootZcap,
-                  json: {
-                    credentialId,
-                    indexAllocator,
-                    credentialStatus: revocationStatusInfo
-                      .expandedCredentialStatus,
-                    status: true
-                  }
-                });
-              } catch(e) {
-                error = e;
-              }
-              assertNoError(error);
-            }
-
-            // then suspend VC
-            {
-              let error;
-              try {
-                const {statusListOptions: [{indexAllocator}]} =
-                  terseMultistatus.issuerConfig;
-                await zcapClient.write({
-                  url: `${terseMultistatus.statusId}/credentials/status`,
-                  capability: terseMultistatus.statusRootZcap,
-                  json: {
-                    credentialId,
-                    indexAllocator,
-                    credentialStatus: suspensionStatusInfo
-                      .expandedCredentialStatus,
-                    status: true
-                  }
-                });
-              } catch(e) {
-                error = e;
-              }
-              assertNoError(error);
-            }
-
-            // force refresh of new SLCs
-            await zcapClient.write({
-              url: `${revocationStatusInfo.statusListCredential}?refresh=true`,
-              capability: terseMultistatus.statusRootZcap,
-              json: {}
-            });
-            await zcapClient.write({
-              url: `${suspensionStatusInfo.statusListCredential}?refresh=true`,
-              capability: terseMultistatus.statusRootZcap,
-              json: {}
-            });
-
-            // check statuses of VC have changed
-            const newRevocationStatus = await helpers.getCredentialStatus(
-              {verifiableCredential, statusPurpose: 'revocation', listLength});
-            newRevocationStatus.status.should.equal(true);
-            const newSuspensionStatus = await helpers.getCredentialStatus(
-              {verifiableCredential, statusPurpose: 'suspension', listLength});
-            newSuspensionStatus.status.should.equal(true);
           });
       });
     });
