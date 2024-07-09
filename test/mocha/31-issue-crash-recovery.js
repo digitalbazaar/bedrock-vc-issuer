@@ -35,16 +35,11 @@ describe('issue crash recovery', () => {
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
     const {issueOptions, statusOptions, terseIssueOptions} = suiteInfo;
-    if(Array.isArray(suiteInfo.algorithm)) {
-      for(const algorithm of suiteInfo.algorithm) {
-        describeSuite({
-          suiteName, algorithm, issueOptions, statusOptions, terseIssueOptions
-        });
-      }
-    } else {
+    const algorithms = Array.isArray(suiteInfo.algorithm) ?
+      suiteInfo.algorithm : [suiteInfo.algorithm];
+    for(const algorithm of algorithms) {
       describeSuite({
-        suiteName, algorithm: suiteInfo.algorithm, issueOptions,
-        statusOptions, terseIssueOptions
+        suiteName, algorithm, issueOptions, statusOptions, terseIssueOptions
       });
     }
   }

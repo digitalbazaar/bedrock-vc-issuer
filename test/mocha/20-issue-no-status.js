@@ -46,12 +46,12 @@ describe('issue w/o status APIs', () => {
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
     const {issueOptions} = suiteInfo;
-    if(Array.isArray(suiteInfo.algorithm)) {
-      for(const algorithm of suiteInfo.algorithm) {
-        describeSuite({suiteName, algorithm, issueOptions});
-      }
-    } else {
-      describeSuite({suiteName, algorithm: suiteInfo.algorithm, issueOptions});
+    const algorithms = Array.isArray(suiteInfo.algorithm) ?
+      suiteInfo.algorithm : [suiteInfo.algorithm];
+    for(const algorithm of algorithms) {
+      describeSuite({
+        suiteName, algorithm, issueOptions
+      });
     }
   }
   function describeSuite({suiteName, algorithm, issueOptions}) {
