@@ -2,16 +2,10 @@
  * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
  */
 import * as helpers from './helpers.js';
-import {agent} from '@bedrock/https-agent';
 import {createRequire} from 'node:module';
-import {httpClient} from '@digitalbazaar/http-client';
 import {klona} from 'klona';
-import {mockData} from './mock.data.js';
 
 const require = createRequire(import.meta.url);
-
-const {baseUrl} = mockData;
-const serviceType = 'vc-issuer';
 
 // NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
@@ -19,10 +13,9 @@ const mockCredential = require('./mock-credential.json');
 
 describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
   'compatibility test', () => {
-  const zcaps = {};
   describe('Ed25519Signature2020', function() {
     let capabilityAgent;
-    let keystoreAgent;
+    let zcaps;
     let noStatusListIssuerId;
     let noStatusListIssuerRootZcap;
     let sl2021Revocation;
@@ -36,46 +29,18 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
       };
 
       // provision dependencies
-      ({capabilityAgent, keystoreAgent} = await helpers.provisionDependencies(
-        {status: false}));
-
-      // generate key for signing VCs (make it a did:key DID for simplicity)
-      const assertionMethodKey = await keystoreAgent.generateKey({
-        type: 'asymmetric',
-        publicAliasTemplate: 'did:key:{publicKeyMultibase}#' +
-          '{publicKeyMultibase}'
-      });
-
-      // create EDV for storage (creating hmac and kak in the process)
-      const {
-        edvConfig,
-        hmac,
-        keyAgreementKey
-      } = await helpers.createEdv({capabilityAgent, keystoreAgent});
-
-      // get service agent to delegate to
-      const serviceAgentUrl =
-        `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
-      const {data: serviceAgent} = await httpClient.get(
-        serviceAgentUrl, {agent});
-
-      // delegate edv, hmac, and key agreement key zcaps to service agent
-      await helpers.delegateEdvZcaps({
-        edvConfig, hmac, keyAgreementKey, serviceAgent,
-        capabilityAgent, zcaps
-      });
-      // delegate assertion method zcap to service agent
-      zcaps.assertionMethod = await helpers.delegate({
-        capability: 'urn:zcap:root:' +
-          encodeURIComponent(helpers.parseKeystoreId(assertionMethodKey.kmsId)),
-        controller: serviceAgent.id,
-        invocationTarget: assertionMethodKey.kmsId,
-        delegator: capabilityAgent
-      });
+      ({capabilityAgent, zcaps} = await helpers.provisionDependencies({
+        status: false,
+        cryptosuites: [{
+          name: suiteName,
+          algorithm: 'Ed25519'
+        }],
+        zcaps: true
+      }));
 
       // create issuer instance w/ no status list options
       const noStatusListIssuerConfig = await helpers.createIssuerConfig(
-        {capabilityAgent, zcaps, suiteName: 'Ed25519Signature2020'});
+        {capabilityAgent, zcaps, suiteName});
       noStatusListIssuerId = noStatusListIssuerConfig.id;
       noStatusListIssuerRootZcap =
           `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
