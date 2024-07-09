@@ -5,7 +5,6 @@ import * as assertions from './assertions.js';
 import * as helpers from './helpers.js';
 import {agent} from '@bedrock/https-agent';
 import {createRequire} from 'node:module';
-import {encode} from 'base64url-universal';
 import {httpClient} from '@digitalbazaar/http-client';
 import {issuer} from '@bedrock/vc-issuer';
 import {klona} from 'klona';
@@ -23,10 +22,9 @@ const serviceType = 'vc-issuer';
 // NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
 const mockCredential = require('./mock-credential.json');
-const mockCredentialV2 = require('./mock-credential-v2.json');
 const mockTerseCredential = require('./mock-terse-credential.json');
 
-describe('issue APIs', () => {
+describe('issue w/status APIs', () => {
   const suiteNames = {
     Ed25519Signature2020: {
       algorithm: 'Ed25519',
@@ -72,10 +70,6 @@ describe('issue APIs', () => {
       terseIssueOptions: {mandatoryPointers: ['/issuer']}
     }
   };
-  // list of suites to run the selective disclosure tests on
-  const sdSuites = new Set(['ecdsa-sd-2023', 'bbs-2023']);
-  // list of suites to run extra information tests on
-  const xiSuites = new Set(['ecdsa-xi-2023']);
   for(const suiteName in suiteNames) {
     const suiteInfo = suiteNames[suiteName];
     const {issueOptions, statusOptions, terseIssueOptions} = suiteInfo;
@@ -105,17 +99,12 @@ describe('issue APIs', () => {
     describe(testDescription, function() {
       let capabilityAgent;
       let keystoreAgent;
-      // FIXME: split into separate tests so instances aren't created for
-      // tests that they aren't used in
-      let noStatusListIssuerId;
-      let noStatusListIssuerRootZcap;
       let bslRevocation;
       let bslSuspension;
       let bslRevocationSuspension;
       let smallBsl;
       let smallTerseStatusList;
       let terseMultistatus;
-      let oauth2IssuerConfig;
       beforeEach(async () => {
         // provision dependencies
         ({capabilityAgent, keystoreAgent} = await helpers.provisionDependencies(
@@ -164,14 +153,6 @@ describe('issue APIs', () => {
           controller: serviceAgent.id,
           invocationTarget: assertionMethodKey.kmsId,
           delegator: capabilityAgent
-        });
-
-        // create issuer instance w/ no status list options
-        const noStatusListIssuerConfig = await helpers.createIssuerConfig(
-          {capabilityAgent, zcaps, suiteName});
-        noStatusListIssuerId = noStatusListIssuerConfig.id;
-        noStatusListIssuerRootZcap = helpers.createRootZcap({
-          url: noStatusListIssuerId
         });
 
         // create issuer instance w/ bitstring status list options
@@ -288,214 +269,8 @@ describe('issue APIs', () => {
               capabilityAgent, zcaps, suiteName, statusListOptions, depOptions
             });
         }
-
-        // create issuer instance w/ oauth2-based authz
-        oauth2IssuerConfig = await helpers.createIssuerConfig(
-          {capabilityAgent, zcaps, oauth2: true, suiteName});
       });
       describe('/credentials/issue', () => {
-        it('issues a valid credential w/no "credentialStatus"', async () => {
-          const credential = klona(mockCredential);
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          const {verifiableCredential} = await assertions.issueAndAssert({
-            configId: noStatusListIssuerId,
-            credential,
-            issueOptions,
-            zcapClient,
-            capability: noStatusListIssuerRootZcap
-          });
-          should.not.exist(verifiableCredential.credentialStatus);
-        });
-        it('issues a VC 2.0 credential w/no "credentialStatus"', async () => {
-          const credential = klona(mockCredentialV2);
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          const {verifiableCredential} = await assertions.issueAndAssert({
-            configId: noStatusListIssuerId,
-            credential,
-            issueOptions,
-            zcapClient,
-            capability: noStatusListIssuerRootZcap
-          });
-          should.not.exist(verifiableCredential.credentialStatus);
-        });
-
-        it('fails to issue an empty credential', async () => {
-          let error;
-          try {
-            const zcapClient = helpers.createZcapClient({capabilityAgent});
-            await zcapClient.write({
-              url: `${noStatusListIssuerId}/credentials/issue`,
-              capability: noStatusListIssuerRootZcap,
-              json: {
-                credential: {}
-              }
-            });
-          } catch(e) {
-            error = e;
-          }
-          should.exist(error);
-          error.data.type.should.equal('ValidationError');
-        });
-        it('issues a valid credential w/oauth2 w/root scope', async () => {
-          const credential = klona(mockCredential);
-          let error;
-          let result;
-          try {
-            const configId = oauth2IssuerConfig.id;
-            const url = `${configId}/credentials/issue`;
-            const accessToken = await helpers.getOAuth2AccessToken(
-              {configId, action: 'write', target: '/'});
-            result = await httpClient.post(url, {
-              agent,
-              headers: {authorization: `Bearer ${accessToken}`},
-              json: {credential, options: issueOptions}
-            });
-          } catch(e) {
-            error = e;
-          }
-          assertNoError(error);
-          should.exist(result.data);
-          should.exist(result.data.verifiableCredential);
-          const {verifiableCredential} = result.data;
-          verifiableCredential.should.be.an('object');
-          should.exist(verifiableCredential['@context']);
-          should.exist(verifiableCredential.id);
-          should.exist(verifiableCredential.type);
-          should.exist(verifiableCredential.issuer);
-          should.exist(verifiableCredential.issuanceDate);
-          should.exist(verifiableCredential.credentialSubject);
-          verifiableCredential.credentialSubject.should.be.an('object');
-          should.not.exist(verifiableCredential.credentialStatus);
-          should.exist(verifiableCredential.proof);
-          verifiableCredential.proof.should.be.an('object');
-        });
-        it('issues a valid credential w/oauth2 w/credentials scope',
-          async () => {
-            const credential = klona(mockCredential);
-            let error;
-            let result;
-            try {
-              const configId = oauth2IssuerConfig.id;
-              const url = `${configId}/credentials/issue`;
-              const accessToken = await helpers.getOAuth2AccessToken(
-                {configId, action: 'write', target: '/credentials'});
-              result = await httpClient.post(url, {
-                agent,
-                headers: {authorization: `Bearer ${accessToken}`},
-                json: {credential, options: issueOptions}
-              });
-            } catch(e) {
-              error = e;
-            }
-            assertNoError(error);
-            should.exist(result.data);
-            should.exist(result.data.verifiableCredential);
-            const {verifiableCredential} = result.data;
-            verifiableCredential.should.be.an('object');
-            should.exist(verifiableCredential['@context']);
-            should.exist(verifiableCredential.id);
-            should.exist(verifiableCredential.type);
-            should.exist(verifiableCredential.issuer);
-            should.exist(verifiableCredential.issuanceDate);
-            should.exist(verifiableCredential.credentialSubject);
-            verifiableCredential.credentialSubject.should.be.an('object');
-            should.not.exist(verifiableCredential.credentialStatus);
-            should.exist(verifiableCredential.proof);
-            verifiableCredential.proof.should.be.an('object');
-          });
-        it('issues a valid credential w/oauth2 w/targeted scope', async () => {
-          const credential = klona(mockCredential);
-          let error;
-          let result;
-          try {
-            const configId = oauth2IssuerConfig.id;
-            const url = `${configId}/credentials/issue`;
-            const accessToken = await helpers.getOAuth2AccessToken(
-              {configId, action: 'write', target: '/credentials/issue'});
-            result = await httpClient.post(url, {
-              agent,
-              headers: {authorization: `Bearer ${accessToken}`},
-              json: {credential, options: issueOptions}
-            });
-          } catch(e) {
-            error = e;
-          }
-          assertNoError(error);
-          should.exist(result.data);
-          should.exist(result.data.verifiableCredential);
-          const {verifiableCredential} = result.data;
-          verifiableCredential.should.be.an('object');
-          should.exist(verifiableCredential['@context']);
-          should.exist(verifiableCredential.id);
-          should.exist(verifiableCredential.type);
-          should.exist(verifiableCredential.issuer);
-          should.exist(verifiableCredential.issuanceDate);
-          should.exist(verifiableCredential.credentialSubject);
-          verifiableCredential.credentialSubject.should.be.an('object');
-          should.not.exist(verifiableCredential.credentialStatus);
-          should.exist(verifiableCredential.proof);
-          verifiableCredential.proof.should.be.an('object');
-        });
-        it('fails to issue a valid credential w/bad action scope', async () => {
-          const credential = klona(mockCredential);
-          let error;
-          let result;
-          try {
-            const configId = oauth2IssuerConfig.id;
-            const url = `${configId}/credentials/issue`;
-            const accessToken = await helpers.getOAuth2AccessToken(
-              // wrong action: `read`
-              {configId, action: 'read', target: '/credentials/issue'});
-            result = await httpClient.post(url, {
-              agent,
-              headers: {authorization: `Bearer ${accessToken}`},
-              json: {credential, options: issueOptions}
-            });
-          } catch(e) {
-            error = e;
-          }
-          should.exist(error);
-          should.not.exist(result);
-          error.status.should.equal(403);
-          error.data.type.should.equal('NotAllowedError');
-          should.exist(error.data.cause);
-          should.exist(error.data.cause.details);
-          should.exist(error.data.cause.details.code);
-          error.data.cause.details.code.should.equal(
-            'ERR_JWT_CLAIM_VALIDATION_FAILED');
-          should.exist(error.data.cause.details.claim);
-          error.data.cause.details.claim.should.equal('scope');
-        });
-        it('fails to issue a valid credential w/bad path scope', async () => {
-          const credential = klona(mockCredential);
-          let error;
-          let result;
-          try {
-            const configId = oauth2IssuerConfig.id;
-            const url = `${configId}/credentials/issue`;
-            const accessToken = await helpers.getOAuth2AccessToken(
-              // wrong path: `/foo`
-              {configId, action: 'write', target: '/foo'});
-            result = await httpClient.post(url, {
-              agent,
-              headers: {authorization: `Bearer ${accessToken}`},
-              json: {credential, options: issueOptions}
-            });
-          } catch(e) {
-            error = e;
-          }
-          should.exist(error);
-          should.not.exist(result);
-          error.status.should.equal(403);
-          error.data.type.should.equal('NotAllowedError');
-          should.exist(error.data.cause);
-          should.exist(error.data.cause.details);
-          should.exist(error.data.cause.details.code);
-          error.data.cause.details.code.should.equal(
-            'ERR_JWT_CLAIM_VALIDATION_FAILED');
-          should.exist(error.data.cause.details.claim);
-          error.data.cause.details.claim.should.equal('scope');
-        });
         it('issues a valid credential w/ "credentialStatus" and ' +
           'suspension status purpose', async () => {
           const zcapClient = helpers.createZcapClient({capabilityAgent});
@@ -692,141 +467,6 @@ describe('issue APIs', () => {
             should.not.exist(result);
           }
         });
-        // selective disclosure specific tests here
-        if(sdSuites.has(suiteName)) {
-          it('issues a valid credential w/ "options.mandatoryPointers"',
-            async () => {
-              const credential = klona(mockCredential);
-              let error;
-              let result;
-              try {
-                const zcapClient = helpers.createZcapClient({capabilityAgent});
-                result = await zcapClient.write({
-                  url: `${noStatusListIssuerId}/credentials/issue`,
-                  capability: noStatusListIssuerRootZcap,
-                  json: {
-                    credential,
-                    options: {
-                      ...issueOptions,
-                      mandatoryPointers: ['/issuer']
-                    }
-                  }
-                });
-              } catch(e) {
-                error = e;
-              }
-              assertNoError(error);
-              should.exist(result.data);
-              should.exist(result.data.verifiableCredential);
-              const {verifiableCredential} = result.data;
-              verifiableCredential.should.be.an('object');
-              should.exist(verifiableCredential['@context']);
-              should.exist(verifiableCredential.id);
-              should.exist(verifiableCredential.type);
-              should.exist(verifiableCredential.issuer);
-              should.exist(verifiableCredential.issuanceDate);
-              should.exist(verifiableCredential.credentialSubject);
-              verifiableCredential.credentialSubject.should.be.an('object');
-              should.not.exist(verifiableCredential.credentialStatus);
-              should.exist(verifiableCredential.proof);
-              verifiableCredential.proof.should.be.an('object');
-            });
-          it('fails to issue a valid credential w/ invalid ' +
-            '"options.mandatoryPointers"', async () => {
-            let error;
-            const missingPointer = '/nonExistentPointer';
-            try {
-              const credential = klona(mockCredential);
-              const zcapClient = helpers.createZcapClient({capabilityAgent});
-              await zcapClient.write({
-                url: `${noStatusListIssuerId}/credentials/issue`,
-                capability: noStatusListIssuerRootZcap,
-                json: {
-                  credential,
-                  options: {
-                    ...issueOptions,
-                    mandatoryPointers: [missingPointer]
-                  }
-                }
-              });
-            } catch(e) {
-              error = e;
-            }
-            should.exist(error);
-            error.data.type.should.equal('DataError');
-            error.status.should.equal(400);
-            error.data.message.should.equal(
-              `JSON pointer "${missingPointer}" does not match document.`);
-          });
-        }
-        // extra information tests
-        if(xiSuites.has(suiteName)) {
-          it('issues a valid credential w/ "options.extraInformation"',
-            async () => {
-              const credential = klona(mockCredential);
-              let error;
-              let result;
-              try {
-                const zcapClient = helpers.createZcapClient({capabilityAgent});
-                const extraInformationBytes = new Uint8Array([
-                  12, 52, 75, 63, 74, 85, 21, 5, 62, 10
-                ]);
-                const extraInformationEncoded = encode(extraInformationBytes);
-                result = await zcapClient.write({
-                  url: `${noStatusListIssuerId}/credentials/issue`,
-                  capability: noStatusListIssuerRootZcap,
-                  json: {
-                    credential,
-                    options: {
-                      ...issueOptions,
-                      extraInformation: extraInformationEncoded
-                    }
-                  }
-                });
-              } catch(e) {
-                error = e;
-              }
-              assertNoError(error);
-              should.exist(result.data);
-              should.exist(result.data.verifiableCredential);
-              const {verifiableCredential} = result.data;
-              verifiableCredential.should.be.an('object');
-              should.exist(verifiableCredential['@context']);
-              should.exist(verifiableCredential.id);
-              should.exist(verifiableCredential.type);
-              should.exist(verifiableCredential.issuer);
-              should.exist(verifiableCredential.issuanceDate);
-              should.exist(verifiableCredential.credentialSubject);
-              verifiableCredential.credentialSubject.should.be.an('object');
-              should.not.exist(verifiableCredential.credentialStatus);
-              should.exist(verifiableCredential.proof);
-              verifiableCredential.proof.should.be.an('object');
-            });
-          it('fails to issue a valid credential w/ invalid ' +
-            '"options.extraInformation"', async () => {
-            let error;
-            try {
-              const credential = klona(mockCredential);
-              const zcapClient = helpers.createZcapClient({capabilityAgent});
-              await zcapClient.write({
-                url: `${noStatusListIssuerId}/credentials/issue`,
-                capability: noStatusListIssuerRootZcap,
-                json: {
-                  credential,
-                  options: {
-                    ...issueOptions,
-                    extraInformation: ['notAString']
-                  }
-                }
-              });
-            } catch(e) {
-              error = e;
-            }
-            should.exist(error);
-            // how to throw OperationError not ValidationError here? necessary?
-            error.data.type.should.equal('ValidationError');
-          });
-        }
       });
 
       describe('/credentials/status', () => {
