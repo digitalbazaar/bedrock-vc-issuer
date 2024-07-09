@@ -83,7 +83,12 @@ describe('issue with TerseBitstringStatusList APIs', () => {
     const depOptions = {
       suiteOptions: {
         suiteName, algorithm, issueOptions, statusOptions, terseIssueOptions
-      }
+      },
+      cryptosuites: [{
+        name: suiteName,
+        algorithm
+      }],
+      zcaps: true
     };
     describe(testDescription, function() {
       let capabilityAgent;

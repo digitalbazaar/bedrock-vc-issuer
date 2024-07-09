@@ -3,17 +3,11 @@
  */
 import * as assertions from './assertions.js';
 import * as helpers from './helpers.js';
-import {agent} from '@bedrock/https-agent';
 import {createRequire} from 'node:module';
-import {httpClient} from '@digitalbazaar/http-client';
 import {klona} from 'klona';
-import {mockData} from './mock.data.js';
 import {v4 as uuid} from 'uuid';
 
 const require = createRequire(import.meta.url);
-
-const {baseUrl} = mockData;
-const serviceType = 'vc-issuer';
 
 // NOTE: using embedded context in mockCredential:
 // https://www.w3.org/2018/credentials/examples/v1
@@ -81,64 +75,24 @@ describe('issue with BitstringStatusList', () => {
     const depOptions = {
       suiteOptions: {
         suiteName, algorithm, issueOptions, statusOptions
-      }
+      },
+      cryptosuites: [{
+        name: suiteName,
+        algorithm
+      }],
+      zcaps: true
     };
     describe(testDescription, function() {
       let capabilityAgent;
-      let keystoreAgent;
+      let zcaps;
       // FIXME: convert to loop based on params
       let bslRevocation;
       let bslSuspension;
       let bslRevocationSuspension;
       beforeEach(async () => {
         // provision dependencies
-        ({capabilityAgent, keystoreAgent} = await helpers.provisionDependencies(
+        ({capabilityAgent, zcaps} = await helpers.provisionDependencies(
           depOptions));
-
-        // generate key for signing VCs (make it a did:key DID for simplicity)
-        let assertionMethodKey;
-        const publicAliasTemplate =
-          'did:key:{publicKeyMultibase}#{publicKeyMultibase}';
-        if(['P-256', 'P-384', 'Bls12381G2'].includes(algorithm)) {
-          assertionMethodKey = await helpers._generateMultikey({
-            keystoreAgent,
-            type: `urn:webkms:multikey:${algorithm}`,
-            publicAliasTemplate
-          });
-        } else {
-          assertionMethodKey = await keystoreAgent.generateKey({
-            type: 'asymmetric',
-            publicAliasTemplate
-          });
-        }
-
-        // create EDV for storage (creating hmac and kak in the process)
-        const {
-          edvConfig,
-          hmac,
-          keyAgreementKey
-        } = await helpers.createEdv({capabilityAgent, keystoreAgent});
-
-        // get service agent to delegate to
-        const serviceAgentUrl =
-          `${baseUrl}/service-agents/${encodeURIComponent(serviceType)}`;
-        const {data: serviceAgent} = await httpClient.get(
-          serviceAgentUrl, {agent});
-
-        // delegate edv, hmac, and key agreement key zcaps to service agent
-        const zcaps = await helpers.delegateEdvZcaps({
-          edvConfig, hmac, keyAgreementKey, serviceAgent,
-          capabilityAgent
-        });
-        // delegate assertion method zcap to service agent
-        zcaps.assertionMethod = await helpers.delegate({
-          capability: helpers.createRootZcap({
-            url: helpers.parseKeystoreId(assertionMethodKey.kmsId)
-          }),
-          controller: serviceAgent.id,
-          invocationTarget: assertionMethodKey.kmsId,
-          delegator: capabilityAgent
-        });
 
         // create issuer instance w/ bitstring status list options
         // w/ revocation status purpose
