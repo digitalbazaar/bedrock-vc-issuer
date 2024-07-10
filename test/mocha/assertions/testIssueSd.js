@@ -42,51 +42,48 @@ export function testIssueSd({suiteName, algorithm, issueOptions}) {
         url: noStatusListIssuerId
       });
     });
-    describe('/credentials/issue', () => {
-      it('issues a valid credential w/ "options.mandatoryPointers"',
-        async () => {
-          const credential = klona(mockCredential);
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          const {verifiableCredential} = await assertions.issueAndAssert({
-            configId: noStatusListIssuerId,
-            credential,
-            issueOptions: {
-              ...issueOptions,
-              mandatoryPointers: ['/issuer']
-            },
-            zcapClient,
-            capability: noStatusListIssuerRootZcap
-          });
-          should.exist(verifiableCredential.id);
-          should.not.exist(verifiableCredential.credentialStatus);
-        });
-      it('fails to issue a valid credential w/ invalid ' +
-        '"options.mandatoryPointers"', async () => {
-        let error;
-        const missingPointer = '/nonExistentPointer';
-        try {
-          const credential = klona(mockCredential);
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          await zcapClient.write({
-            url: `${noStatusListIssuerId}/credentials/issue`,
-            capability: noStatusListIssuerRootZcap,
-            json: {
-              credential,
-              options: {
-                ...issueOptions,
-                mandatoryPointers: [missingPointer]
-              }
-            }
-          });
-        } catch(e) {
-          error = e;
-        }
-        should.exist(error);
-        error.data.type.should.equal('DataError');
-        error.status.should.equal(400);
-        error.data.message.should.equal(
-          `JSON pointer "${missingPointer}" does not match document.`);
+    it('issues a valid credential w/ "options.mandatoryPointers"', async () => {
+      const credential = klona(mockCredential);
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      const {verifiableCredential} = await assertions.issueAndAssert({
+        configId: noStatusListIssuerId,
+        credential,
+        issueOptions: {
+          ...issueOptions,
+          mandatoryPointers: ['/issuer']
+        },
+        zcapClient,
+        capability: noStatusListIssuerRootZcap
       });
+      should.exist(verifiableCredential.id);
+      should.not.exist(verifiableCredential.credentialStatus);
+    });
+    it('fails to issue a valid credential w/ invalid ' +
+      '"options.mandatoryPointers"', async () => {
+      let error;
+      const missingPointer = '/nonExistentPointer';
+      try {
+        const credential = klona(mockCredential);
+        const zcapClient = helpers.createZcapClient({capabilityAgent});
+        await zcapClient.write({
+          url: `${noStatusListIssuerId}/credentials/issue`,
+          capability: noStatusListIssuerRootZcap,
+          json: {
+            credential,
+            options: {
+              ...issueOptions,
+              mandatoryPointers: [missingPointer]
+            }
+          }
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      error.data.type.should.equal('DataError');
+      error.status.should.equal(400);
+      error.data.message.should.equal(
+        `JSON pointer "${missingPointer}" does not match document.`);
     });
   });
 }

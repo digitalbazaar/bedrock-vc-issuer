@@ -65,7 +65,7 @@ function testStatusPurpose({
         capabilityAgent, zcaps, suiteName, statusListOptions, depOptions
       });
     });
-    describe('/credentials/issue', () => {
+    describe('issue', () => {
       it('issues a valid credential w/ "credentialStatus"', async () => {
         const zcapClient = helpers.createZcapClient({capabilityAgent});
         const credential = klona(mockCredential);
@@ -230,7 +230,7 @@ function testStatusPurpose({
         }
       });
     });
-    describe('/credentials/status', () => {
+    describe('status', () => {
       let zcapClient;
       let verifiableCredential;
       before(async () => {

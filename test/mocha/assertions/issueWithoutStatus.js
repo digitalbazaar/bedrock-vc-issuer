@@ -43,51 +43,49 @@ export function testIssueWithoutStatus({suiteName, algorithm, issueOptions}) {
         url: noStatusListIssuerId
       });
     });
-    describe('/credentials/issue', () => {
-      it('issues a valid credential w/no "credentialStatus"', async () => {
-        const credential = klona(mockCredential);
-        const zcapClient = helpers.createZcapClient({capabilityAgent});
-        const {verifiableCredential} = await assertions.issueAndAssert({
-          configId: noStatusListIssuerId,
-          credential,
-          issueOptions,
-          zcapClient,
-          capability: noStatusListIssuerRootZcap
-        });
-        should.exist(verifiableCredential.id);
-        should.not.exist(verifiableCredential.credentialStatus);
+    it('issues a valid credential w/no "credentialStatus"', async () => {
+      const credential = klona(mockCredential);
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      const {verifiableCredential} = await assertions.issueAndAssert({
+        configId: noStatusListIssuerId,
+        credential,
+        issueOptions,
+        zcapClient,
+        capability: noStatusListIssuerRootZcap
       });
-      it('issues a VC 2.0 credential w/no "credentialStatus"', async () => {
-        const credential = klona(mockCredentialV2);
-        const zcapClient = helpers.createZcapClient({capabilityAgent});
-        const {verifiableCredential} = await assertions.issueAndAssert({
-          configId: noStatusListIssuerId,
-          credential,
-          issueOptions,
-          zcapClient,
-          capability: noStatusListIssuerRootZcap
-        });
-        should.exist(verifiableCredential.id);
-        should.not.exist(verifiableCredential.credentialStatus);
+      should.exist(verifiableCredential.id);
+      should.not.exist(verifiableCredential.credentialStatus);
+    });
+    it('issues a VC 2.0 credential w/no "credentialStatus"', async () => {
+      const credential = klona(mockCredentialV2);
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      const {verifiableCredential} = await assertions.issueAndAssert({
+        configId: noStatusListIssuerId,
+        credential,
+        issueOptions,
+        zcapClient,
+        capability: noStatusListIssuerRootZcap
       });
+      should.exist(verifiableCredential.id);
+      should.not.exist(verifiableCredential.credentialStatus);
+    });
 
-      it('fails to issue an empty credential', async () => {
-        let error;
-        try {
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          await zcapClient.write({
-            url: `${noStatusListIssuerId}/credentials/issue`,
-            capability: noStatusListIssuerRootZcap,
-            json: {
-              credential: {}
-            }
-          });
-        } catch(e) {
-          error = e;
-        }
-        should.exist(error);
-        error.data.type.should.equal('ValidationError');
-      });
+    it('fails to issue an empty credential', async () => {
+      let error;
+      try {
+        const zcapClient = helpers.createZcapClient({capabilityAgent});
+        await zcapClient.write({
+          url: `${noStatusListIssuerId}/credentials/issue`,
+          capability: noStatusListIssuerRootZcap,
+          json: {
+            credential: {}
+          }
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      error.data.type.should.equal('ValidationError');
     });
   });
 }
