@@ -480,20 +480,9 @@ export async function provisionDependencies({
         // key already set
         continue;
       }
-      let assertionMethodKey;
-      if(['P-256', 'P-384', 'Bls12381G2'].includes(algorithm)) {
-        assertionMethodKey = await _generateMultikey({
-          keystoreAgent,
-          type: `urn:webkms:multikey:${algorithm}`,
-          publicAliasTemplate
-        });
-      } else {
-        assertionMethodKey = await keystoreAgent.generateKey({
-          type: 'asymmetric',
-          publicAliasTemplate
-        });
-      }
-      suite.assertionMethodKey = assertionMethodKey;
+      suite.assertionMethodKey = await generateAsymmetricKey({
+        keystoreAgent, algorithm, publicAliasTemplate
+      });
     }
 
     if(zcaps) {
@@ -588,18 +577,9 @@ export async function provisionIssuerForStatus({
     const didTemplate = did ?? 'did:key:{publicKeyMultibase}';
     const publicAliasTemplate = didTemplate + '#{publicKeyMultibase}';
     const algorithm = statusOptions.algorithm ?? suiteOptions.algorithm;
-    if(['P-256', 'P-384'].includes(algorithm)) {
-      assertionMethodKey = await _generateMultikey({
-        keystoreAgent,
-        type: `urn:webkms:multikey:${algorithm}`,
-        publicAliasTemplate
-      });
-    } else {
-      assertionMethodKey = await keystoreAgent.generateKey({
-        type: 'asymmetric',
-        publicAliasTemplate
-      });
-    }
+    const assertionMethodKey = await generateAsymmetricKey({
+      keystoreAgent, algorithm, publicAliasTemplate
+    });
 
     // delegate assertion method zcap to service agent
     zcaps.assertionMethod = await delegate({
@@ -706,21 +686,19 @@ export async function provisionStatus({
   };
 }
 
-export async function _generateMultikey({
-  keystoreAgent, type, publicAliasTemplate
+export async function generateAsymmetricKey({
+  keystoreAgent, algorithm, publicAliasTemplate
 }) {
-  const {capabilityAgent, kmsClient} = keystoreAgent;
-  const invocationSigner = capabilityAgent.getSigner();
-  const {keyId, keyDescription} = await kmsClient.generateKey({
-    type,
-    suiteContextUrl: 'https://w3id.org/security/multikey/v1',
-    invocationSigner,
+  if(['P-256', 'P-384', 'Bls12381G2'].includes(algorithm)) {
+    return _generateMultikey({
+      keystoreAgent,
+      type: `urn:webkms:multikey:${algorithm}`,
+      publicAliasTemplate
+    });
+  }
+  return keystoreAgent.generateKey({
+    type: 'asymmetric',
     publicAliasTemplate
-  });
-  const {id} = keyDescription;
-  ({type} = keyDescription);
-  return new AsymmetricKey({
-    id, kmsId: keyId, type, invocationSigner, kmsClient, keyDescription
   });
 }
 
@@ -768,4 +746,22 @@ export function parseEnvelope({verifiableCredential}) {
     return claimSet.vc;
   }
   throw new Error(`Unknown envelope format "${format}".`);
+}
+
+async function _generateMultikey({
+  keystoreAgent, type, publicAliasTemplate
+}) {
+  const {capabilityAgent, kmsClient} = keystoreAgent;
+  const invocationSigner = capabilityAgent.getSigner();
+  const {keyId, keyDescription} = await kmsClient.generateKey({
+    type,
+    suiteContextUrl: 'https://w3id.org/security/multikey/v1',
+    invocationSigner,
+    publicAliasTemplate
+  });
+  const {id} = keyDescription;
+  ({type} = keyDescription);
+  return new AsymmetricKey({
+    id, kmsId: keyId, type, invocationSigner, kmsClient, keyDescription
+  });
 }
