@@ -43,51 +43,48 @@ export function testIssueXi({suiteName, algorithm, issueOptions}) {
         url: noStatusListIssuerId
       });
     });
-    describe('/credentials/issue', () => {
-      it('issues a valid credential w/ "options.extraInformation"',
-        async () => {
-          const credential = klona(mockCredential);
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          const extraInformationBytes = new Uint8Array([
-            12, 52, 75, 63, 74, 85, 21, 5, 62, 10
-          ]);
-          const extraInformationEncoded = encode(extraInformationBytes);
-          const {verifiableCredential} = await assertions.issueAndAssert({
-            configId: noStatusListIssuerId,
-            credential,
-            issueOptions: {
-              ...issueOptions,
-              extraInformation: extraInformationEncoded
-            },
-            zcapClient,
-            capability: noStatusListIssuerRootZcap
-          });
-          should.exist(verifiableCredential.id);
-          should.not.exist(verifiableCredential.credentialStatus);
-        });
-      it('fails to issue a valid credential w/ invalid ' +
-        '"options.extraInformation"', async () => {
-        let error;
-        try {
-          const credential = klona(mockCredential);
-          const zcapClient = helpers.createZcapClient({capabilityAgent});
-          await zcapClient.write({
-            url: `${noStatusListIssuerId}/credentials/issue`,
-            capability: noStatusListIssuerRootZcap,
-            json: {
-              credential,
-              options: {
-                ...issueOptions,
-                extraInformation: ['notAString']
-              }
-            }
-          });
-        } catch(e) {
-          error = e;
-        }
-        should.exist(error);
-        error.data.name.should.equal('ValidationError');
+    it('issues a valid credential w/ "options.extraInformation"', async () => {
+      const credential = klona(mockCredential);
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      const extraInformationBytes = new Uint8Array([
+        12, 52, 75, 63, 74, 85, 21, 5, 62, 10
+      ]);
+      const extraInformationEncoded = encode(extraInformationBytes);
+      const {verifiableCredential} = await assertions.issueAndAssert({
+        configId: noStatusListIssuerId,
+        credential,
+        issueOptions: {
+          ...issueOptions,
+          extraInformation: extraInformationEncoded
+        },
+        zcapClient,
+        capability: noStatusListIssuerRootZcap
       });
+      should.exist(verifiableCredential.id);
+      should.not.exist(verifiableCredential.credentialStatus);
+    });
+    it('fails to issue a valid credential w/ invalid ' +
+      '"options.extraInformation"', async () => {
+      let error;
+      try {
+        const credential = klona(mockCredential);
+        const zcapClient = helpers.createZcapClient({capabilityAgent});
+        await zcapClient.write({
+          url: `${noStatusListIssuerId}/credentials/issue`,
+          capability: noStatusListIssuerRootZcap,
+          json: {
+            credential,
+            options: {
+              ...issueOptions,
+              extraInformation: ['notAString']
+            }
+          }
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      error.data.name.should.equal('ValidationError');
     });
   });
 }

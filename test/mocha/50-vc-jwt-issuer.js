@@ -81,58 +81,56 @@ describe('issue using VC-JWT format', () => {
     noStatusListIssuerRootZcap =
       `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
   });
-  describe('/credentials/issue', () => {
-    it('issues a VC-JWT VC 1.1 credential', async () => {
-      const credential = klona(mockCredential);
-      let error;
-      let result;
-      try {
-        const zcapClient = helpers.createZcapClient({capabilityAgent});
-        result = await zcapClient.write({
-          url: `${noStatusListIssuerId}/credentials/issue`,
-          capability: noStatusListIssuerRootZcap,
-          json: {
-            credential,
-            options: {
-              extraInformation: 'abc'
-            }
+  it('issues a VC-JWT VC 1.1 credential', async () => {
+    const credential = klona(mockCredential);
+    let error;
+    let result;
+    try {
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      result = await zcapClient.write({
+        url: `${noStatusListIssuerId}/credentials/issue`,
+        capability: noStatusListIssuerRootZcap,
+        json: {
+          credential,
+          options: {
+            extraInformation: 'abc'
           }
-        });
-      } catch(e) {
-        error = e;
-      }
-      assertNoError(error);
-      should.exist(result.data);
-      should.exist(result.data.verifiableCredential);
-      const {verifiableCredential} = result.data;
-      verifiableCredential.should.be.an('object');
-      should.exist(verifiableCredential['@context']);
-      should.exist(verifiableCredential.id);
-      should.exist(verifiableCredential.type);
-      verifiableCredential.type.should.equal('EnvelopedVerifiableCredential');
-      verifiableCredential.id.should.be.a('string');
-      verifiableCredential.id.should.include('data:application/jwt,');
+        }
+      });
+    } catch(e) {
+      error = e;
+    }
+    assertNoError(error);
+    should.exist(result.data);
+    should.exist(result.data.verifiableCredential);
+    const {verifiableCredential} = result.data;
+    verifiableCredential.should.be.an('object');
+    should.exist(verifiableCredential['@context']);
+    should.exist(verifiableCredential.id);
+    should.exist(verifiableCredential.type);
+    verifiableCredential.type.should.equal('EnvelopedVerifiableCredential');
+    verifiableCredential.id.should.be.a('string');
+    verifiableCredential.id.should.include('data:application/jwt,');
 
-      // assert JWT contents
-      const jwt = verifiableCredential.id.slice('data:application/jwt,'.length);
-      const split = jwt.split('.');
-      split.length.should.equal(3);
-      const header = JSON.parse(
-        new TextDecoder().decode(base64url.decode(split[0])));
-      const payload = JSON.parse(
-        new TextDecoder().decode(base64url.decode(split[1])));
-      header.kid.should.equal(assertionMethodKeyId);
-      header.alg.should.equal('ES256');
-      payload.iss.should.equal(did);
-      payload.jti.should.equal(credential.id);
-      payload.sub.should.equal(credential.credentialSubject.id);
-      should.exist(payload.vc);
-      const expectedCredential = {
-        ...credential,
-        issuer: did,
-        issuanceDate: payload.vc.issuanceDate ?? 'error: missing date'
-      };
-      payload.vc.should.deep.equal(expectedCredential);
-    });
+    // assert JWT contents
+    const jwt = verifiableCredential.id.slice('data:application/jwt,'.length);
+    const split = jwt.split('.');
+    split.length.should.equal(3);
+    const header = JSON.parse(
+      new TextDecoder().decode(base64url.decode(split[0])));
+    const payload = JSON.parse(
+      new TextDecoder().decode(base64url.decode(split[1])));
+    header.kid.should.equal(assertionMethodKeyId);
+    header.alg.should.equal('ES256');
+    payload.iss.should.equal(did);
+    payload.jti.should.equal(credential.id);
+    payload.sub.should.equal(credential.credentialSubject.id);
+    should.exist(payload.vc);
+    const expectedCredential = {
+      ...credential,
+      issuer: did,
+      issuanceDate: payload.vc.issuanceDate ?? 'error: missing date'
+    };
+    payload.vc.should.deep.equal(expectedCredential);
   });
 });

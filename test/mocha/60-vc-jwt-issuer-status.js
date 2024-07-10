@@ -103,125 +103,120 @@ describe('issue using VC-JWT format w/status list support', () => {
     statusId = statusConfig.id;
     statusRootZcap = `urn:zcap:root:${encodeURIComponent(statusConfig.id)}`;
   });
-  describe('/credentials/issue', () => {
-    it('issues a VC-JWT VC 1.1 credential', async () => {
-      const credential = klona(mockCredential);
-      let error;
-      let result;
-      try {
-        const zcapClient = helpers.createZcapClient({capabilityAgent});
-        result = await zcapClient.write({
-          url: `${issuerId}/credentials/issue`,
-          capability: issuerRootZcap,
-          json: {
-            credential,
-            options: {
-              extraInformation: 'abc'
-            }
+  it('issues a VC-JWT VC 1.1 credential', async () => {
+    const credential = klona(mockCredential);
+    let error;
+    let result;
+    try {
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      result = await zcapClient.write({
+        url: `${issuerId}/credentials/issue`,
+        capability: issuerRootZcap,
+        json: {
+          credential,
+          options: {
+            extraInformation: 'abc'
           }
-        });
-      } catch(e) {
-        error = e;
-      }
-      assertNoError(error);
-      should.exist(result.data);
-      should.exist(result.data.verifiableCredential);
-      const {verifiableCredential} = result.data;
-      verifiableCredential.should.be.an('object');
-      should.exist(verifiableCredential['@context']);
-      should.exist(verifiableCredential.id);
-      should.exist(verifiableCredential.type);
-      verifiableCredential.type.should.equal('EnvelopedVerifiableCredential');
-      verifiableCredential.id.should.be.a('string');
-      verifiableCredential.id.should.include('data:application/jwt,');
-
-      // assert JWT contents
-      const jwt = verifiableCredential.id.slice('data:application/jwt,'.length);
-      const split = jwt.split('.');
-      split.length.should.equal(3);
-      const header = JSON.parse(
-        new TextDecoder().decode(base64url.decode(split[0])));
-      const payload = JSON.parse(
-        new TextDecoder().decode(base64url.decode(split[1])));
-      header.kid.should.equal(assertionMethodKeyId);
-      header.alg.should.equal('ES256');
-      payload.iss.should.equal(did);
-      payload.jti.should.equal(credential.id);
-      payload.sub.should.equal(credential.credentialSubject.id);
-      should.exist(payload.vc);
-      // assert credential status is set in payload
-      should.exist(payload.vc.credentialStatus);
-      // assert other properties
-      const expectedCredential = {
-        ...credential,
-        '@context': [
-          ...credential['@context'],
-          'https://www.w3.org/ns/credentials/status/v1'
-        ],
-        issuer: did,
-        issuanceDate: payload.vc.issuanceDate ?? 'error: missing date'
-      };
-      const moduloStatus = {...payload.vc};
-      delete moduloStatus.credentialStatus;
-      moduloStatus.should.deep.equal(expectedCredential);
-    });
-  });
-  describe('/credentials/status', () => {
-    it('updates a BitstringStatusList revocation credential status',
-      async () => {
-        // first issue VC
-        const credential = klona(mockCredential);
-        const zcapClient = helpers.createZcapClient({capabilityAgent});
-        let {data: {verifiableCredential}} = await zcapClient.write({
-          url: `${issuerId}/credentials/issue`,
-          capability: issuerRootZcap,
-          json: {credential}
-        });
-
-        // parse enveloped VC as needed
-        if(verifiableCredential.type === 'EnvelopedVerifiableCredential') {
-          verifiableCredential = helpers.parseEnvelope({verifiableCredential});
         }
-
-        // get VC status
-        const statusInfo = await helpers.getCredentialStatus(
-          {verifiableCredential});
-        let {status} = statusInfo;
-        status.should.equal(false);
-
-        // then revoke VC
-        let error;
-        try {
-          const {statusListOptions: [{indexAllocator}]} = issuerConfig;
-          await zcapClient.write({
-            url: `${statusId}/credentials/status`,
-            capability: statusRootZcap,
-            json: {
-              credentialId: verifiableCredential.id,
-              indexAllocator,
-              credentialStatus: verifiableCredential.credentialStatus,
-              status: true
-            }
-          });
-        } catch(e) {
-          error = e;
-        }
-        assertNoError(error);
-
-        // force refresh of new SLC
-        await zcapClient.write({
-          url: `${statusInfo.statusListCredential}?refresh=true`,
-          capability: statusRootZcap,
-          json: {}
-        });
-
-        // check status of VC has changed
-        ({status} = await helpers.getCredentialStatus(
-          {verifiableCredential}));
-        status.should.equal(true);
-
-        // FIXME: check returned status VC envelope and ensure it is
-        // JWT-encoded
       });
+    } catch(e) {
+      error = e;
+    }
+    assertNoError(error);
+    should.exist(result.data);
+    should.exist(result.data.verifiableCredential);
+    const {verifiableCredential} = result.data;
+    verifiableCredential.should.be.an('object');
+    should.exist(verifiableCredential['@context']);
+    should.exist(verifiableCredential.id);
+    should.exist(verifiableCredential.type);
+    verifiableCredential.type.should.equal('EnvelopedVerifiableCredential');
+    verifiableCredential.id.should.be.a('string');
+    verifiableCredential.id.should.include('data:application/jwt,');
+
+    // assert JWT contents
+    const jwt = verifiableCredential.id.slice('data:application/jwt,'.length);
+    const split = jwt.split('.');
+    split.length.should.equal(3);
+    const header = JSON.parse(
+      new TextDecoder().decode(base64url.decode(split[0])));
+    const payload = JSON.parse(
+      new TextDecoder().decode(base64url.decode(split[1])));
+    header.kid.should.equal(assertionMethodKeyId);
+    header.alg.should.equal('ES256');
+    payload.iss.should.equal(did);
+    payload.jti.should.equal(credential.id);
+    payload.sub.should.equal(credential.credentialSubject.id);
+    should.exist(payload.vc);
+    // assert credential status is set in payload
+    should.exist(payload.vc.credentialStatus);
+    // assert other properties
+    const expectedCredential = {
+      ...credential,
+      '@context': [
+        ...credential['@context'],
+        'https://www.w3.org/ns/credentials/status/v1'
+      ],
+      issuer: did,
+      issuanceDate: payload.vc.issuanceDate ?? 'error: missing date'
+    };
+    const moduloStatus = {...payload.vc};
+    delete moduloStatus.credentialStatus;
+    moduloStatus.should.deep.equal(expectedCredential);
+  });
+  it('updates a BitstringStatusList revocation credential status', async () => {
+    // first issue VC
+    const credential = klona(mockCredential);
+    const zcapClient = helpers.createZcapClient({capabilityAgent});
+    let {data: {verifiableCredential}} = await zcapClient.write({
+      url: `${issuerId}/credentials/issue`,
+      capability: issuerRootZcap,
+      json: {credential}
+    });
+
+    // parse enveloped VC as needed
+    if(verifiableCredential.type === 'EnvelopedVerifiableCredential') {
+      verifiableCredential = helpers.parseEnvelope({verifiableCredential});
+    }
+
+    // get VC status
+    const statusInfo = await helpers.getCredentialStatus(
+      {verifiableCredential});
+    let {status} = statusInfo;
+    status.should.equal(false);
+
+    // then revoke VC
+    let error;
+    try {
+      const {statusListOptions: [{indexAllocator}]} = issuerConfig;
+      await zcapClient.write({
+        url: `${statusId}/credentials/status`,
+        capability: statusRootZcap,
+        json: {
+          credentialId: verifiableCredential.id,
+          indexAllocator,
+          credentialStatus: verifiableCredential.credentialStatus,
+          status: true
+        }
+      });
+    } catch(e) {
+      error = e;
+    }
+    assertNoError(error);
+
+    // force refresh of new SLC
+    await zcapClient.write({
+      url: `${statusInfo.statusListCredential}?refresh=true`,
+      capability: statusRootZcap,
+      json: {}
+    });
+
+    // check status of VC has changed
+    ({status} = await helpers.getCredentialStatus(
+      {verifiableCredential}));
+    status.should.equal(true);
+
+    // FIXME: check returned status VC envelope and ensure it is
+    // JWT-encoded
   });
 });
