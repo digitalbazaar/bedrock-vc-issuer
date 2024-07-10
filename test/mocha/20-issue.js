@@ -13,50 +13,27 @@ import {
 } from './assertions/testTerseBitstringStatusList.js';
 
 describe('issue', () => {
-  describe('eddsa-rdfc-2022', () => {
-    const options = {
+  const suites = {
+    'eddsa-rdfc-2022': {
       suiteName: 'eddsa-rdfc-2022',
       algorithm: 'Ed25519',
       issueOptions: {},
-      statusOptions: {}
-    };
-    testIssueWithoutStatus(options);
-    testBitstringStatusList(options);
-    testTerseBitstringStatusList(options);
-
-    // to reduce runtime and because a different suite should not change
-    // the results, only this suite runs against these tests
-    testIssueWithOAuth2(options);
-    testIssueCrashRecovery(options);
-    testStatusScaling(options);
-  });
-
-  describe('ecdsa-rdfc-2019, P-256', () => {
-    const options = {
+      statusOptions: {},
+      tags: ['general']
+    },
+    'ecdsa-rdfc-2019, P-256': {
       suiteName: 'ecdsa-rdfc-2019',
       algorithm: 'P-256',
       issueOptions: {},
       statusOptions: {}
-    };
-    testIssueWithoutStatus(options);
-    testBitstringStatusList(options);
-    testTerseBitstringStatusList(options);
-  });
-
-  describe('ecdsa-rdfc-2019, P-384', () => {
-    const options = {
+    },
+    'ecdsa-rdfc-2019, P-384': {
       suiteName: 'ecdsa-rdfc-2019',
       algorithm: 'P-384',
       issueOptions: {},
       statusOptions: {}
-    };
-    testIssueWithoutStatus(options);
-    testBitstringStatusList(options);
-    testTerseBitstringStatusList(options);
-  });
-
-  describe('ecdsa-sd-2023', () => {
-    const options = {
+    },
+    'ecdsa-sd-2023': {
       suiteName: 'ecdsa-sd-2023',
       algorithm: 'P-256',
       issueOptions: {},
@@ -65,15 +42,10 @@ describe('issue', () => {
         suiteName: 'ecdsa-rdfc-2019',
         algorithm: 'P-256'
       },
-      terseIssueOptions: {mandatoryPointers: ['/issuer']}
-    };
-    testIssueWithoutStatus(options);
-    testBitstringStatusList(options);
-    testTerseBitstringStatusList(options);
-  });
-
-  describe('bbs-2023', () => {
-    const options = {
+      terseIssueOptions: {mandatoryPointers: ['/issuer']},
+      tags: ['sd']
+    },
+    'bbs-2023': {
       suiteName: 'bbs-2023',
       algorithm: 'Bls12381G2',
       issueOptions: {},
@@ -82,16 +54,10 @@ describe('issue', () => {
         suiteName: 'ecdsa-rdfc-2019',
         algorithm: 'P-256'
       },
-      terseIssueOptions: {mandatoryPointers: ['/issuer']}
-    };
-    testIssueWithoutStatus(options);
-    testIssueSd(options);
-    testBitstringStatusList(options);
-    testTerseBitstringStatusList(options);
-  });
-
-  describe('ecdsa-xi-2023, P-256', () => {
-    const options = {
+      terseIssueOptions: {mandatoryPointers: ['/issuer']},
+      tags: ['sd']
+    },
+    'ecdsa-xi-2023': {
       suiteName: 'ecdsa-xi-2023',
       algorithm: 'P-256',
       issueOptions: {
@@ -101,24 +67,42 @@ describe('issue', () => {
         // sign status list with simple ECDSA
         suiteName: 'ecdsa-rdfc-2019',
         algorithm: 'P-256'
-      }
-    };
-
-    testIssueWithoutStatus(options);
-    testIssueXi(options);
-    testBitstringStatusList(options);
-    testTerseBitstringStatusList(options);
-  });
-
-  describe('Ed25519Signature2020', () => {
-    const options = {
+      },
+      tags: ['xi']
+    },
+    Ed25519Signature2020: {
       suiteName: 'Ed25519Signature2020',
       algorithm: 'Ed25519',
       issueOptions: {},
       statusOptions: {}
-    };
-    testIssueWithoutStatus(options);
-    testBitstringStatusList(options);
-    testTerseBitstringStatusList(options);
-  });
+    }
+  };
+
+  for(const name in suites) {
+    const options = suites[name];
+    describe(name, () => {
+      // these tests run for every suite
+      testIssueWithoutStatus(options);
+      testBitstringStatusList(options);
+      testTerseBitstringStatusList(options);
+
+      // to reduce runtime and because a different suite should not change
+      // the results, only suites marked "general" run these tests
+      if(options.tags?.includes('general')) {
+        testIssueWithOAuth2(options);
+        testIssueCrashRecovery(options);
+        testStatusScaling(options);
+      }
+
+      // tests that run for SD suites only
+      if(options.tags?.includes('sd')) {
+        testIssueSd(options);
+      }
+
+      // tests that run for XI suites only
+      if(options.tags?.includes('xi')) {
+        testIssueXi(options);
+      }
+    });
+  }
 });
