@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Digital Bazaar, Inc. All rights reserved.
  */
-import * as assertions from './assertions.js';
+import * as assertions from './index.js';
 import * as helpers from '../helpers.js';
 import {createRequire} from 'node:module';
 import {klona} from 'klona';
