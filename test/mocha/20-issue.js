@@ -25,13 +25,15 @@ describe('issue', () => {
       suiteName: 'ecdsa-rdfc-2019',
       algorithm: 'P-256',
       issueOptions: {},
-      statusOptions: {}
+      statusOptions: {},
+      tags: []
     },
     'ecdsa-rdfc-2019, P-384': {
       suiteName: 'ecdsa-rdfc-2019',
       algorithm: 'P-384',
       issueOptions: {},
-      statusOptions: {}
+      statusOptions: {},
+      tags: []
     },
     'ecdsa-sd-2023': {
       suiteName: 'ecdsa-sd-2023',
@@ -74,11 +76,20 @@ describe('issue', () => {
       suiteName: 'Ed25519Signature2020',
       algorithm: 'Ed25519',
       issueOptions: {},
-      statusOptions: {}
+      statusOptions: {},
+      tags: []
     }
   };
 
-  for(const name in suites) {
+  // enable setting 'only' tag
+  let suitesToRun = Object.values(suites)
+    .filter(({tags}) => tags?.includes('only'))
+    .map(({suiteName}) => suiteName);
+  if(suitesToRun.length === 0) {
+    suitesToRun = Object.keys(suites);
+  }
+
+  for(const name of suitesToRun) {
     const options = suites[name];
     describe(name, () => {
       // these tests run for every suite
