@@ -102,85 +102,83 @@ describe('issue using "did:web" issuer', () => {
     noStatusListIssuerRootZcap =
       `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
   });
-  describe('/credentials/issue', () => {
-    it('issues a VC 1.1 credential with a proof set', async () => {
-      const credential = klona(mockCredential);
-      let error;
-      let result;
-      try {
-        const zcapClient = helpers.createZcapClient({capabilityAgent});
-        result = await zcapClient.write({
-          url: `${noStatusListIssuerId}/credentials/issue`,
-          capability: noStatusListIssuerRootZcap,
-          json: {
-            credential,
-            options: {
-              extraInformation: 'abc'
-            }
+  it('issues a VC 1.1 credential with a proof set', async () => {
+    const credential = klona(mockCredential);
+    let error;
+    let result;
+    try {
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      result = await zcapClient.write({
+        url: `${noStatusListIssuerId}/credentials/issue`,
+        capability: noStatusListIssuerRootZcap,
+        json: {
+          credential,
+          options: {
+            extraInformation: 'abc'
           }
-        });
-      } catch(e) {
-        error = e;
-      }
-      assertNoError(error);
-      should.exist(result.data);
-      should.exist(result.data.verifiableCredential);
-      const {verifiableCredential} = result.data;
-      verifiableCredential.should.be.an('object');
-      should.exist(verifiableCredential['@context']);
-      should.exist(verifiableCredential.id);
-      should.exist(verifiableCredential.type);
-      should.exist(verifiableCredential.issuer);
-      should.exist(verifiableCredential.issuanceDate);
-      should.exist(verifiableCredential.credentialSubject);
-      verifiableCredential.credentialSubject.should.be.an('object');
-      should.not.exist(verifiableCredential.credentialStatus);
-      should.exist(verifiableCredential.proof);
-      verifiableCredential.proof.should.be.an('array');
-      verifiableCredential.proof.length.should.equal(suites.length);
-      const parsedCryptosuites = verifiableCredential.proof.map(
-        ({type, cryptosuite}) => cryptosuite ?? type);
-      const expectedCryptosuites = suites.map(({name}) => name);
-      parsedCryptosuites.should.deep.equal(expectedCryptosuites);
-    });
-    it('issues a VC 2.0 credential with a proof set', async () => {
-      const credential = klona(mockCredentialV2);
-      let error;
-      let result;
-      try {
-        const zcapClient = helpers.createZcapClient({capabilityAgent});
-        result = await zcapClient.write({
-          url: `${noStatusListIssuerId}/credentials/issue`,
-          capability: noStatusListIssuerRootZcap,
-          json: {
-            credential,
-            options: {
-              extraInformation: 'abc'
-            }
+        }
+      });
+    } catch(e) {
+      error = e;
+    }
+    assertNoError(error);
+    should.exist(result.data);
+    should.exist(result.data.verifiableCredential);
+    const {verifiableCredential} = result.data;
+    verifiableCredential.should.be.an('object');
+    should.exist(verifiableCredential['@context']);
+    should.exist(verifiableCredential.id);
+    should.exist(verifiableCredential.type);
+    should.exist(verifiableCredential.issuer);
+    should.exist(verifiableCredential.issuanceDate);
+    should.exist(verifiableCredential.credentialSubject);
+    verifiableCredential.credentialSubject.should.be.an('object');
+    should.not.exist(verifiableCredential.credentialStatus);
+    should.exist(verifiableCredential.proof);
+    verifiableCredential.proof.should.be.an('array');
+    verifiableCredential.proof.length.should.equal(suites.length);
+    const parsedCryptosuites = verifiableCredential.proof.map(
+      ({type, cryptosuite}) => cryptosuite ?? type);
+    const expectedCryptosuites = suites.map(({name}) => name);
+    parsedCryptosuites.should.deep.equal(expectedCryptosuites);
+  });
+  it('issues a VC 2.0 credential with a proof set', async () => {
+    const credential = klona(mockCredentialV2);
+    let error;
+    let result;
+    try {
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      result = await zcapClient.write({
+        url: `${noStatusListIssuerId}/credentials/issue`,
+        capability: noStatusListIssuerRootZcap,
+        json: {
+          credential,
+          options: {
+            extraInformation: 'abc'
           }
-        });
-      } catch(e) {
-        error = e;
-      }
-      assertNoError(error);
-      should.exist(result.data);
-      should.exist(result.data.verifiableCredential);
-      const {verifiableCredential} = result.data;
-      verifiableCredential.should.be.an('object');
-      should.exist(verifiableCredential['@context']);
-      should.exist(verifiableCredential.id);
-      should.exist(verifiableCredential.type);
-      should.exist(verifiableCredential.issuer);
-      should.exist(verifiableCredential.credentialSubject);
-      verifiableCredential.credentialSubject.should.be.an('object');
-      should.not.exist(verifiableCredential.credentialStatus);
-      should.exist(verifiableCredential.proof);
-      verifiableCredential.proof.should.be.an('array');
-      verifiableCredential.proof.length.should.equal(suites.length);
-      const parsedCryptosuites = verifiableCredential.proof.map(
-        ({type, cryptosuite}) => cryptosuite ?? type);
-      const expectedCryptosuites = suites.map(({name}) => name);
-      parsedCryptosuites.should.deep.equal(expectedCryptosuites);
-    });
+        }
+      });
+    } catch(e) {
+      error = e;
+    }
+    assertNoError(error);
+    should.exist(result.data);
+    should.exist(result.data.verifiableCredential);
+    const {verifiableCredential} = result.data;
+    verifiableCredential.should.be.an('object');
+    should.exist(verifiableCredential['@context']);
+    should.exist(verifiableCredential.id);
+    should.exist(verifiableCredential.type);
+    should.exist(verifiableCredential.issuer);
+    should.exist(verifiableCredential.credentialSubject);
+    verifiableCredential.credentialSubject.should.be.an('object');
+    should.not.exist(verifiableCredential.credentialStatus);
+    should.exist(verifiableCredential.proof);
+    verifiableCredential.proof.should.be.an('array');
+    verifiableCredential.proof.length.should.equal(suites.length);
+    const parsedCryptosuites = verifiableCredential.proof.map(
+      ({type, cryptosuite}) => cryptosuite ?? type);
+    const expectedCryptosuites = suites.map(({name}) => name);
+    parsedCryptosuites.should.deep.equal(expectedCryptosuites);
   });
 });
