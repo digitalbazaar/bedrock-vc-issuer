@@ -13,7 +13,7 @@ import {mockData} from './mock.data.js';
 const {baseUrl} = mockData;
 const serviceType = 'vc-issuer';
 
-describe('provision API', () => {
+describe('provision', () => {
   let capabilityAgent;
   let keystoreAgent;
   let zcaps = {};

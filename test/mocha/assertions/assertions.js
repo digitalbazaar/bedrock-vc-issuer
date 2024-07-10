@@ -2,7 +2,7 @@
  * Copyright (c) 2024 Digital Bazaar, Inc. All rights reserved.
  */
 import {CapabilityAgent} from '@digitalbazaar/webkms-client';
-import {createZcapClient} from './helpers.js';
+import {createZcapClient} from '../helpers.js';
 
 const VC_CONTEXT_V1 = 'https://www.w3.org/2018/credentials/v1';
 const VC_CONTEXT_V2 = 'https://www.w3.org/ns/credentials/v2';
@@ -45,33 +45,6 @@ export async function assertStoredCredential({
   }
 }
 
-export async function issueAndAssert({
-  configId, credential, issueOptions, zcapClient, capability
-}) {
-  let error;
-  let result;
-  try {
-    result = await zcapClient.write({
-      url: `${configId}/credentials/issue`,
-      capability,
-      json: {
-        credential,
-        options: issueOptions
-      }
-    });
-  } catch(e) {
-    error = e;
-  }
-  assertNoError(error);
-  should.exist(result.data);
-  should.exist(result.data.verifiableCredential);
-  const {verifiableCredential} = result.data;
-
-  assertVerifiableCredential({verifiableCredential});
-
-  return {result, verifiableCredential};
-}
-
 export function assertVerifiableCredential({verifiableCredential} = {}) {
   let version1;
   let version2;
@@ -100,4 +73,31 @@ export function assertVerifiableCredential({verifiableCredential} = {}) {
   verifiableCredential.credentialSubject.should.be.an('object');
   should.exist(verifiableCredential.proof);
   verifiableCredential.proof.should.be.an('object');
+}
+
+export async function issueAndAssert({
+  configId, credential, issueOptions, zcapClient, capability
+}) {
+  let error;
+  let result;
+  try {
+    result = await zcapClient.write({
+      url: `${configId}/credentials/issue`,
+      capability,
+      json: {
+        credential,
+        options: issueOptions
+      }
+    });
+  } catch(e) {
+    error = e;
+  }
+  assertNoError(error);
+  should.exist(result.data);
+  should.exist(result.data.verifiableCredential);
+  const {verifiableCredential} = result.data;
+
+  assertVerifiableCredential({verifiableCredential});
+
+  return {result, verifiableCredential};
 }
