@@ -16,6 +16,8 @@
   them (e.g., `options.mandatoryPointers`).
 - Add `<issuer-instance>/credentials/<credentialId>` endpoint for retrieving
   previously issued VCs, provided that those VCs included `credentialStatus`.
+- Add additional validation around basic VCDM properties, preventing issuance
+  of some invalid VCs.
 
 ### Changed
 - **BREAKING**: Management of status list index allocation has been rewritten
