@@ -87,5 +87,32 @@ export function testIssueWithoutStatus({suiteName, algorithm, issueOptions}) {
       should.exist(error);
       error.data.type.should.equal('ValidationError');
     });
+
+    it('fails to issue a VC missing a "credentialSchema" type', async () => {
+      const credential = klona(mockCredentialV2);
+      // `type` is not present, so a validation error should occur
+      credential.credentialSchema = {
+        id: 'https://example.com#schema'
+      };
+
+      let error;
+      try {
+        const zcapClient = helpers.createZcapClient({capabilityAgent});
+        await zcapClient.write({
+          url: `${noStatusListIssuerId}/credentials/issue`,
+          capability: noStatusListIssuerRootZcap,
+          json: {credential}
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      error.data.name.should.equal('ValidationError');
+      should.exist(error.data.details?.errors?.[0]);
+      const typeError = error.data.details.errors[0];
+      typeError.name.should.equal('ValidationError');
+      typeError.details.path.should.equal('.credential.credentialSchema');
+      typeError.details.params.missingProperty.should.equal('type');
+    });
   });
 }
