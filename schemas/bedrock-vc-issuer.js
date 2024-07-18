@@ -236,6 +236,72 @@ export const statusListOptions = {
   items: statusListConfig
 };
 
+const vcdmType = {
+  title: 'VCDM Type',
+  oneOf: [{
+    type: 'string'
+  }, {
+    type: 'array',
+    items: {
+      minItems: 1,
+      items: {
+        type: ['string']
+      }
+    }
+  }]
+};
+
+const vcdmObject = {
+  title: 'VCDM Object',
+  type: 'object',
+  additionalProperties: true,
+  properties: {
+    id: {
+      type: 'string'
+    },
+    type: vcdmType
+  }
+};
+
+const vcdmTypedObject = {
+  ...vcdmObject,
+  required: ['type']
+};
+
+const vcdmObjectOrReference = {
+  title: 'VCDM Object or Reference',
+  oneOf: [vcdmObject, {
+    type: 'string'
+  }]
+};
+
+const vcdmObjectSet = {
+  title: 'VCDM Object Set',
+  oneOf: [vcdmObject, {
+    type: 'array',
+    minItems: 1,
+    items: vcdmObject
+  }]
+};
+
+const vcdmObjectOrReferenceSet = {
+  title: 'VCDM Object or Reference Set',
+  oneOf: [vcdmObjectOrReference, {
+    type: 'array',
+    minItems: 1,
+    items: vcdmObjectOrReference
+  }]
+};
+
+const vcdmTypedObjectSet = {
+  title: 'VCDM Typed Object Set',
+  oneOf: [vcdmTypedObject, {
+    type: 'array',
+    minItems: 1,
+    items: vcdmTypedObject
+  }]
+};
+
 export const issueCredentialBody = {
   title: 'Issue Credential',
   type: 'object',
@@ -258,9 +324,42 @@ export const issueCredentialBody = {
     credential: {
       type: 'object',
       additionalProperties: true,
-      required: ['@context'],
+      required: ['@context', 'type'],
       properties: {
-        '@context': context
+        '@context': context,
+        type: vcdmType,
+        confidenceMethod: vcdmTypedObjectSet,
+        credentialSchema: vcdmTypedObjectSet,
+        credentialStatus: vcdmTypedObjectSet,
+        credentialSubject: vcdmObjectOrReferenceSet,
+        description: {
+          type: 'string'
+        },
+        evidence: vcdmTypedObjectSet,
+        // `issuer` skipped, handled internally during issuance
+        name: {
+          type: 'string'
+        },
+        proof: vcdmTypedObjectSet,
+        refreshService: vcdmTypedObjectSet,
+        relatedResource: vcdmObjectSet,
+        renderMethod: vcdmTypedObjectSet,
+        termsOfUse: vcdmTypedObjectSet,
+        validFrom: {
+          // FIXME: improve date validation
+          type: 'string'
+        },
+        validUntil: {
+          // FIXME: improve date validation
+          type: 'string'
+        },
+        // VC 1.1 properties
+        issuanceDate: {
+          type: 'string'
+        },
+        expirationDate: {
+          type: 'string'
+        }
       }
     }
   }
