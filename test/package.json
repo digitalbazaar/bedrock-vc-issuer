@@ -52,7 +52,7 @@
     "@digitalbazaar/vc-status-list": "^7.1.0",
     "@digitalbazaar/webkms-client": "^14.1.0",
     "base64url-universal": "^2.0.0",
-    "c8": "^9.1.0",
+    "c8": "^10.1.2",
     "cross-env": "^7.0.3",
     "jose": "^4.8.3",
     "klona": "^2.0.5",
