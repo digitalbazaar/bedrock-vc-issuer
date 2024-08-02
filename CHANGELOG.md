@@ -43,6 +43,19 @@
   include a zcap to create status lists on such a service.
 - **BREAKING**: `mandatoryPointers` for `ecdsa-sd-2023` & `bbs-2023` now default
   to `['/issuer']`.
+- **BREAKING**: Update peer dependencies.
+  - `@bedrock/credentials-context@5.0.2`
+  - `@bedrock/data-integrity-context@4.0.3`
+  - `@bedrock/did-context@6`
+  - `@bedrock/jsonld-document-loader@5.1.0`
+  - `@bedrock/multikey-context@3`
+  - `@bedrock/security-context@9`
+  - `@bedrock/service-agent@9.0.1`
+  - `@bedrock/service-context-store@12`
+  - `@bedrock/service-core@10`
+  - `@bedrock/vc-status-list-context@6.0.2`
+  - `@bedrock/veres-one-context@16`
+- Update minor, test, and dev dependencies.
 
 ### Removed
 - **BREAKING**: Remove support for obsolete `RevocationList2020`.
