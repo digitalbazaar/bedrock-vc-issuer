@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 26.0.0 - 2024-mm-dd
+## 26.0.0 - 2024-08-02
 
 ### Added
 - Allow setting the `blockSize` and `blockCount` for status lists via status
