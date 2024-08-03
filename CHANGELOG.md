@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 26.0.1 - 2024-08-xx
+## 26.0.1 - 2024-08-02
 
 ### Fixed
 - Remove unused `@digitalbazaar/lru-memoize` dependency.
