@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 27.0.3 - 2024-xx-xx
+
+### Changed
+- Improve error handling.
+  - Return 400 instead of 500 for some common errors.
+
 ## 27.0.2 - 2024-08-26
 
 ### Fixed
