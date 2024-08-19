@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 27.0.0 - 2024-08-dd
+## 27.0.0 - 2024-08-19
 
 ### Changed
 - **BREAKING**: Use `@digitalbazaar/bbs-2023-cryptosuite@2` to get
