@@ -1,5 +1,12 @@
 # bedrock-vc-issuer ChangeLog
 
+## 27.0.0 - 2024-08-dd
+
+### Changed
+- **BREAKING**: Use `@digitalbazaar/bbs-2023-cryptosuite@2` to get
+  interoperability with the latest IETF BBS draft 6. Previous BBS proofs are
+  no longer compatible and should be considered obsolete.
+
 ## 26.0.1 - 2024-08-02
 
 ### Fixed
