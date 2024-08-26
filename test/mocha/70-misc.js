@@ -3,17 +3,9 @@
  */
 import * as bedrock from '@bedrock/core';
 import * as helpers from './helpers.js';
-//import {createRequire} from 'node:module';
 import {klona} from 'klona';
 import {mockData} from './mock.data.js';
 import {v4 as uuid} from 'uuid';
-
-//const require = createRequire(import.meta.url);
-
-// NOTE: using embedded context in mockCredential:
-// https://www.w3.org/2018/credentials/examples/v1
-//const mockCredential = require('./mock-credential.json');
-//const mockCredentialV2 = require('./mock-credential-v2.json');
 
 const badCredentials = [
   {
@@ -22,7 +14,11 @@ const badCredentials = [
     expect: {
       statusCode: 400,
       name: 'ValidationError',
-      message: null
+      cause: {
+        // FIXME non-BedrockError causes don't pass through
+        // could add details.errors[] checks in this case
+        //name: 'jsonld.ValidationError'
+      }
     }
   },
   {
@@ -38,10 +34,11 @@ const badCredentials = [
       }
     },
     expect: {
-      // FIXME
       statusCode: 400,
-      name: 'jsonld.InvalidUrl',
-      message: null
+      name: 'DataError',
+      detailsError: {
+        name: 'jsonld.InvalidUrl'
+      }
     }
   },
   {
@@ -52,10 +49,10 @@ const badCredentials = [
       credentialSubject: {}
     },
     expect: {
-      // FIXME
-      statusCode: 500,
-      name: null,
-      message: null
+      // FIXME Improve @digitalbazaar/vc error handling.
+      // This test is a plain 'Error' with a message of
+      // '"credentialSubject" must make a claim.'.
+      statusCode: 400
     }
   },
   {
@@ -69,13 +66,16 @@ const badCredentials = [
     },
     expect: {
       statusCode: 400,
-      name: 'SyntaxError',
-      message: 'Invalid credential.'
+      name: 'DataError',
+      message: 'Invalid credential.',
+      detailsError: {
+        name: 'jsonld.ValidationError'
+      }
     }
   }
 ];
 
-describe.only('fail for bed credentials', () => {
+describe('fail for bad credentials', () => {
   let suites;
   let capabilityAgent;
   let zcaps;
@@ -162,13 +162,17 @@ describe.only('fail for bed credentials', () => {
     noStatusListIssuerRootZcap =
       `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
   });
-  // filter using 'only' and 'skip'
-  const _hasOnly = badCredentials.some(c => c.skip !== true && c.only === true);
-  const _badCredentials = badCredentials
-    .filter(c => c.skip !== true)
-    .filter(c => !_hasOnly || c.only === true);
-  for(const testCred of _badCredentials) {
-    it(`fails for ${testCred.title}`, async () => {
+  for(const testCred of badCredentials) {
+    // handle 'skip' and 'only' flags.
+    let _it;
+    if(testCred.skip) {
+      _it = it.skip;
+    } else if(testCred.only) {
+      _it = it.only;
+    } else {
+      _it = it;
+    }
+    _it(`fails for ${testCred.title}`, async () => {
       const credential = klona(testCred.credential);
       let error;
       let result;
@@ -192,11 +196,18 @@ describe.only('fail for bed credentials', () => {
       if(testCred.expect.statusCode) {
         error.status.should.equal(testCred.expect.statusCode);
       }
-      if(testCred.expect.name !== null) {
+      if(testCred.expect.name) {
         error.data.name.should.equal(testCred.expect.name);
       }
-      if(testCred.expect.message !== null) {
+      if(testCred.expect.message) {
         error.data.message.should.equal(testCred.expect.message);
+      }
+      if(testCred.expect?.cause?.name) {
+        error.data.cause.name.should.equal(testCred.expect.cause.name);
+      }
+      if(testCred.expect?.detailsError?.name) {
+        error.data.details.error.name.should.equal(
+          testCred.expect.detailsError.name);
       }
     });
   }
