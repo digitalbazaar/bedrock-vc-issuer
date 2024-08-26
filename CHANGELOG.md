@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 27.0.2 - 2024-08-dd
+
+### Fixed
+- Use latest cryptosuite dependencies to get bug fixes.
+
 ## 27.0.1 - 2024-08-26
 
 ### Fixed
