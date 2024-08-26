@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 27.0.1 - 2024-08-dd
+## 27.0.1 - 2024-08-26
 
 ### Fixed
 - Use `@digitalbazaar/ecdsa-rdfc-2019@1.1.1` to get P-384 proof fix.
