@@ -19,7 +19,7 @@ jobs:
 #    - name: Run eslint
 #      run: npm run lint
   test-node:
-    needs: [lint]
+    #    needs: [lint]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     services:
