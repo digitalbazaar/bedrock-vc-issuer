@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 27.0.3 - 2024-xx-xx
+## 27.0.3 - 2024-08-27
 
 ### Changed
 - Improve error handling.
