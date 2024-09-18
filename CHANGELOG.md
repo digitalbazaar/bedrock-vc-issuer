@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 27.1.0 - 2024-09-dd
+
+### Added
+- Allow `activation` status purpose.
+
 ## 27.0.3 - 2024-08-27
 
 ### Changed
