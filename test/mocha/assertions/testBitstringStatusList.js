@@ -19,9 +19,10 @@ export function testBitstringStatusList({
   describe('BitstringStatusList', function() {
     // all the status purpose combinations to test
     const statusPurposes = [
+      'activation',
       'revocation',
       'suspension',
-      ['revocation', 'suspension']
+      ['activation', 'revocation', 'suspension']
     ];
     for(const statusPurpose of statusPurposes) {
       testStatusPurpose({

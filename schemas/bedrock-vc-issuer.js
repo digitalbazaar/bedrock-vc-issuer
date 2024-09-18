@@ -144,7 +144,7 @@ export const issueOptions = {
 };
 
 // supported status purposes in this version
-const statusPurposes = ['revocation', 'suspension'];
+const statusPurposes = ['activation', 'revocation', 'suspension'];
 
 export const statusListConfig = {
   title: 'Status List Configuration',
