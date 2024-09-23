@@ -60,9 +60,12 @@ export function testIssueWithoutStatus({
       });
       should.exist(verifiableCredential.id);
       should.not.exist(verifiableCredential.credentialStatus);
-      // `created` should not be set by default because new issue config
-      // mechanism was used w/o requesting it
-      should.not.exist(verifiableCredential.proof.created);
+      // not supported with old `Ed25519Signature2020`
+      if(suiteName !== 'Ed25519Signature2020') {
+        // `created` should not be set by default because new issue config
+        // mechanism was used w/o requesting it
+        should.not.exist(verifiableCredential.proof.created);
+      }
     });
     it('issues a VC 2.0 credential w/no "credentialStatus"', async () => {
       const credential = klona(mockCredentialV2);
@@ -76,9 +79,12 @@ export function testIssueWithoutStatus({
       });
       should.exist(verifiableCredential.id);
       should.not.exist(verifiableCredential.credentialStatus);
-      // `created` should not be set by default because new issue config
-      // mechanism was used w/o requesting it
-      should.not.exist(verifiableCredential.proof.created);
+      // not supported with old `Ed25519Signature2020`
+      if(suiteName !== 'Ed25519Signature2020') {
+        // `created` should not be set by default because new issue config
+        // mechanism was used w/o requesting it
+        should.not.exist(verifiableCredential.proof.created);
+      }
     });
 
     it('fails to issue an empty credential', async () => {
