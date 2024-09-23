@@ -18,7 +18,10 @@ describe('issue', () => {
       suiteName: 'eddsa-rdfc-2022',
       algorithm: 'Ed25519',
       issueOptions: {},
-      statusOptions: {},
+      statusOptions: {
+        suiteName: 'eddsa-rdfc-2022',
+        algorithm: 'Ed25519'
+      },
       tags: ['general']
     },
     'ecdsa-rdfc-2019, P-256': {
@@ -76,7 +79,10 @@ describe('issue', () => {
       suiteName: 'Ed25519Signature2020',
       algorithm: 'Ed25519',
       issueOptions: {},
-      statusOptions: {},
+      statusOptions: {
+        suiteName: 'Ed25519Signature2020',
+        algorithm: 'Ed25519'
+      },
       tags: []
     }
   };

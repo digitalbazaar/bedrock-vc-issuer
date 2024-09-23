@@ -46,12 +46,13 @@ function testStatusPurpose({
     zcaps: true
   };
   describe(`BitstringStatusList, statusPurpose: ${statusPurpose}`, function() {
+    let issuer;
     let capabilityAgent;
     let zcaps;
     let bslInstance;
     before(async () => {
       // provision dependencies
-      ({capabilityAgent, zcaps} = await helpers.provisionDependencies(
+      ({issuer, capabilityAgent, zcaps} = await helpers.provisionDependencies(
         depOptions));
 
       // create issuer instance w/ bitstring status list options
@@ -62,8 +63,10 @@ function testStatusPurpose({
           createCredentialStatusList: 'createCredentialStatusList'
         }
       }];
+      const {cryptosuites} = depOptions;
+      const issueOptions = helpers.createIssueOptions({issuer, cryptosuites});
       bslInstance = await helpers.createIssuerConfigAndDependencies({
-        capabilityAgent, zcaps, suiteName, statusListOptions, depOptions
+        capabilityAgent, zcaps, issueOptions, statusListOptions, depOptions
       });
     });
     describe('issue', () => {
@@ -100,6 +103,9 @@ function testStatusPurpose({
         should.exist(verifiableCredential.credentialStatus);
         should.exist(verifiableCredential.proof);
         verifiableCredential.proof.should.be.an('object');
+        // `created` should not be set by default because new issue config
+        // mechanism was used w/o requesting it
+        should.not.exist(verifiableCredential.proof.created);
 
         await assertions.assertStoredCredential({
           configId: bslInstance.issuerId,

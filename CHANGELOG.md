@@ -1,5 +1,19 @@
 # bedrock-vc-issuer ChangeLog
 
+## 28.0.0 - 2024-09-dd
+
+### Changed
+- **BREAKING**: Any issuer configuration created using the non-legacy format
+  will no longer include the optional `created` field in its proofs. To
+  include `created` in the proofs for a particular cryptosuite, specify
+  `includeCreated=true` in the `cryptosuite` options for that cryptosuite. Any
+  issuer instances created using the legacy format will continue to have
+  `created` appear in the generated proof. A new instance or a configuration
+  change to the new format is required to stop including `created` in
+  legacy issuer instances. This approach ensures that deployments that only
+  use legacy issuer instances in production can include this update without
+  any changes.
+
 ## 27.1.0 - 2024-09-18
 
 ### Added

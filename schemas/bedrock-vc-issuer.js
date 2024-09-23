@@ -55,6 +55,9 @@ const cryptosuite = {
       type: 'object',
       additionalProperties: false,
       properties: {
+        includeCreated: {
+          type: 'boolean'
+        },
         mandatoryPointers
       }
     },
