@@ -520,13 +520,13 @@ export async function provisionDependencies({
       const {data: serviceAgent} = await httpClient.get(
         serviceAgentUrl, {agent});
 
-      const assertionMethodZcaps = did ? zcaps : {};
-
       // delegate edv, hmac, and key agreement key zcaps to service agent
       zcaps = await delegateEdvZcaps({
         edvConfig, hmac, keyAgreementKey, serviceAgent,
         capabilityAgent
       });
+
+      const assertionMethodZcaps = did ? zcaps : {};
 
       // delegate zcaps for each cryptosuite
       await delegateAssertionMethodZcaps({
