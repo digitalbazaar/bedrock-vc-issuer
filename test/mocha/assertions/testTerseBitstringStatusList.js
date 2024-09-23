@@ -28,12 +28,13 @@ export function testTerseBitstringStatusList({
     zcaps: true
   };
   describe('TerseBitstringStatusList', function() {
+    let issuer;
     let capabilityAgent;
     let zcaps;
     let terseMultistatus;
-    beforeEach(async () => {
+    before(async () => {
       // provision dependencies
-      ({capabilityAgent, zcaps} = await helpers.provisionDependencies(
+      ({issuer, capabilityAgent, zcaps} = await helpers.provisionDependencies(
         depOptions));
 
       // create issuer instance w/ terse bitstring status list options
@@ -46,9 +47,11 @@ export function testTerseBitstringStatusList({
             createCredentialStatusList: 'createCredentialStatusList'
           }
         }];
+        const {cryptosuites} = depOptions;
+        const issueOptions = helpers.createIssueOptions({issuer, cryptosuites});
         terseMultistatus = await helpers
           .createIssuerConfigAndDependencies({
-            capabilityAgent, zcaps, suiteName, statusListOptions, depOptions
+            capabilityAgent, zcaps, issueOptions, statusListOptions, depOptions
           });
 
         // insert example context for issuing VCs w/terse status entries

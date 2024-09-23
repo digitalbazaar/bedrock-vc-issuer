@@ -76,6 +76,20 @@ export async function createStatusConfig({
   });
 }
 
+export function createIssueOptions({issuer, cryptosuites}) {
+  return {
+    issuer,
+    cryptosuites: cryptosuites.map(suite => {
+      const {name, options, zcapReferenceIds} = suite;
+      const cryptosuite = {name, zcapReferenceIds};
+      if(options) {
+        cryptosuite.options = options;
+      }
+      return cryptosuite;
+    })
+  };
+}
+
 export async function createIssuerConfig({
   capabilityAgent, ipAllowList, meterId, zcaps, issueOptions,
   suiteName = 'Ed25519Signature2020', statusListOptions, oauth2 = false
@@ -463,6 +477,9 @@ export async function provisionDependencies({
   // create keystore for capability agent
   const keystoreAgent = await createKeystoreAgent({capabilityAgent});
 
+  // default `issuer` to `did`, to be set to generated `did:key` if not passed
+  let issuer = did;
+
   const suites = cryptosuites.slice();
   if(envelope) {
     suites.push(envelope);
@@ -476,13 +493,17 @@ export async function provisionDependencies({
     // generate an assertion method key for each cryptosuite and / or envelope
     for(const suite of suites) {
       const {algorithm} = suite;
-      if(suite.assertionMethodKey) {
-        // key already set
-        continue;
+      // set key if not already set
+      if(!suite.assertionMethodKey) {
+        suite.assertionMethodKey = await generateAsymmetricKey({
+          keystoreAgent, algorithm, publicAliasTemplate
+        });
       }
-      suite.assertionMethodKey = await generateAsymmetricKey({
-        keystoreAgent, algorithm, publicAliasTemplate
-      });
+      // set `issuer` if not yet set
+      if(!issuer) {
+        const {controller} = await suite.assertionMethodKey.getKeyDescription();
+        issuer = controller;
+      }
     }
 
     if(zcaps) {
@@ -499,13 +520,13 @@ export async function provisionDependencies({
       const {data: serviceAgent} = await httpClient.get(
         serviceAgentUrl, {agent});
 
+      const assertionMethodZcaps = did ? zcaps : {};
+
       // delegate edv, hmac, and key agreement key zcaps to service agent
       zcaps = await delegateEdvZcaps({
         edvConfig, hmac, keyAgreementKey, serviceAgent,
         capabilityAgent
       });
-
-      const assertionMethodZcaps = did ? zcaps : {};
 
       // delegate zcaps for each cryptosuite
       await delegateAssertionMethodZcaps({
@@ -519,12 +540,13 @@ export async function provisionDependencies({
         // set single `assertionMethod` zcap reference ID
         zcaps.assertionMethod = assertionMethodZcaps[
           cryptosuites[0].zcapReferenceIds.assertionMethod];
+        cryptosuites[0].zcapReferenceIds.assertionMethod = 'assertionMethod';
       }
     }
   }
 
   if(!status) {
-    return {capabilityAgent, keystoreAgent, zcaps};
+    return {issuer, capabilityAgent, keystoreAgent, zcaps};
   }
 
   const {
@@ -536,6 +558,7 @@ export async function provisionDependencies({
   });
 
   return {
+    issuer,
     statusConfig, issuerCreateStatusListZcap, capabilityAgent, keystoreAgent,
     zcaps,
     // legacy `assertionMethodKey` only generated when not using status
