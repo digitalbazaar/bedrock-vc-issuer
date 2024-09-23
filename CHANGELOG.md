@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 28.0.0 - 2024-09-dd
+## 28.0.0 - 2024-09-23
 
 ### Changed
 - **BREAKING**: Any issuer configuration created using the non-legacy format
