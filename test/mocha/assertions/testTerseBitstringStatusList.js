@@ -105,6 +105,12 @@ export function testTerseBitstringStatusList({
         .should.be.a('number');
       should.exist(verifiableCredential.proof);
       verifiableCredential.proof.should.be.an('object');
+      // not supported with old `Ed25519Signature2020`
+      if(suiteName !== 'Ed25519Signature2020') {
+        // `created` should not be set by default because new issue config
+        // mechanism was used w/o requesting it
+        should.not.exist(verifiableCredential.proof.created);
+      }
     });
 
     it('updates multiple TerseBitstringStatusList statuses', async () => {

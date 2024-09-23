@@ -12,7 +12,8 @@
   change to the new format is required to stop including `created` in
   legacy issuer instances. This approach ensures that deployments that only
   use legacy issuer instances in production can include this update without
-  any changes.
+  any changes. Note that for the legacy `Ed25519Signature2020` cryptosuite,
+  the `created` date will always be present regardless of these options.
 
 ## 27.1.0 - 2024-09-18
 
