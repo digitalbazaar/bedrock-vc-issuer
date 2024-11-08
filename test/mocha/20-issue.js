@@ -32,7 +32,7 @@ describe('issue', () => {
         suiteName: 'eddsa-jcs-2022',
         algorithm: 'Ed25519'
       },
-      tags: ['general']
+      tags: []
     },
     'ecdsa-rdfc-2019, P-256': {
       suiteName: 'ecdsa-rdfc-2019',
