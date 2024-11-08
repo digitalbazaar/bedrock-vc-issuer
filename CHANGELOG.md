@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 28.1.0 - 2024-11-xx
+## 28.1.0 - 2024-11-08
 
 ### Added
 - Add support for issuing vcs with `ecdsa-jcs-2019` and `eddsa-jcs-2022`
