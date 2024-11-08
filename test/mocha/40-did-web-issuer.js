@@ -30,7 +30,13 @@ describe('issue using "did:web" issuer', () => {
       name: 'eddsa-rdfc-2022',
       algorithm: 'Ed25519'
     }, {
+      name: 'eddsa-jcs-2022',
+      algorithm: 'Ed25519'
+    }, {
       name: 'ecdsa-rdfc-2019',
+      algorithm: 'P-256'
+    }, {
+      name: 'ecdsa-jcs-2019',
       algorithm: 'P-256'
     }, {
       name: 'ecdsa-sd-2023',

@@ -24,6 +24,16 @@ describe('issue', () => {
       },
       tags: ['general']
     },
+    'eddsa-jcs-2022': {
+      suiteName: 'eddsa-jcs-2022',
+      algorithm: 'Ed25519',
+      issueOptions: {},
+      statusOptions: {
+        suiteName: 'eddsa-jcs-2022',
+        algorithm: 'Ed25519'
+      },
+      tags: ['general']
+    },
     'ecdsa-rdfc-2019, P-256': {
       suiteName: 'ecdsa-rdfc-2019',
       algorithm: 'P-256',
@@ -33,6 +43,20 @@ describe('issue', () => {
     },
     'ecdsa-rdfc-2019, P-384': {
       suiteName: 'ecdsa-rdfc-2019',
+      algorithm: 'P-384',
+      issueOptions: {},
+      statusOptions: {},
+      tags: []
+    },
+    'ecdsa-jcs-2019, P-256': {
+      suiteName: 'ecdsa-jcs-2019',
+      algorithm: 'P-256',
+      issueOptions: {},
+      statusOptions: {},
+      tags: []
+    },
+    'ecdsa-jcs-2019, P-384': {
+      suiteName: 'ecdsa-jcs-2019',
       algorithm: 'P-384',
       issueOptions: {},
       statusOptions: {},
