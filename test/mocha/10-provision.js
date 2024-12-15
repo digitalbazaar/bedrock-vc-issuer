@@ -191,7 +191,7 @@ describe('provision', () => {
       should.not.exist(result);
       err.data.type.should.equal('ValidationError');
       err.data.message.should.equal(
-        'A validation error occured in the \'createConfigBody\' validator.');
+        'A validation error occurred in the \'createConfigBody\' validator.');
     });
   });
 
@@ -719,7 +719,7 @@ describe('provision', () => {
       should.not.exist(result);
       err.data.type.should.equal('ValidationError');
       err.data.message.should.equal(
-        'A validation error occured in the \'Delegated ZCAP\' validator.');
+        'A validation error occurred in the \'Delegated ZCAP\' validator.');
     });
     it('revokes a zcap', async () => {
       const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
@@ -835,7 +835,7 @@ describe('provision', () => {
       should.not.exist(result);
       err.data.type.should.equal('ValidationError');
       err.data.message.should.equal(
-        'A validation error occured in the \'createContextBody\' validator.');
+        'A validation error occurred in the \'createContextBody\' validator.');
     });
     it('updates a context', async () => {
       const config = await helpers.createIssuerConfig({capabilityAgent, zcaps});
