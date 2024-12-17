@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 28.2.0 - 2024-12-dd
+
+### Added
+- Add support for language values in `name` and `description` properties.
+
 ## 28.1.0 - 2024-11-08
 
 ### Added
