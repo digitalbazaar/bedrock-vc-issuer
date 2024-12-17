@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 28.4.0 - 2024-12-dd
+## 28.4.0 - 2024-12-17
 
 ### Added
 - Ensure invalid JSON-LD is rejected when using JCS cryptosuites.
