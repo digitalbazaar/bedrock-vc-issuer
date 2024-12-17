@@ -86,6 +86,35 @@ export function testIssueWithoutStatus({
         should.not.exist(verifiableCredential.proof.created);
       }
     });
+    it('issues a valid credential w/"@language"', async () => {
+      const credential = klona(mockCredentialV2);
+      credential.name = {
+        '@value': 'Name of credential',
+        '@language': 'en',
+        '@direction': 'ltr'
+      };
+      credential.description = {
+        '@value': 'Description of credential',
+        '@language': 'en',
+        '@direction': 'ltr'
+      };
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      const {verifiableCredential} = await assertions.issueAndAssert({
+        configId: noStatusListIssuerId,
+        credential,
+        issueOptions,
+        zcapClient,
+        capability: noStatusListIssuerRootZcap
+      });
+      should.exist(verifiableCredential.id);
+      should.not.exist(verifiableCredential.credentialStatus);
+      // not supported with old `Ed25519Signature2020`
+      if(suiteName !== 'Ed25519Signature2020') {
+        // `created` should not be set by default because new issue config
+        // mechanism was used w/o requesting it
+        should.not.exist(verifiableCredential.proof.created);
+      }
+    });
 
     it('fails to issue an empty credential', async () => {
       let error;
