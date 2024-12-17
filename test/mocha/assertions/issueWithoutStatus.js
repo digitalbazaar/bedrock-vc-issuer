@@ -210,6 +210,66 @@ export function testIssueWithoutStatus({
         should.not.exist(verifiableCredential.proof.created);
       }
     });
+    it('issues a credential w/issuer name languages', async () => {
+      const credential = klona(mockCredentialV2);
+      credential.issuer = {
+        name: [{
+          '@value': 'Name of issuer',
+          '@language': 'en',
+          '@direction': 'ltr'
+        }, {
+          '@value': 'Name of issuer, pip pip',
+          '@language': 'en-GB',
+          '@direction': 'ltr'
+        }]
+      };
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      const {verifiableCredential} = await assertions.issueAndAssert({
+        configId: noStatusListIssuerId,
+        credential,
+        issueOptions,
+        zcapClient,
+        capability: noStatusListIssuerRootZcap
+      });
+      should.exist(verifiableCredential.id);
+      should.not.exist(verifiableCredential.credentialStatus);
+      // not supported with old `Ed25519Signature2020`
+      if(suiteName !== 'Ed25519Signature2020') {
+        // `created` should not be set by default because new issue config
+        // mechanism was used w/o requesting it
+        should.not.exist(verifiableCredential.proof.created);
+      }
+    });
+    it('issues a credential w/issuer description languages', async () => {
+      const credential = klona(mockCredentialV2);
+      credential.issuer = {
+        description: [{
+          '@value': 'Description of issuer',
+          '@language': 'en',
+          '@direction': 'ltr'
+        }, {
+          '@value': 'Description of issuer, pip pip',
+          '@language': 'en-GB',
+          '@direction': 'ltr'
+        }]
+      };
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      const {verifiableCredential} = await assertions.issueAndAssert({
+        configId: noStatusListIssuerId,
+        credential,
+        issueOptions,
+        zcapClient,
+        capability: noStatusListIssuerRootZcap
+      });
+      should.exist(verifiableCredential.id);
+      should.not.exist(verifiableCredential.credentialStatus);
+      // not supported with old `Ed25519Signature2020`
+      if(suiteName !== 'Ed25519Signature2020') {
+        // `created` should not be set by default because new issue config
+        // mechanism was used w/o requesting it
+        should.not.exist(verifiableCredential.proof.created);
+      }
+    });
 
     it('fails to issue an empty credential', async () => {
       let error;
@@ -229,6 +289,110 @@ export function testIssueWithoutStatus({
       error.data.type.should.equal('ValidationError');
     });
 
+    it('fails to issue a credential w/invalid name', async () => {
+      let error;
+      try {
+        const credential = klona(mockCredentialV2);
+        credential.name = {
+          '@value': 'Name of credential',
+          '@language': 'en',
+          url: 'did:example:credential'
+        };
+        const zcapClient = helpers.createZcapClient({capabilityAgent});
+        await zcapClient.write({
+          url: `${noStatusListIssuerId}/credentials/issue`,
+          capability: noStatusListIssuerRootZcap,
+          json: {
+            credential,
+            options: issueOptions
+          }
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      error.data.type.should.equal('ValidationError');
+    });
+
+    it('fails to issue a credential w/invalid description', async () => {
+      let error;
+      try {
+        const credential = klona(mockCredentialV2);
+        credential.description = {
+          '@value': 'Description of credential',
+          '@language': 'en',
+          url: 'did:example:credential'
+        };
+        const zcapClient = helpers.createZcapClient({capabilityAgent});
+        await zcapClient.write({
+          url: `${noStatusListIssuerId}/credentials/issue`,
+          capability: noStatusListIssuerRootZcap,
+          json: {
+            credential,
+            options: issueOptions
+          }
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      error.data.type.should.equal('ValidationError');
+    });
+
+    it('fails to issue a credential w/invalid issuer name', async () => {
+      let error;
+      try {
+        const credential = klona(mockCredentialV2);
+        credential.issuer = {
+          name: {
+            '@value': 'Name of issuer',
+            '@language': 'en',
+            url: 'did:example:credential'
+          }
+        };
+        const zcapClient = helpers.createZcapClient({capabilityAgent});
+        await zcapClient.write({
+          url: `${noStatusListIssuerId}/credentials/issue`,
+          capability: noStatusListIssuerRootZcap,
+          json: {
+            credential,
+            options: issueOptions
+          }
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      error.data.type.should.equal('DataError');
+    });
+
+    it('fails to issue a credential w/invalid issuer description', async () => {
+      let error;
+      try {
+        const credential = klona(mockCredentialV2);
+        credential.issuer = {
+          description: {
+            '@value': 'Description of issuer',
+            '@language': 'en',
+            url: 'did:example:credential'
+          }
+        };
+        const zcapClient = helpers.createZcapClient({capabilityAgent});
+        await zcapClient.write({
+          url: `${noStatusListIssuerId}/credentials/issue`,
+          capability: noStatusListIssuerRootZcap,
+          json: {
+            credential,
+            options: issueOptions
+          }
+        });
+      } catch(e) {
+        error = e;
+      }
+      should.exist(error);
+      error.data.type.should.equal('DataError');
+    });
+
     it('fails to issue a VC missing a "credentialSchema" type', async () => {
       const credential = klona(mockCredentialV2);
       // `type` is not present, so a validation error should occur
@@ -242,7 +406,10 @@ export function testIssueWithoutStatus({
         await zcapClient.write({
           url: `${noStatusListIssuerId}/credentials/issue`,
           capability: noStatusListIssuerRootZcap,
-          json: {credential}
+          json: {
+            credential,
+            options: issueOptions
+          }
         });
       } catch(e) {
         error = e;
