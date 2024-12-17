@@ -305,7 +305,7 @@ const vcdmTypedObjectSet = {
   }]
 };
 
-const languageValue = {
+const languageObject = {
   type: 'object',
   required: ['@value'],
   additionalProperties: false,
@@ -320,6 +320,17 @@ const languageValue = {
       type: 'string'
     }
   }
+};
+
+const valueStringOrObject = {
+  anyOf: [{type: 'string'}, languageObject]
+};
+
+const languageValue = {
+  anyOf: [
+    valueStringOrObject,
+    {type: 'array', minItems: 1, items: valueStringOrObject}
+  ]
 };
 
 export const issueCredentialBody = {
@@ -352,14 +363,10 @@ export const issueCredentialBody = {
         credentialSchema: vcdmTypedObjectSet,
         credentialStatus: vcdmTypedObjectSet,
         credentialSubject: vcdmObjectOrReferenceSet,
-        description: {
-          anyOf: [{type: 'string'}, languageValue]
-        },
+        description: languageValue,
         evidence: vcdmTypedObjectSet,
         // `issuer` skipped, handled internally during issuance
-        name: {
-          anyOf: [{type: 'string'}, languageValue]
-        },
+        name: languageValue,
         proof: vcdmTypedObjectSet,
         refreshService: vcdmTypedObjectSet,
         relatedResource: vcdmObjectSet,
