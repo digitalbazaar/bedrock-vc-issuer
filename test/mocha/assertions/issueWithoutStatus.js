@@ -86,7 +86,7 @@ export function testIssueWithoutStatus({
         should.not.exist(verifiableCredential.proof.created);
       }
     });
-    it('issues a valid credential w/"@language"', async () => {
+    it('issues a valid credential w/"@language"+"@dir"', async () => {
       const credential = klona(mockCredentialV2);
       credential.name = {
         '@value': 'Name of credential',
@@ -115,7 +115,65 @@ export function testIssueWithoutStatus({
         should.not.exist(verifiableCredential.proof.created);
       }
     });
+    it('issues a valid credential w/"@value"', async () => {
+      const credential = klona(mockCredentialV2);
+      credential.name = {
+        '@value': 'Name of credential'
+      };
+      credential.description = {
+        '@value': 'Description of credential'
+      };
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      const {verifiableCredential} = await assertions.issueAndAssert({
+        configId: noStatusListIssuerId,
+        credential,
+        issueOptions,
+        zcapClient,
+        capability: noStatusListIssuerRootZcap
+      });
+      should.exist(verifiableCredential.id);
+      should.not.exist(verifiableCredential.credentialStatus);
+      // not supported with old `Ed25519Signature2020`
+      if(suiteName !== 'Ed25519Signature2020') {
+        // `created` should not be set by default because new issue config
+        // mechanism was used w/o requesting it
+        should.not.exist(verifiableCredential.proof.created);
+      }
+    });
     it('issues a valid credential w/multiple "@language"', async () => {
+      const credential = klona(mockCredentialV2);
+      credential.name = [{
+        '@value': 'Name of credential',
+        '@language': 'en'
+      }, {
+        '@value': 'Name of credential, pip pip',
+        '@language': 'en-GB'
+      }];
+      credential.description = [{
+        '@value': 'Description of credential',
+        '@language': 'en'
+      }, {
+        '@value': 'Description of credential, pip pip',
+        '@language': 'en-GB'
+      }];
+      const zcapClient = helpers.createZcapClient({capabilityAgent});
+      const {verifiableCredential} = await assertions.issueAndAssert({
+        configId: noStatusListIssuerId,
+        credential,
+        issueOptions,
+        zcapClient,
+        capability: noStatusListIssuerRootZcap
+      });
+      should.exist(verifiableCredential.id);
+      should.not.exist(verifiableCredential.credentialStatus);
+      // not supported with old `Ed25519Signature2020`
+      if(suiteName !== 'Ed25519Signature2020') {
+        // `created` should not be set by default because new issue config
+        // mechanism was used w/o requesting it
+        should.not.exist(verifiableCredential.proof.created);
+      }
+    });
+    it('issues a valid credential w/multiple "@language"+"@dir"', async () => {
       const credential = klona(mockCredentialV2);
       credential.name = [{
         '@value': 'Name of credential',
