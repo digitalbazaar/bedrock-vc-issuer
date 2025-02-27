@@ -1,5 +1,19 @@
 # bedrock-vc-issuer ChangeLog
 
+## 29.0.0 - 2025-mm-dd
+
+### Changed
+- **BREAKING**: Update default terse list count to match spec; it is now
+  64 (2^6) instead of 32768 (2^15). See the `TerseBitstringStatusList` spec
+  for more details on the list count choice. Existing deployments that do not
+  use `TerseBitstringStatusList` can be safely updated to this version.
+  Existing deployments that do use it but where an upgrade is desirable, should
+  stop using existing instances that use `TerseBitstringStatusList`, upgrade
+  and then create new instances that use `TerseBitstringStatusList` to reenable
+  existing use. Other upgrade paths and behavior are undefined.
+- Increase `MAX_LIST_SIZE` to accommodate lists of up to size `2^26`, which is
+  how large terse bitstring status lists are by default.
+
 ## 28.4.0 - 2024-12-17
 
 ### Added
