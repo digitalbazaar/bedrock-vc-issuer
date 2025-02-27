@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 29.0.1 - 2025-02-dd
+## 29.0.1 - 2025-02-27
 
 ### Fixed
 - Ensure `MAX_BLOCK_SIZE` accommodates `MAX_LIST_SIZE`.
