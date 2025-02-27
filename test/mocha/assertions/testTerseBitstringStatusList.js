@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import * as helpers from '../helpers.js';
 import {createRequire} from 'node:module';
@@ -128,7 +128,7 @@ export function testTerseBitstringStatusList({
       });
 
       // get VC statuses
-      const listLength = 131072;
+      const listLength = 67108864;
       const revocationStatusInfo = await helpers.getCredentialStatus(
         {verifiableCredential, statusPurpose: 'revocation', listLength});
       revocationStatusInfo.status.should.equal(false);

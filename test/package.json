@@ -40,7 +40,7 @@
     "@bedrock/test": "^8.2.0",
     "@bedrock/validation": "^7.1.0",
     "@bedrock/vc-issuer": "file:..",
-    "@bedrock/vc-status": "^1.0.0",
+    "@bedrock/vc-status": "^1.1.0",
     "@bedrock/vc-status-list-context": "^6.0.2",
     "@bedrock/veres-one-context": "^16.0.0",
     "@bedrock/zcap-storage": "^8.0.1",

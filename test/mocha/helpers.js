@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2019-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import * as base64url from 'base64url-universal';
 import * as bedrock from '@bedrock/core';
