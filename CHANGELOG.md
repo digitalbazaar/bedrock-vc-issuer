@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 29.0.0 - 2025-mm-dd
+## 29.0.0 - 2025-02-27
 
 ### Changed
 - **BREAKING**: Update default terse list count to match spec; it is now
