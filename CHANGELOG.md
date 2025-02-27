@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 29.0.1 - 2025-02-dd
+
+### Fixed
+- Ensure `MAX_BLOCK_SIZE` accommodates `MAX_LIST_SIZE`.
+
 ## 29.0.0 - 2025-02-27
 
 ### Changed
@@ -10,7 +15,10 @@
   Existing deployments that do use it but where an upgrade is desirable, should
   stop using existing instances that use `TerseBitstringStatusList`, upgrade
   and then create new instances that use `TerseBitstringStatusList` to reenable
-  existing use. Other upgrade paths and behavior are undefined.
+  existing use. Other upgrade paths and behavior are undefined. Note that
+  the associated status instance must support larger list sizes as well, for
+  example, install `@bedrock/vc-status@1.1.0` or later (if using bedrock) on
+  the status service.
 - Increase `MAX_LIST_SIZE` to accommodate lists of up to size `2^26`, which is
   how large terse bitstring status lists are by default.
 
