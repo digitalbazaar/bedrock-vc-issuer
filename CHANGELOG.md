@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 29.0.2 - 2025-02-dd
+## 29.0.2 - 2025-02-27
 
 ### Fixed
 - Only add list capacity when 95% of active lists are fully assigned.
