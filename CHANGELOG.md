@@ -1,5 +1,40 @@
 # bedrock-vc-issuer ChangeLog
 
+## 30.0.0 - 2025-03-xx
+
+### Changed
+- Update dependencies.
+  - `@digitalbazaar/bls12-381-multikey@2.1.0`.
+  - `@digitalbazaar/data-integrity@2.5.0`.
+  - `@digitalbazaar/ecdsa-rdfc-2019-cryptosuite@1.2.0`.
+  - `@digitalbazaar/ecdsa-xi-2023-cryptosuite@1.1.0`.
+  - `@digitalbazaar/ed25519-signature-2018@4.1.0`.
+  - `@digitalbazaar/eddsa-rdfc-2022-cryptosuite@1.2.0`.
+  - `@digitalbazaar/vc@7.1.2`.
+  - `@digitalbazaar/webkms-client@14.1.2`.
+  - `body-parser@1.20.3`.
+  - `jsonld@8.3.3`.
+  - `serialize-error@12.0.0`.
+  - `uuid@11.1.0`.
+- Update peer dependencies.
+  - `@bedrock/core@6.3.0`.
+  - `@bedrock/credentials-context@5.0.3`.
+  - `@bedrock/did-io@10.4.0`.
+  - `@bedrock/jsonld-document-loader@5.2.0`.
+  - **BREAKING**: `@bedrock/mongodb@11`.
+    - Use MongoDB driver 6.x and update error names and details.
+    - See changelog for details.
+  - **BREAKING**: `@bedrock/service-agent@10`.
+    - Updated for `@bedrock/mongodb@11`.
+  - **BREAKING**: `@bedrock/service-context-store@13`.
+    - Updated for `@bedrock/mongodb@11`.
+  - **BREAKING**: `@bedrock/service-core@11`.
+    - Updated for `@bedrock/mongodb@11`.
+  - `@bedrock/validation@7.1.1`.
+  - `@bedrock/vc-status-list-context@6.0.3`.
+- Update dev dependencies.
+- Update test dependencies.
+
 ## 29.0.2 - 2025-02-27
 
 ### Fixed
