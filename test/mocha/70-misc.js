@@ -178,8 +178,7 @@ describe('fail for bad credentials', () => {
       _it = it;
     }
     _it(`fails for ${testCred.title}`, async () => {
-      const credential = structuredClone(
-        registryEntryFile(testCred.credential));
+      const credential = structuredClone(testCred.credential);
       let error;
       let result;
       try {
