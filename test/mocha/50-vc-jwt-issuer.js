@@ -1,7 +1,6 @@
 /*!
  * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
  */
-import * as base64url from 'base64url-universal';
 import * as bedrock from '@bedrock/core';
 import * as helpers from './helpers.js';
 import {createRequire} from 'node:module';
@@ -115,10 +114,8 @@ describe('issue using VC-JWT format', () => {
     const jwt = verifiableCredential.id.slice('data:application/jwt,'.length);
     const split = jwt.split('.');
     split.length.should.equal(3);
-    const header = JSON.parse(
-      new TextDecoder().decode(base64url.decode(split[0])));
-    const payload = JSON.parse(
-      new TextDecoder().decode(base64url.decode(split[1])));
+    const header = JSON.parse(Buffer.from(split[0], 'base64url').toString());
+    const payload = JSON.parse(Buffer.from(split[1], 'base64url').toString());
     header.kid.should.equal(assertionMethodKeyId);
     header.alg.should.equal('ES256');
     payload.iss.should.equal(did);

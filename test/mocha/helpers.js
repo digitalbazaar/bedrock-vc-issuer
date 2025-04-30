@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2019-2025 Digital Bazaar, Inc. All rights reserved.
  */
-import * as base64url from 'base64url-universal';
 import * as bedrock from '@bedrock/core';
 import * as database from '@bedrock/mongodb';
 import {importJWK, SignJWT} from 'jose';
@@ -764,8 +763,7 @@ export function parseEnvelope({verifiableCredential}) {
     const data = id.slice(commaIndex + 1);
     // FIXME: consider adding verification of `data` (JWT)
     const split = data.split('.');
-    const claimSet = JSON.parse(
-      new TextDecoder().decode(base64url.decode(split[1])));
+    const claimSet = JSON.parse(Buffer.from(split[1], 'base64url').toString());
     return claimSet.vc;
   }
   throw new Error(`Unknown envelope format "${format}".`);
