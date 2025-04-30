@@ -1,11 +1,10 @@
 /*!
- * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import * as helpers from '../helpers.js';
 import {agent} from '@bedrock/https-agent';
 import {createRequire} from 'node:module';
 import {httpClient} from '@digitalbazaar/http-client';
-import {klona} from 'klona';
 
 const require = createRequire(import.meta.url);
 
@@ -39,7 +38,7 @@ export function testIssueWithOAuth2({suiteName, algorithm, issueOptions}) {
         {capabilityAgent, zcaps, oauth2: true, suiteName});
     });
     it('issues a valid credential w/oauth2 w/root scope', async () => {
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       let error;
       let result;
       try {
@@ -73,7 +72,7 @@ export function testIssueWithOAuth2({suiteName, algorithm, issueOptions}) {
     });
     it('issues a valid credential w/oauth2 w/credentials scope',
       async () => {
-        const credential = klona(mockCredential);
+        const credential = structuredClone(mockCredential);
         let error;
         let result;
         try {
@@ -106,7 +105,7 @@ export function testIssueWithOAuth2({suiteName, algorithm, issueOptions}) {
         verifiableCredential.proof.should.be.an('object');
       });
     it('issues a valid credential w/oauth2 w/targeted scope', async () => {
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       let error;
       let result;
       try {
@@ -139,7 +138,7 @@ export function testIssueWithOAuth2({suiteName, algorithm, issueOptions}) {
       verifiableCredential.proof.should.be.an('object');
     });
     it('fails to issue a valid credential w/bad action scope', async () => {
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       let error;
       let result;
       try {
@@ -169,7 +168,7 @@ export function testIssueWithOAuth2({suiteName, algorithm, issueOptions}) {
       error.data.cause.details.claim.should.equal('scope');
     });
     it('fails to issue a valid credential w/bad path scope', async () => {
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       let error;
       let result;
       try {

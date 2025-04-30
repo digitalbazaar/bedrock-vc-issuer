@@ -1,13 +1,12 @@
 /*!
- * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import * as base64url from 'base64url-universal';
 import * as bedrock from '@bedrock/core';
 import * as helpers from './helpers.js';
 import {createRequire} from 'node:module';
-import {klona} from 'klona';
 import {mockData} from './mock.data.js';
-import {v4 as uuid} from 'uuid';
+import {randomUUID as uuid} from 'node:crypto';
 
 const require = createRequire(import.meta.url);
 
@@ -82,7 +81,7 @@ describe('issue using VC-JWT format', () => {
       `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
   });
   it('issues a VC-JWT VC 1.1 credential', async () => {
-    const credential = klona(mockCredential);
+    const credential = structuredClone(mockCredential);
     let error;
     let result;
     try {

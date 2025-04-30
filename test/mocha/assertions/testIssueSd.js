@@ -1,10 +1,9 @@
 /*!
- * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import * as assertions from './index.js';
 import * as helpers from '../helpers.js';
 import {createRequire} from 'node:module';
-import {klona} from 'klona';
 
 const require = createRequire(import.meta.url);
 
@@ -43,7 +42,7 @@ export function testIssueSd({suiteName, algorithm, issueOptions}) {
       });
     });
     it('issues a valid credential w/ "options.mandatoryPointers"', async () => {
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       const zcapClient = helpers.createZcapClient({capabilityAgent});
       const {verifiableCredential} = await assertions.issueAndAssert({
         configId: noStatusListIssuerId,
@@ -63,7 +62,7 @@ export function testIssueSd({suiteName, algorithm, issueOptions}) {
       let error;
       const missingPointer = '/nonExistentPointer';
       try {
-        const credential = klona(mockCredential);
+        const credential = structuredClone(mockCredential);
         const zcapClient = helpers.createZcapClient({capabilityAgent});
         await zcapClient.write({
           url: `${noStatusListIssuerId}/credentials/issue`,

@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 30.0.1 - 2025-04-dd
+
+### Changed
+- Update dependencies.
+- Support node >= 20.
+
 ## 30.0.0 - 2025-03-18
 
 ### Changed

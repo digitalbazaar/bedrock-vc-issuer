@@ -1,11 +1,10 @@
 /*!
- * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import * as bedrock from '@bedrock/core';
 import * as helpers from './helpers.js';
-import {klona} from 'klona';
 import {mockData} from './mock.data.js';
-import {v4 as uuid} from 'uuid';
+import {randomUUID as uuid} from 'node:crypto';
 
 const badCredentials = [
   {
@@ -179,7 +178,8 @@ describe('fail for bad credentials', () => {
       _it = it;
     }
     _it(`fails for ${testCred.title}`, async () => {
-      const credential = klona(testCred.credential);
+      const credential = structuredClone(
+        registryEntryFile(testCred.credential));
       let error;
       let result;
       try {

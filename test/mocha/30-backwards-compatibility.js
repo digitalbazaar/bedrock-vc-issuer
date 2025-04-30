@@ -1,9 +1,8 @@
 /*!
- * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import * as helpers from './helpers.js';
 import {createRequire} from 'node:module';
-import {klona} from 'klona';
 
 const require = createRequire(import.meta.url);
 
@@ -115,7 +114,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
       }
     });
     it('issues a valid credential w/no "credentialStatus"', async () => {
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       let error;
       let result;
       try {
@@ -148,7 +147,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
     });
     it('issues a valid credential w/ SL 2021 "credentialStatus" and ' +
       'suspension status purpose', async () => {
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       let error;
       let result;
       try {
@@ -182,7 +181,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
 
     it('updates a StatusList2021 revocation credential status', async () => {
       // first issue VC
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       const zcapClient = helpers.createZcapClient({capabilityAgent});
       const {data: {verifiableCredential}} = await zcapClient.write({
         url: `${sl2021Revocation.issuerId}/credentials/issue`,
@@ -230,7 +229,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
     });
     it('updates a StatusList2021 suspension credential status', async () => {
       // first issue VC
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       const zcapClient = helpers.createZcapClient({capabilityAgent});
       const {data: {verifiableCredential}} = await zcapClient.write({
         url: `${sl2021Suspension.issuerId}/credentials/issue`,
