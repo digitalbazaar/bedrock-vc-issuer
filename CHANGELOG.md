@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 30.0.2 - 2025-04-dd
+## 30.0.2 - 2025-04-30
 
 ### Changed
 - Update dependencies (use native base64url implementation).
