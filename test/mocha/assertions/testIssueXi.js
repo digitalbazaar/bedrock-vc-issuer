@@ -4,7 +4,6 @@
 import * as assertions from './index.js';
 import * as helpers from '../helpers.js';
 import {createRequire} from 'node:module';
-import {encode} from 'base64url-universal';
 
 const require = createRequire(import.meta.url);
 
@@ -48,7 +47,8 @@ export function testIssueXi({suiteName, algorithm, issueOptions}) {
       const extraInformationBytes = new Uint8Array([
         12, 52, 75, 63, 74, 85, 21, 5, 62, 10
       ]);
-      const extraInformationEncoded = encode(extraInformationBytes);
+      const extraInformationEncoded = Buffer.from(
+        extraInformationBytes).toString('base64url');
       const {verifiableCredential} = await assertions.issueAndAssert({
         configId: noStatusListIssuerId,
         credential,
