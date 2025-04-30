@@ -1,13 +1,12 @@
 /*!
- * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import * as helpers from '../helpers.js';
 import {createRequire} from 'node:module';
 import {issuer} from '@bedrock/vc-issuer';
-import {klona} from 'klona';
 import {mockData} from '../mock.data.js';
 import sinon from 'sinon';
-import {v4 as uuid} from 'uuid';
+import {randomUUID as uuid} from 'node:crypto';
 
 const require = createRequire(import.meta.url);
 
@@ -143,7 +142,7 @@ export function testIssueCrashRecovery({
       // VC, however, the status list index bookkeeping is not updated
       // The earlier failure is detected by the second issue of a VC and
       // the bookkeeping is repaired
-      const credential1 = klona(mockCredential);
+      const credential1 = structuredClone(mockCredential);
       credential1.id = 'urn:id1';
       const {data: {verifiableCredential: vc1}} = await zcapClient.write({
         url: `${bslRevocation.issuerId}/credentials/issue`,
@@ -154,7 +153,7 @@ export function testIssueCrashRecovery({
       const vc1StatusId = vc1.credentialStatus.id;
 
       // now issue second VC (should succeed and process the
-      const credential2 = klona(mockCredential);
+      const credential2 = structuredClone(mockCredential);
       credential2.id = 'urn:id2';
       const {data: {verifiableCredential: vc2}} = await zcapClient.write({
         url: `${bslRevocation.issuerId}/credentials/issue`,
@@ -177,7 +176,7 @@ export function testIssueCrashRecovery({
       const zcapClient = helpers.createZcapClient({capabilityAgent});
 
       // issue VC (should succeed)
-      let credential = klona(mockCredential);
+      let credential = structuredClone(mockCredential);
       let error;
       let result;
       try {
@@ -197,7 +196,7 @@ export function testIssueCrashRecovery({
       should.exist(proof);
 
       // issue VC with the same ID again (should fail)
-      credential = klona(mockCredential);
+      credential = structuredClone(mockCredential);
       result = undefined;
       try {
         result = await zcapClient.write({
@@ -218,7 +217,7 @@ export function testIssueCrashRecovery({
       // issue VC without `id` and no `credentialId` option
       // (should succeed)
       {
-        const credential = klona(mockCredential);
+        const credential = structuredClone(mockCredential);
         delete credential.id;
         let error;
         let result;
@@ -245,7 +244,7 @@ export function testIssueCrashRecovery({
       // issue VC with "credentialId" option only (should succeed)
       const credentialId = `urn:uuid:${uuid()}`;
       {
-        const credential = klona(mockCredential);
+        const credential = structuredClone(mockCredential);
         delete credential.id;
         let error;
         let result;
@@ -271,7 +270,7 @@ export function testIssueCrashRecovery({
 
       // issue VC with the same "credentialId" again (should fail)
       {
-        const credential = klona(mockCredential);
+        const credential = structuredClone(mockCredential);
         delete credential.id;
         let error;
         let result;
@@ -301,7 +300,7 @@ export function testIssueCrashRecovery({
       const listLength = 8;
       for(let i = 0; i < (listLength * 2 + 1); ++i) {
         // first issue VC
-        const credential = klona(mockCredential);
+        const credential = structuredClone(mockCredential);
         credential.id = `urn:uuid:${uuid()}`;
         const zcapClient = helpers.createZcapClient({capabilityAgent});
         const {data: {verifiableCredential}} = await zcapClient.write({
@@ -360,7 +359,7 @@ export function testIssueCrashRecovery({
       const listLength = 8;
       for(let i = 0; i < (listLength * 2 + 1); ++i) {
         // first issue VC
-        const credential = klona(mockTerseCredential);
+        const credential = structuredClone(mockTerseCredential);
         credential.id = `urn:uuid:${uuid()}`;
         const zcapClient = helpers.createZcapClient({capabilityAgent});
         let verifiableCredential;

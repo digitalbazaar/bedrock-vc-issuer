@@ -4,8 +4,7 @@
 import * as assertions from './index.js';
 import * as helpers from '../helpers.js';
 import {createRequire} from 'node:module';
-import {klona} from 'klona';
-import {v4 as uuid} from 'uuid';
+import {randomUUID as uuid} from 'node:crypto';
 
 const require = createRequire(import.meta.url);
 
@@ -72,7 +71,7 @@ function testStatusPurpose({
     describe('issue', () => {
       it('issues a valid credential w/ "credentialStatus"', async () => {
         const zcapClient = helpers.createZcapClient({capabilityAgent});
-        const credential = klona(mockCredential);
+        const credential = structuredClone(mockCredential);
         credential.id = `urn:uuid:${uuid()}`;
         let error;
         let result;
@@ -123,7 +122,7 @@ function testStatusPurpose({
 
         // issue VC (should succeed)
         const credentialId = `urn:uuid:${uuid()}`;
-        let credential = klona(mockCredential);
+        let credential = structuredClone(mockCredential);
         credential.id = credentialId;
         let error;
         let result;
@@ -144,7 +143,7 @@ function testStatusPurpose({
         should.exist(proof);
 
         // issue VC with the same ID again (should fail)
-        credential = klona(mockCredential);
+        credential = structuredClone(mockCredential);
         credential.id = credentialId;
         result = undefined;
         try {
@@ -165,7 +164,7 @@ function testStatusPurpose({
         // issue VC without `id` and no `credentialId` option
         // (should succeed)
         {
-          const credential = klona(mockCredential);
+          const credential = structuredClone(mockCredential);
           delete credential.id;
           let error;
           let result;
@@ -192,7 +191,7 @@ function testStatusPurpose({
         // issue VC with "credentialId" option only (should succeed)
         const credentialId = `urn:uuid:${uuid()}`;
         {
-          const credential = klona(mockCredential);
+          const credential = structuredClone(mockCredential);
           delete credential.id;
           let error;
           let result;
@@ -218,7 +217,7 @@ function testStatusPurpose({
 
         // issue VC with the same "credentialId" again (should fail)
         {
-          const credential = klona(mockCredential);
+          const credential = structuredClone(mockCredential);
           delete credential.id;
           let error;
           let result;
@@ -245,7 +244,7 @@ function testStatusPurpose({
       let verifiableCredential;
       before(async () => {
         // first issue VC
-        const credential = klona(mockCredential);
+        const credential = structuredClone(mockCredential);
         credential.id = `urn:uuid:${uuid()}`;
         zcapClient = helpers.createZcapClient({capabilityAgent});
         ({data: {verifiableCredential}} = await zcapClient.write({

@@ -3,9 +3,8 @@
  */
 import * as helpers from '../helpers.js';
 import {createRequire} from 'node:module';
-import {klona} from 'klona';
 import {mockData} from '../mock.data.js';
-import {v4 as uuid} from 'uuid';
+import {randomUUID as uuid} from 'node:crypto';
 
 const require = createRequire(import.meta.url);
 
@@ -72,7 +71,7 @@ export function testTerseBitstringStatusList({
     });
     it('issues a valid credential w/ terse "credentialStatus" for ' +
       'both revocation and suspension status purpose', async () => {
-      const credential = klona(mockTerseCredential);
+      const credential = structuredClone(mockTerseCredential);
       let error;
       let result;
       try {
@@ -115,7 +114,7 @@ export function testTerseBitstringStatusList({
 
     it('updates multiple TerseBitstringStatusList statuses', async () => {
       // first issue VC
-      const credential = klona(mockTerseCredential);
+      const credential = structuredClone(mockTerseCredential);
       const credentialId = `urn:uuid:${uuid()}`;
       const zcapClient = helpers.createZcapClient({capabilityAgent});
       const {data: {verifiableCredential}} = await zcapClient.write({

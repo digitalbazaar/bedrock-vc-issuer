@@ -1,10 +1,9 @@
-/*
- * Copyright (c) 2024 Digital Bazaar, Inc. All rights reserved.
+/*!
+ * Copyright (c) 2024-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import * as assertions from './index.js';
 import * as helpers from '../helpers.js';
 import {createRequire} from 'node:module';
-import {klona} from 'klona';
 
 const require = createRequire(import.meta.url);
 
@@ -49,7 +48,7 @@ export function testIssueWithoutStatus({
       });
     });
     it('issues a valid credential w/no "credentialStatus"', async () => {
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       const zcapClient = helpers.createZcapClient({capabilityAgent});
       const {verifiableCredential} = await assertions.issueAndAssert({
         configId: noStatusListIssuerId,
@@ -68,7 +67,7 @@ export function testIssueWithoutStatus({
       }
     });
     it('issues a VC 2.0 credential w/no "credentialStatus"', async () => {
-      const credential = klona(mockCredentialV2);
+      const credential = structuredClone(mockCredentialV2);
       const zcapClient = helpers.createZcapClient({capabilityAgent});
       const {verifiableCredential} = await assertions.issueAndAssert({
         configId: noStatusListIssuerId,
@@ -87,7 +86,7 @@ export function testIssueWithoutStatus({
       }
     });
     it('issues a valid credential w/"@language"+"@dir"', async () => {
-      const credential = klona(mockCredentialV2);
+      const credential = structuredClone(mockCredentialV2);
       credential.name = {
         '@value': 'Name of credential',
         '@language': 'en',
@@ -116,7 +115,7 @@ export function testIssueWithoutStatus({
       }
     });
     it('issues a valid credential w/"@value"', async () => {
-      const credential = klona(mockCredentialV2);
+      const credential = structuredClone(mockCredentialV2);
       credential.name = {
         '@value': 'Name of credential'
       };
@@ -141,7 +140,7 @@ export function testIssueWithoutStatus({
       }
     });
     it('issues a valid credential w/multiple "@language"', async () => {
-      const credential = klona(mockCredentialV2);
+      const credential = structuredClone(mockCredentialV2);
       credential.name = [{
         '@value': 'Name of credential',
         '@language': 'en'
@@ -174,7 +173,7 @@ export function testIssueWithoutStatus({
       }
     });
     it('issues a valid credential w/multiple "@language"+"@dir"', async () => {
-      const credential = klona(mockCredentialV2);
+      const credential = structuredClone(mockCredentialV2);
       credential.name = [{
         '@value': 'Name of credential',
         '@language': 'en',
@@ -211,7 +210,7 @@ export function testIssueWithoutStatus({
       }
     });
     it('issues a credential w/issuer name languages', async () => {
-      const credential = klona(mockCredentialV2);
+      const credential = structuredClone(mockCredentialV2);
       credential.issuer = {
         name: [{
           '@value': 'Name of issuer',
@@ -241,7 +240,7 @@ export function testIssueWithoutStatus({
       }
     });
     it('issues a credential w/issuer description languages', async () => {
-      const credential = klona(mockCredentialV2);
+      const credential = structuredClone(mockCredentialV2);
       credential.issuer = {
         description: [{
           '@value': 'Description of issuer',
@@ -292,7 +291,7 @@ export function testIssueWithoutStatus({
     it('fails to issue a credential w/invalid name', async () => {
       let error;
       try {
-        const credential = klona(mockCredentialV2);
+        const credential = structuredClone(mockCredentialV2);
         credential.name = {
           '@value': 'Name of credential',
           '@language': 'en',
@@ -317,7 +316,7 @@ export function testIssueWithoutStatus({
     it('fails to issue a credential w/invalid description', async () => {
       let error;
       try {
-        const credential = klona(mockCredentialV2);
+        const credential = structuredClone(mockCredentialV2);
         credential.description = {
           '@value': 'Description of credential',
           '@language': 'en',
@@ -342,7 +341,7 @@ export function testIssueWithoutStatus({
     it('fails to issue a credential w/invalid issuer name', async () => {
       let error;
       try {
-        const credential = klona(mockCredentialV2);
+        const credential = structuredClone(mockCredentialV2);
         credential.issuer = {
           name: {
             '@value': 'Name of issuer',
@@ -369,7 +368,7 @@ export function testIssueWithoutStatus({
     it('fails to issue a credential w/invalid issuer description', async () => {
       let error;
       try {
-        const credential = klona(mockCredentialV2);
+        const credential = structuredClone(mockCredentialV2);
         credential.issuer = {
           description: {
             '@value': 'Description of issuer',
@@ -394,7 +393,7 @@ export function testIssueWithoutStatus({
     });
 
     it('fails to issue a VC missing a "credentialSchema" type', async () => {
-      const credential = klona(mockCredentialV2);
+      const credential = structuredClone(mockCredentialV2);
       // `type` is not present, so a validation error should occur
       credential.credentialSchema = {
         id: 'https://example.com#schema'
@@ -465,7 +464,7 @@ export function testIssueWithoutStatus({
       });
     });
     it('issues a valid credential w/no "credentialStatus"', async () => {
-      const credential = klona(mockCredential);
+      const credential = structuredClone(mockCredential);
       const zcapClient = helpers.createZcapClient({capabilityAgent});
       const {verifiableCredential} = await assertions.issueAndAssert({
         configId: noStatusListIssuerId,
@@ -480,7 +479,7 @@ export function testIssueWithoutStatus({
       should.exist(verifiableCredential.proof.created);
     });
     it('issues a VC 2.0 credential w/no "credentialStatus"', async () => {
-      const credential = klona(mockCredentialV2);
+      const credential = structuredClone(mockCredentialV2);
       const zcapClient = helpers.createZcapClient({capabilityAgent});
       const {verifiableCredential} = await assertions.issueAndAssert({
         configId: noStatusListIssuerId,

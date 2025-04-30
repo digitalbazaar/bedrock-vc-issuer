@@ -1,12 +1,11 @@
 /*!
- * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import * as bedrock from '@bedrock/core';
 import * as helpers from './helpers.js';
 import {createRequire} from 'node:module';
-import {klona} from 'klona';
 import {mockData} from './mock.data.js';
-import {v4 as uuid} from 'uuid';
+import {randomUUID as uuid} from 'node:crypto';
 
 const require = createRequire(import.meta.url);
 
@@ -109,7 +108,7 @@ describe('issue using "did:web" issuer', () => {
       `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
   });
   it('issues a VC 1.1 credential with a proof set', async () => {
-    const credential = klona(mockCredential);
+    const credential = structuredClone(mockCredential);
     let error;
     let result;
     try {
@@ -149,7 +148,7 @@ describe('issue using "did:web" issuer', () => {
     parsedCryptosuites.should.deep.equal(expectedCryptosuites);
   });
   it('issues a VC 2.0 credential with a proof set', async () => {
-    const credential = klona(mockCredentialV2);
+    const credential = structuredClone(mockCredentialV2);
     let error;
     let result;
     try {
