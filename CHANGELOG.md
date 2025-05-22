@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 30.1.0 - 2025-05-dd
+## 30.1.0 - 2025-05-22
 
 ### Changed
 - Use `lru-cache@11`.
