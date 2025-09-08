@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2020-2024 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
  */
 import {testBitstringStatusList} from './assertions/testBitstringStatusList.js';
 import {testIssueCrashRecovery} from './assertions/testIssueCrashRecovery.js';
@@ -7,6 +7,7 @@ import {testIssueSd} from './assertions/testIssueSd.js';
 import {testIssueWithOAuth2} from './assertions/issueWithOAuth2.js';
 import {testIssueWithoutStatus} from './assertions/issueWithoutStatus.js';
 import {testIssueXi} from './assertions/testIssueXi.js';
+import {testStatusConcurrency} from './assertions/testStatusConcurrency.js';
 import {testStatusScaling} from './assertions/testStatusScaling.js';
 import {
   testTerseBitstringStatusList
@@ -133,6 +134,7 @@ describe('issue', () => {
         testIssueWithOAuth2(options);
         testIssueCrashRecovery(options);
         testStatusScaling(options);
+        testStatusConcurrency(options);
       }
 
       // tests that run for SD suites only

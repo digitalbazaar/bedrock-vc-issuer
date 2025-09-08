@@ -1,5 +1,13 @@
 # bedrock-vc-issuer ChangeLog
 
+## 30.2.0 - 2025-mm-dd
+
+### Changed
+- Increased max shard queue size for status issuance from 10 to 100.
+
+### Fixed
+- Better handle conflict errors in status allocation code.
+
 ## 30.1.0 - 2025-05-22
 
 ### Changed
