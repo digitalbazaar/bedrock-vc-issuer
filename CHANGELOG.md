@@ -3,8 +3,12 @@
 ## 30.3.0 - 2025-mm-dd
 
 ### Changed
-- Ensure `credentialId` uniqueness is enforced for VCs that do not use
-  status (by storing VCs when `credentialId` is provided without status).
+- Ensure `options.credentialId` uniqueness is enforced for VCs that do not
+  use status (by storing VCs when `options.credentialId` is provided without
+  status). To continue to issue VCs without any storage, do not include
+  `options.credentialId` as usual (i.e., there was no reason to provide it
+  before for non-storage use cases and this continues; only start using it
+  if uniqueness constraints are of interest).
 
 ## 30.2.0 - 2025-09-08
 
