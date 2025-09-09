@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 30.3.0 - 2025-mm-dd
+
+### Changed
+- Ensure `credentialId` uniqueness is enforced for VCs that do not use
+  status (by storing VCs when `credentialId` is provided without status).
+
 ## 30.2.0 - 2025-09-08
 
 ### Changed
