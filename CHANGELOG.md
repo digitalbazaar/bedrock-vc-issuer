@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 30.3.0 - 2025-mm-dd
+## 30.3.0 - 2025-09-11
 
 ### Changed
 - Ensure `options.credentialId` uniqueness is enforced for VCs that do not
