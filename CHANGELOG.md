@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 30.3.1 - 2025-10-xx
+## 30.3.1 - 2025-10-15
 
 ### Fixed
 - Fix `@bedrock/app-identity` peer dependency version constraint.
