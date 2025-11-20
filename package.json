@@ -1,6 +1,6 @@
 {
   "name": "@bedrock/vc-issuer",
-  "version": "30.3.2-0",
+  "version": "30.4.0",
   "type": "module",
   "description": "Bedrock Verifiable Credential Issuer",
   "main": "./lib/index.js",
