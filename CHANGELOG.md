@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 30.4.0 - 2025-mm-dd
+## 30.4.0 - 2025-11-20
 
 ### Added
 - Add automatic zcap-refresh feature.
