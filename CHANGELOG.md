@@ -1,5 +1,19 @@
 # bedrock-vc-issuer ChangeLog
 
+## 30.5.0 - 2026-02-xx
+
+### Changed
+- Update dependencies:
+  - `@digitalbazaar/ecdsa-rdfc-2019-cryptosuite@1.3.0`.
+  - `@digitalbazaar/ecdsa-xi-2023-cryptosuite@1.2.0`.
+  - `@digitalbazaar/ed25519-signature-2018@4.2.0`.
+  - `@digitalbazaar/eddsa-rdfc-2022-cryptosuite@1.3.0`.
+  - `@digitalbazaar/vc@7.3.0`.
+  - `jsonld@9`.
+- **NOTE**: The `jsonld` updates may have rare edge case compatibility issues.
+  The important related indirect `rdf-canonize` issues were addressed with
+  other existing minor version updates of dependencies.
+
 ## 30.4.0 - 2025-11-20
 
 ### Added
