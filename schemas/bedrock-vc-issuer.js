@@ -45,8 +45,9 @@ const cryptosuite = {
       type: 'string',
       // supported default suites in this version
       enum: [
-        'ecdsa-rdfc-2019', 'eddsa-rdfc-2022', 'ecdsa-jcs-2019',
-        'eddsa-jcs-2022', 'Ed25519Signature2020', 'Ed25519Signature2018',
+        'Ed25519Signature2020',
+        'ecdsa-rdfc-2019', 'eddsa-rdfc-2022',
+        'ecdsa-jcs-2019', 'eddsa-jcs-2022',
         'ecdsa-sd-2023', 'ecdsa-xi-2023', 'bbs-2023'
       ]
     },
@@ -138,8 +139,9 @@ export const issueOptions = {
       type: 'string',
       // supported default suites in this version
       enum: [
-        'ecdsa-rdfc-2019', 'eddsa-rdfc-2022', 'ecdsa-jcs-2019',
-        'eddsa-jcs-2022', 'Ed25519Signature2020', 'Ed25519Signature2018',
+        'Ed25519Signature2020',
+        'ecdsa-rdfc-2019', 'eddsa-rdfc-2022',
+        'ecdsa-jcs-2019', 'eddsa-jcs-2022',
         'ecdsa-sd-2023', 'ecdsa-xi-2023', 'bbs-2023'
       ]
     }
