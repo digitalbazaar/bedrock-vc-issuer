@@ -1,5 +1,13 @@
 # bedrock-vc-issuer ChangeLog
 
+## 31.0.0 - 2026-02-xx
+
+### Removed
+- **BREAKING**: Remove support for old cryptosuites.
+  - `Ed25519Signature2018`: Migrate to `Ed25519Signature2020`.
+  - `ecdsa-2019`: Migrate to `ecdsa-rdfc-2019`.
+  - `eddsa-2022`: Migrate to `eddsa-rdfc-2022`.
+
 ## 30.5.0 - 2026-02-06
 
 ### Changed
