@@ -9,7 +9,7 @@
     "schemas/**/*.js"
   ],
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint"
   },
   "repository": {
     "type": "git",
@@ -73,10 +73,8 @@
     "@bedrock/veres-one-context": "^16.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.57.1",
-    "eslint-config-digitalbazaar": "^5.2.0",
-    "eslint-plugin-jsdoc": "^50.6.8",
-    "eslint-plugin-unicorn": "^56.0.1"
+    "@digitalbazaar/eslint-config": "^8.0.1",
+    "eslint": "^9.39.4"
   },
   "directories": {
     "lib": "./lib"

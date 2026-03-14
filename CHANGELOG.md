@@ -1,6 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
-## 31.0.0 - 2026-02-xx
+## 31.0.0 - 2026-03-xx
+
+### Changed
+- Update dev dependencies.
+  - `@digitalbazaar/eslint-config@8`.
+  - `eslint@9`.
 
 ### Removed
 - **BREAKING**: Remove support for old cryptosuites.
