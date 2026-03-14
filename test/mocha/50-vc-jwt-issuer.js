@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2026 Digital Bazaar, Inc.
  */
 import * as bedrock from '@bedrock/core';
 import * as helpers from './helpers.js';
@@ -24,7 +24,7 @@ describe('issue using VC-JWT format', () => {
     // use envelope-based security
     const envelope = {
       format: 'VC-JWT',
-      algorithm: 'P-256',
+      algorithm: 'P-256'
       // works with or without options
       /*options: {
         alg: 'ES256'
