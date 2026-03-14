@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2025 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2019-2026 Digital Bazaar, Inc.
  */
 import * as bedrock from '@bedrock/core';
 import * as database from '@bedrock/mongodb';
@@ -732,7 +732,7 @@ export async function updateConfig({configId, referenceId}) {
     'config.zcaps.assertionMethod': `config.zcaps.${referenceId}`
   };
   await serviceCoreConfigCollection.updateOne({
-    'config.id': configId,
+    'config.id': configId
   }, {
     $rename: updateReferenceId
   });
@@ -740,7 +740,7 @@ export async function updateConfig({configId, referenceId}) {
 
 export async function findConfig({configId}) {
   return serviceCoreConfigCollection.findOne({
-    'config.id': configId,
+    'config.id': configId
   });
 }
 

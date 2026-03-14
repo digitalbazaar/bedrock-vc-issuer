@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2020-2025 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2020-2026 Digital Bazaar, Inc.
  */
 import * as helpers from './helpers.js';
 import {createRequire} from 'node:module';
@@ -42,7 +42,7 @@ describe('issue APIs - Reference ID `assertionMethod:foo` backwards ' +
         {capabilityAgent, zcaps, suiteName});
       noStatusListIssuerId = noStatusListIssuerConfig.id;
       noStatusListIssuerRootZcap =
-          `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
+        `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
 
       // Intentionally change the referenceId of the assertion method zcap
       // in the database to be lowercase
