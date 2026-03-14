@@ -3,9 +3,14 @@
 ## 31.0.0 - 2026-03-xx
 
 ### Changed
-- Update dev dependencies.
+- Update dependencies.
+  - `body-parser@2`.
+  - `serialize-error@13`.
+- Update all minor dependencies.
+- Update all dev dependencies.
   - `@digitalbazaar/eslint-config@8`.
   - `eslint@9`.
+- Update all test dependencies.
 
 ### Removed
 - **BREAKING**: Remove support for old cryptosuites.
