@@ -48,6 +48,8 @@
     "@digitalbazaar/http-client": "^4.3.0",
     "@digitalbazaar/vc-bitstring-status-list": "^2.0.1",
     "@digitalbazaar/vc-status-list": "^8.0.1",
+    "@digitalbazaar/vdl-aamva-context": "^1.0.0",
+    "@digitalbazaar/vdl-context": "^1.0.0",
     "@digitalbazaar/webkms-client": "^14.3.0",
     "c8": "^11.0.0",
     "cross-env": "^10.1.0",
