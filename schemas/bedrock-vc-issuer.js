@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2022-2025 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2022-2026 Digital Bazaar, Inc. All rights reserved.
  */
 import {
   MAX_BLOCK_COUNT, MAX_BLOCK_SIZE, MAX_LIST_COUNT,
@@ -77,15 +77,24 @@ const cryptosuites = {
 const envelope = {
   title: 'Envelope Options',
   type: 'object',
-  required: ['format', 'zcapReferenceIds'],
+  // use only one of `mediaType` (preferred) or `format` (deprecated)
+  oneOf: [
+    {required: ['mediaType', 'zcapReferenceIds']},
+    {required: ['format', 'zcapReferenceIds']}
+  ],
   additionalProperties: false,
   properties: {
     format: {
       type: 'string',
-      // supported default envelope formats in this version
+      // supported envelope formats in this version
       enum: [
         'VC-JWT'
       ]
+    },
+    mediaType: {
+      type: 'string',
+      // supported envelope media types in this version
+      enum: ['application/jwt', 'application/mdl']
     },
     options: {
       title: 'Envelope options',

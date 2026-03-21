@@ -28,7 +28,7 @@ describe('issue using VC-JWT format w/status list support', () => {
   beforeEach(async () => {
     // use envelope-based security
     const envelope = {
-      format: 'VC-JWT',
+      mediaType: 'application/jwt',
       algorithm: 'P-256'
     };
 
@@ -54,7 +54,7 @@ describe('issue using VC-JWT format w/status list support', () => {
     const issueOptions = {
       issuer: did,
       envelope: {
-        format: envelope.format,
+        mediaType: envelope.mediaType,
         zcapReferenceIds: envelope.zcapReferenceIds
       }
     };

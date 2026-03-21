@@ -1,5 +1,11 @@
 # bedrock-vc-issuer ChangeLog
 
+## 31.1.0 - 2026-03-dd
+
+### Added
+- Add `mediaType` option to envelope options; this is now the preferred way to
+  specify a VC envelope media type instead of the now deprecated way: `format`.
+
 ## 31.0.0 - 2026-03-21
 
 ### Changed

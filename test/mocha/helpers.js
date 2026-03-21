@@ -640,6 +640,7 @@ export async function provisionIssuerForStatus({
     }
     if(statusOptions.envelope) {
       issueOptions.envelope = {
+        mediaType: statusOptions.envelope.mediaType,
         format: statusOptions.envelope.format,
         zcapReferenceIds: statusOptions.envelope.zcapReferenceIds
       };
@@ -756,17 +757,17 @@ export function parseKeystoreId(keyId) {
 export function parseEnvelope({verifiableCredential}) {
   const {id} = verifiableCredential;
   const commaIndex = id.indexOf(',');
-  const format = id.slice('data:'.length, commaIndex);
+  const mediaType = id.slice('data:'.length, commaIndex);
 
   // VC-JWT envelope
-  if(format === 'application/jwt') {
+  if(mediaType === 'application/jwt') {
     const data = id.slice(commaIndex + 1);
     // FIXME: consider adding verification of `data` (JWT)
     const split = data.split('.');
     const claimSet = JSON.parse(Buffer.from(split[1], 'base64url').toString());
     return claimSet.vc;
   }
-  throw new Error(`Unknown envelope format "${format}".`);
+  throw new Error(`Unknown envelope "${mediaType}".`);
 }
 
 async function _generateMultikey({
