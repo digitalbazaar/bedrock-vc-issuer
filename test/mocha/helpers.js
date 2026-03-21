@@ -91,7 +91,8 @@ export function createIssueOptions({issuer, cryptosuites}) {
 
 export async function createIssuerConfig({
   capabilityAgent, ipAllowList, meterId, zcaps, issueOptions,
-  suiteName = 'Ed25519Signature2020', statusListOptions, oauth2 = false
+  suiteName = 'Ed25519Signature2020', statusListOptions, oauth2 = false,
+  contexts
 } = {}) {
   const url = `${mockData.baseUrl}/issuers`;
   // issuer-specific options
@@ -101,16 +102,27 @@ export async function createIssuerConfig({
   if(statusListOptions) {
     configOptions.statusListOptions = statusListOptions;
   }
-  return createConfig({
+  const config = await createConfig({
     serviceType: 'vc-issuer',
     url, capabilityAgent, ipAllowList, meterId, zcaps, configOptions, oauth2
   });
+
+  // add any `contexts` to instance
+  if(contexts) {
+    const rootZcap = `urn:zcap:root:${encodeURIComponent(config.id)}`;
+    const client = createZcapClient({capabilityAgent});
+    const url = `${config.id}/contexts`;
+    await Promise.all(contexts.map(
+      json => client.write({url, json, capability: rootZcap})));
+  }
+
+  return config;
 }
 
 export async function createIssuerConfigAndDependencies({
   capabilityAgent, ipAllowList, meterId, zcaps, issueOptions,
   suiteName = 'Ed25519Signature2020', statusListOptions, oauth2 = false,
-  depOptions
+  contexts, depOptions
 }) {
   let statusConfig;
   let issuerCreateStatusListZcap;
@@ -119,9 +131,7 @@ export async function createIssuerConfigAndDependencies({
       statusConfig,
       issuerCreateStatusListZcap
     } = await provisionDependencies(depOptions));
-    zcaps = {
-      ...zcaps
-    };
+    zcaps = {...zcaps};
     for(const {zcapReferenceIds} of statusListOptions) {
       zcaps[zcapReferenceIds.createCredentialStatusList] =
         issuerCreateStatusListZcap;
@@ -129,7 +139,7 @@ export async function createIssuerConfigAndDependencies({
   }
   const issuerConfig = await createIssuerConfig({
     capabilityAgent, ipAllowList, meterId, zcaps, issueOptions,
-    suiteName, statusListOptions, oauth2
+    suiteName, statusListOptions, oauth2, contexts
   });
   return {
     issuerConfig,
