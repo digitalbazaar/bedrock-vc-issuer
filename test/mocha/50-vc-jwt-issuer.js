@@ -23,7 +23,7 @@ describe('issue using VC-JWT format', () => {
   beforeEach(async () => {
     // use envelope-based security
     const envelope = {
-      format: 'VC-JWT',
+      mediaType: 'application/jwt',
       algorithm: 'P-256'
       // works with or without options
       /*options: {
@@ -44,7 +44,7 @@ describe('issue using VC-JWT format', () => {
     const issueOptions = {
       issuer: did,
       envelope: {
-        format: envelope.format,
+        mediaType: envelope.mediaType,
         options: envelope.options,
         zcapReferenceIds: envelope.zcapReferenceIds
       }
