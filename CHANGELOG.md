@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 31.0.0 - 2026-03-xx
+## 31.0.0 - 2026-03-21
 
 ### Changed
 - Update dependencies.
