@@ -15,7 +15,6 @@ const mockVDL = require('./mock-vdl.json');
 const mockDeprecatedVDL = require('./mock-vdl-deprecated.json');
 
 describe('issue vDL', () => {
-  let assertionMethodKeyId;
   let capabilityAgent;
   let did;
   let zcaps;
@@ -35,7 +34,7 @@ describe('issue vDL', () => {
           suiteName: 'ecdsa-rdfc-2019',
           algorithm
         },
-        terseIssueOptions: {mandatoryPointers: ['/issuer']},
+        terseIssueOptions: {mandatoryPointers: ['/issuer']}
       },
       cryptosuites: [{
         name: suiteName,
@@ -83,7 +82,6 @@ describe('issue vDL', () => {
       delete description['@context'];
       didDocument.verificationMethod.push(description);
       didDocument.assertionMethod.push(description.id);
-      assertionMethodKeyId = description.id;
     }
     // add DID doc to map with DID docs to be served
     mockData.didWebDocuments.set(localId, didDocument);

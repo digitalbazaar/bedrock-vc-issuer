@@ -2,11 +2,12 @@
  * Copyright (c) 2020-2026 Digital Bazaar, Inc.
  */
 import * as bedrock from '@bedrock/core';
-import * as helpers from './helpers.js';
 import * as EcdsaMultikey from '@digitalbazaar/ecdsa-multikey';
+import * as helpers from './helpers.js';
 import {parse as parseMDL, Verifier} from '@auth0/mdl';
 import {createRequire} from 'node:module';
 import {generateCertificateChain} from './certUtils.js';
+import {generateDeviceKeyPair} from './mdlUtils.js';
 import {mockData} from './mock.data.js';
 import {randomUUID as uuid} from 'node:crypto';
 
@@ -15,7 +16,6 @@ const require = createRequire(import.meta.url);
 const mockVDL = require('./mock-vdl.json');
 
 describe('issue mDL', () => {
-  let assertionMethodKeyId;
   let capabilityAgent;
   let did;
   let zcaps;
@@ -57,7 +57,6 @@ describe('issue mDL', () => {
       delete description['@context'];
       didDocument.verificationMethod.push(description);
       didDocument.assertionMethod.push(description.id);
-      assertionMethodKeyId = description.id;
       issuerKeyPair = await EcdsaMultikey.from(description);
       issuerPublicJwk = await EcdsaMultikey.toJwk({keyPair: issuerKeyPair});
     }
@@ -93,6 +92,10 @@ describe('issue mDL', () => {
       `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
   });
   it('issues an mDL', async () => {
+    // create device key pair for mDL
+    const {publicJwk: devicePublicJwk} = await generateDeviceKeyPair();
+
+    // issue mDL
     const credential = structuredClone(mockVDL);
     let error;
     let result;
@@ -101,7 +104,12 @@ describe('issue mDL', () => {
       result = await zcapClient.write({
         url: `${noStatusListIssuerId}/credentials/issue`,
         capability: noStatusListIssuerRootZcap,
-        json: {credential}
+        json: {
+          credential,
+          options: {
+            mdl: {devicePublicJwk}
+          }
+        }
       });
     } catch(e) {
       error = e;

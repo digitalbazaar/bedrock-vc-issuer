@@ -144,7 +144,7 @@ function _createCrypto() {
   // initialize `pkijs` crypto engine only as needed
   try {
     pkijs.getEngine();
-  } catch(e) {
+  } catch {
     pkijs.setEngine('newEngine', new pkijs.CryptoEngine({
       name: 'newEngine', crypto: webcrypto, subtle: webcrypto.subtle
     }));
@@ -159,6 +159,6 @@ function _toPem(buffer, tag = 'CERTIFICATE') {
     `-----BEGIN ${tag}-----`,
     wrapped,
     `-----END ${tag}-----`,
-    '',
+    ''
   ].join('\n');
 }
