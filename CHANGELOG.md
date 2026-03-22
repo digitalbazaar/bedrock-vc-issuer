@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 31.1.0 - 2026-03-dd
+## 31.1.0 - 2026-03-22
 
 ### Added
 - Add `mediaType` option to envelope options; this is now the preferred way to
