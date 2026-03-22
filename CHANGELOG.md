@@ -5,7 +5,9 @@
 ### Added
 - Add `mediaType` option to envelope options; this is now the preferred way to
   specify a VC envelope media type instead of the now deprecated way: `format`.
-- Add mDL issuance capability.
+- Add mDL issuance capability. An mDL can be issued by sending a vDL VC to
+  an appropriately configured issuer instance (i.e., one that uses envelope-
+  based security with an envelope of media type `application/mdl`).
 
 ## 31.0.0 - 2026-03-21
 
