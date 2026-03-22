@@ -48,6 +48,7 @@
     "@digitalbazaar/edv-client": "^16.3.0",
     "@digitalbazaar/ezcap": "^4.2.0",
     "@digitalbazaar/http-client": "^4.3.0",
+    "@digitalbazaar/oid4-client": "^5.9.1",
     "@digitalbazaar/vc-bitstring-status-list": "^2.0.1",
     "@digitalbazaar/vc-status-list": "^8.0.1",
     "@digitalbazaar/vdl-aamva-context": "^1.0.0",

@@ -371,6 +371,19 @@ export const issueCredentialBody = {
         mandatoryPointers,
         extraInformation: {
           type: 'string'
+        },
+        // mdl issuance options
+        mdl: {
+          title: 'mDL Issuance Options',
+          type: 'object',
+          required: ['devicePublicJwk'],
+          additionalProperties: false,
+          properties: {
+            devicePublicJwk: {
+              title: 'mDL Device Public Key in JWK format',
+              type: 'object'
+            }
+          }
         }
       }
     },
