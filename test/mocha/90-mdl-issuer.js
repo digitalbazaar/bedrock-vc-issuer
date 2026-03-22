@@ -167,8 +167,8 @@ function _convertMapsToObjects(value) {
   if(Array.isArray(value)) {
     value = value.map(_convertMapsToObjects);
   } else if(_isObject(value) || value instanceof Map) {
-    const entries = value instanceof Map ?
-      value.entries() : Object.entries(value);
+    const entries = [...(value instanceof Map ?
+      value.entries() : Object.entries(value))];
     return Object.fromEntries(entries.map(
       ([k, v]) => [k, _convertMapsToObjects(v)]));
   } else if(value && typeof value === 'object') {
