@@ -11,6 +11,7 @@
     "coverage-report": "c8 report"
   },
   "dependencies": {
+    "@auth0/mdl": "^3.0.1",
     "@bedrock/app-identity": "^4.2.0",
     "@bedrock/core": "^6.3.0",
     "@bedrock/credentials-context": "^5.0.3",
@@ -42,6 +43,7 @@
     "@bedrock/vc-status-list-context": "^6.0.3",
     "@bedrock/veres-one-context": "^16.0.0",
     "@bedrock/zcap-storage": "^9.6.0",
+    "@digitalbazaar/ecdsa-multikey": "^1.8.0",
     "@digitalbazaar/ed25519-signature-2020": "^5.4.0",
     "@digitalbazaar/edv-client": "^16.3.0",
     "@digitalbazaar/ezcap": "^4.2.0",
@@ -51,10 +53,12 @@
     "@digitalbazaar/vdl-aamva-context": "^1.0.0",
     "@digitalbazaar/vdl-context": "^1.0.0",
     "@digitalbazaar/webkms-client": "^14.3.0",
+    "asn1js": "^3.0.7",
     "c8": "^11.0.0",
     "cross-env": "^10.1.0",
     "jose": "^6.2.1",
     "p-queue": "^9.1.0",
+    "pkijs": "^3.4.0",
     "sinon": "^21.0.2"
   },
   "c8": {

@@ -5,6 +5,12 @@ import {
   MAX_BLOCK_COUNT, MAX_BLOCK_SIZE, MAX_LIST_COUNT,
   MAX_STATUS_LIST_OPTIONS
 } from '../lib/constants.js';
+import {schemas} from '@bedrock/validation';
+
+const VC_CONTEXT_1 = 'https://www.w3.org/2018/credentials/v1';
+const VC_CONTEXT_2 = 'https://www.w3.org/ns/credentials/v2';
+const VDL_CONTEXT_1 = 'https://w3id.org/vdl/v1';
+const VDL_AAMVA_CONTEXT_1 = 'https://w3id.org/vdl/aamva/v1';
 
 const context = {
   title: '@context',
@@ -84,17 +90,16 @@ const envelope = {
   ],
   additionalProperties: false,
   properties: {
-    format: {
-      type: 'string',
-      // supported envelope formats in this version
-      enum: [
-        'VC-JWT'
-      ]
-    },
     mediaType: {
       type: 'string',
       // supported envelope media types in this version
       enum: ['application/jwt', 'application/mdl']
+    },
+    // deprecated; use `mediaType` instead
+    format: {
+      type: 'string',
+      // supported envelope formats in this version
+      enum: ['VC-JWT']
     },
     options: {
       title: 'Envelope options',
@@ -104,6 +109,12 @@ const envelope = {
         alg: {
           type: 'string',
           enum: ['ES256', 'EdDSA', 'Ed25519']
+        },
+        // X.509 certificate chain w/PEM-formatted certs for mDL issuance
+        issuerCertificateChain: {
+          type: 'array',
+          minItems: 1,
+          items: {type: 'string'}
         }
       }
     },
@@ -402,3 +413,129 @@ export const issueCredentialBody = {
     }
   }
 };
+
+function idOrObjectWithId() {
+  return {
+    title: 'identifier or an object with an id',
+    anyOf: [
+      schemas.identifier(),
+      {
+        type: 'object',
+        required: ['id'],
+        additionalProperties: true,
+        properties: {id: schemas.identifier()}
+      }
+    ]
+  };
+}
+
+export function vDL() {
+  return {
+    title: `Verifiable Driver's License`,
+    type: 'object',
+    required: [
+      '@context',
+      'credentialSubject',
+      'issuer',
+      'type'
+    ],
+    additionalProperties: false,
+    properties: {
+      '@context': {
+        type: 'array',
+        oneOf: [
+          {const: [VC_CONTEXT_1, VDL_CONTEXT_1, VDL_AAMVA_CONTEXT_1]},
+          {const: [VC_CONTEXT_2, VDL_CONTEXT_1, VDL_AAMVA_CONTEXT_1]}
+        ]
+      },
+      id: {type: 'string'},
+      issuer: idOrObjectWithId(),
+      type: {
+        const: ['VerifiableCredential', 'Iso18013DriversLicenseCredential']
+      },
+      name: {type: 'string'},
+      image: {type: 'string'},
+      description: {type: 'string'},
+      credentialSubject: {
+        type: 'object',
+        required: ['type', 'driversLicense'],
+        additionalProperties: false,
+        properties: {
+          id: {type: 'string'},
+          type: {const: 'LicensedDriver'},
+          driversLicense: {
+            type: 'object',
+            required: ['type'],
+            additionalProperties: false,
+            properties: {
+              type: {const: 'Iso18013DriversLicense'},
+              // base properties
+              administrative_number: {type: 'string'},
+              age_birth_year: {type: 'number'},
+              age_in_years: {type: 'number'},
+              age_over_18: {type: 'boolean'},
+              age_over_21: {type: 'boolean'},
+              age_over_25: {type: 'boolean'},
+              age_over_62: {type: 'boolean'},
+              age_over_65: {type: 'boolean'},
+              birth_date: {type: 'string'},
+              birth_place: {type: 'string'},
+              document_number: {type: 'string'},
+              driving_privileges: {type: 'array'},
+              expiry_date: {type: 'string'},
+              eye_colour: {type: 'string'},
+              family_name: {type: 'string'},
+              family_name_national_character: {type: 'string'},
+              given_name: {type: 'string'},
+              given_name_national_character: {type: 'string'},
+              hair_colour: {type: 'string'},
+              height: {type: 'number'},
+              issue_date: {type: 'string'},
+              issuing_authority: {type: 'string'},
+              issuing_country: {type: 'string'},
+              issuing_jurisdiction: {type: 'string'},
+              nationality: {type: 'string'},
+              portrait: {type: 'string'},
+              portrait_capture_date: {type: 'string'},
+              resident_address: {type: 'string'},
+              resident_city: {type: 'string'},
+              resident_country: {type: 'string'},
+              resident_postal_code: {type: 'string'},
+              resident_state: {type: 'string'},
+              sex: {type: 'number'},
+              signature_usual_mark: {type: 'string'},
+              un_distinguishing_sign: {type: 'string'},
+              weight: {type: 'number'},
+              // aamva additions
+              aamva_aka_family_name_v2: {type: 'string'},
+              aamva_aka_given_name_v2: {type: 'string'},
+              aamva_aka_suffix: {type: 'string'},
+              aamva_cdl_indicator: {type: 'number'},
+              aamva_dhs_compliance: {type: 'string'},
+              aamva_dhs_compliance_text: {type: 'string'},
+              aamva_dhs_temporary_lawful_status: {type: 'number'},
+              aamva_domestic_driving_privileges: {type: 'object'},
+              aamva_edl_credential: {type: 'number'},
+              aamva_family_name_truncation: {type: 'string'},
+              aamva_given_name_truncation: {type: 'string'},
+              aamva_hazmat_endorsement_expiration_date: {type: 'string'},
+              aamva_name_suffix: {type: 'string'},
+              aamva_organ_donor: {type: 'number'},
+              aamva_race_ethnicity: {type: 'string'},
+              aamva_resident_county: {type: 'string'},
+              aamva_sex: {type: 'number'},
+              aamva_veteran: {type: 'number'},
+              aamva_weight_range: {type: 'number'}
+            }
+          }
+        }
+      },
+      // VCDM v2 (preferred)
+      validFrom: {type: 'string'},
+      validUntil: {type: 'string'},
+      // VCDM v1 (deprecated)
+      issuanceDate: {type: 'string'},
+      expirationDate: {type: 'string'}
+    }
+  };
+}
