@@ -5,6 +5,7 @@
 ### Added
 - Add `mediaType` option to envelope options; this is now the preferred way to
   specify a VC envelope media type instead of the now deprecated way: `format`.
+- Add mDL issuance capability.
 
 ## 31.0.0 - 2026-03-21
 
