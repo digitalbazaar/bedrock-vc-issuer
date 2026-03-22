@@ -21,7 +21,7 @@ describe('issue mDL', () => {
   let zcaps;
   let noStatusListIssuerId;
   let noStatusListIssuerRootZcap;
-  let fullCertificateChain;
+  let certificateEntities;
   let issuerCertificateChain;
   beforeEach(async () => {
     // use envelope-based security
@@ -64,14 +64,14 @@ describe('issue mDL', () => {
     mockData.didWebDocuments.set(localId, didDocument);
 
     // create a certificate chain that ends in the MDL issuer (leaf)
-    fullCertificateChain = await generateCertificateChain({
+    certificateEntities = await generateCertificateChain({
       leafKeyPairInfo: {
         keyPair: issuerKeyPair,
         jwk: issuerPublicJwk
       }
     });
 
-    issuerCertificateChain = [fullCertificateChain.leaf.pemCertificate];
+    issuerCertificateChain = [certificateEntities.leaf.pemCertificate];
 
     // create issue options
     const issueOptions = {
@@ -145,14 +145,15 @@ describe('issue mDL', () => {
     fields.should.deep.equal(expectedFields);
 
     // ensure mDL can verify
-    const verifier = new Verifier(issuerCertificateChain);
+    const verifierCertificateChain = [
+      certificateEntities.intermediate.pemCertificate,
+      certificateEntities.root.pemCertificate
+    ];
+    const verifier = new Verifier(verifierCertificateChain);
     await verifier.verify(encodedMDL, {
       onCheck: (verification, original) => {
-        // skip device authentication and issuer cert validity for tests
-        // FIXME: do not skip issuer cert validity, just device auth
-        // console.log('verify result', verification);
-        if(verification.category === 'DEVICE_AUTH' ||
-          verification.id === 'ISSUER_CERTIFICATE_VALIDITY') {
+        // skip device authentication, only checking issuer signature
+        if(verification.category === 'DEVICE_AUTH') {
           return;
         }
         original(verification);
