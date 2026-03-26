@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 31.1.1 - 2026-03-dd
+
+### Fixed
+- Use `@owf/mdoc@0.6.0` (full release, not alpha).
+
 ## 31.1.0 - 2026-03-22
 
 ### Added

@@ -44,7 +44,7 @@
     "@digitalbazaar/ezcap": "^4.2.0",
     "@digitalbazaar/vc": "^7.3.0",
     "@digitalbazaar/webkms-client": "^14.3.0",
-    "@owf/mdoc": "^0.6.0-alpha-20260225221529",
+    "@owf/mdoc": "^0.6.0",
     "assert-plus": "^1.0.0",
     "bnid": "^3.0.0",
     "body-parser": "^2.2.2",
