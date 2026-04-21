@@ -4,6 +4,8 @@
 
 ### Changed
 - Downgrade to `body-parser@1` to ensure same version across packages and apps.
+- Update all minor dependencies.
+- Update all test dependencies.
 
 ## 31.1.1 - 2026-03-26
 
