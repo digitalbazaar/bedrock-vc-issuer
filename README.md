@@ -1,7 +1,7 @@
-# Bedrock Verifiable Credentials Issuer API module _(bedrock-vc-issuer)_
+# Bedrock Verifiable Credentials Issuer API module _(@bedrock/vc-issuer)_
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/digitalbazaar/bedrock-vc-issuer/main.yaml)](https://github.com/digitalbazaar/bedrock-vc-issuer/actions/workflow/main.yaml)
-[![NPM Version](https://img.shields.io/npm/v/bedrock-vc-issuer.svg)](https://npm.im/bedrock-vc-issuer)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/digitalbazaar/bedrock-vc-issuer/main.yaml)](https://github.com/digitalbazaar/bedrock-vc-issuer/actions/workflows/main.yaml)
+[![NPM Version](https://img.shields.io/npm/v/@bedrock/vc-issuer.svg)](https://npm.im/@bedrock/vc-issuer)
 
 > A VC Issuer API library for use with Bedrock applications.
 
