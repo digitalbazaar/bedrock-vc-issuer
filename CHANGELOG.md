@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 31.1.2 - 2026-04-xx
+
+### Changed
+- Downgrade to `body-parser@1` to ensure same version across packages and apps.
+
 ## 31.1.1 - 2026-03-26
 
 ### Fixed
