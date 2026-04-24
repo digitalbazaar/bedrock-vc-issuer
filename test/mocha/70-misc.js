@@ -153,6 +153,7 @@ describe('fail for bad credentials', () => {
     for(const {assertionMethodKey} of suites) {
       const description = await assertionMethodKey.getKeyDescription();
       delete description['@context'];
+      description.controller = did;
       didDocument.verificationMethod.push(description);
       didDocument.assertionMethod.push(description.id);
     }

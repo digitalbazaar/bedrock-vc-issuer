@@ -55,6 +55,7 @@ describe('issue mDL', () => {
     for(const {assertionMethodKey} of [envelope]) {
       const description = await assertionMethodKey.getKeyDescription();
       delete description['@context'];
+      description.controller = did;
       didDocument.verificationMethod.push(description);
       didDocument.assertionMethod.push(description.id);
       issuerKeyPair = await EcdsaMultikey.from(description);

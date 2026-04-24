@@ -93,6 +93,7 @@ describe('issue using "did:web" issuer', () => {
     for(const {assertionMethodKey} of suites) {
       const description = await assertionMethodKey.getKeyDescription();
       delete description['@context'];
+      description.controller = did;
       didDocument.verificationMethod.push(description);
       didDocument.assertionMethod.push(description.id);
     }

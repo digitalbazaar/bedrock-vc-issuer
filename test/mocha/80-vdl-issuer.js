@@ -80,6 +80,7 @@ describe('issue vDL', () => {
     for(const {assertionMethodKey} of cryptosuites) {
       const description = await assertionMethodKey.getKeyDescription();
       delete description['@context'];
+      description.controller = did;
       didDocument.verificationMethod.push(description);
       didDocument.assertionMethod.push(description.id);
     }
