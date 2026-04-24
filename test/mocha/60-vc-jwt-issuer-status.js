@@ -73,6 +73,7 @@ describe('issue using VC-JWT format w/status list support', () => {
     for(const {assertionMethodKey} of [envelope]) {
       const description = await assertionMethodKey.getKeyDescription();
       delete description['@context'];
+      description.controller = did;
       didDocument.verificationMethod.push(description);
       didDocument.assertionMethod.push(description.id);
       assertionMethodKeyId = description.id;
