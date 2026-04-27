@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 31.1.3 - 2026-04-dd
+
+### Fixed
+- Fix mDL issue response. Now an `IssuerSigned` encoded object is returned.
+
 ## 31.1.2 - 2026-04-21
 
 ### Changed
