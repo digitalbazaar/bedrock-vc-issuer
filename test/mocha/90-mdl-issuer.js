@@ -5,6 +5,7 @@ import * as bedrock from '@bedrock/core';
 import * as EcdsaMultikey from '@digitalbazaar/ecdsa-multikey';
 import * as helpers from './helpers.js';
 import {parse as parseMDL, Verifier} from '@auth0/mdl';
+import {encode as cborEncode} from 'cborg';
 import {createRequire} from 'node:module';
 import {generateCertificateChain} from './certUtils.js';
 import {generateDeviceKeyPair} from './mdlUtils.js';
@@ -14,6 +15,9 @@ import {randomUUID as uuid} from 'node:crypto';
 const require = createRequire(import.meta.url);
 
 const mockVDL = require('./mock-vdl.json');
+
+const MDL_NAMESPACE = 'org.iso.18013.5.1';
+const MDOC_TYPE_MDL = `${MDL_NAMESPACE}.mDL`;
 
 describe('issue mDL', () => {
   let capabilityAgent;
@@ -130,7 +134,28 @@ describe('issue mDL', () => {
     // assert mDL contents
     const b64 = verifiableCredential.id
       .slice('data:application/mdl;base64,'.length);
-    const encodedMDL = Buffer.from(b64, 'base64');
+    const encodedIssuerSigned = Buffer.from(b64, 'base64');
+
+    // create mdoc container with empty `issuerSigned` with the right Map
+    // size -- it will be replaced with the proper `issuerSigned` thereafter
+    const mdoc = new Map([
+      ['version', '1.0'],
+      ['documents', [
+        new Map([
+          ['docType', MDOC_TYPE_MDL],
+          ['issuerSigned', new Map([['nameSpaces', []], ['issuerAuth', []]])]
+        ])
+      ]]
+    ]);
+    const encodedMDL = new Uint8Array(Buffer.concat([
+      // 68 bytes into the payload, replace with encoded `issuerSigned`; this
+      // must be done because there is no API available to wrap the
+      // `issuerSigned` document with an mdoc container that does not also
+      // include a `deviceSigned` document
+      cborEncode(mdoc).subarray(0, 68),
+      encodedIssuerSigned
+    ]));
+
     const mDL = parseMDL(encodedMDL);
 
     // issuer signed document should have matching fields from
