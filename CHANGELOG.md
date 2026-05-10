@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 31.2.0 - 2026-mm-dd
+## 31.2.0 - 2026-05-10
 
 ### Changed
 - Use configuration system to set body parser limits for specific routes
