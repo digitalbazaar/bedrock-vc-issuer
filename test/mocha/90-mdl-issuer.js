@@ -4,11 +4,10 @@
 import * as bedrock from '@bedrock/core';
 import * as EcdsaMultikey from '@digitalbazaar/ecdsa-multikey';
 import * as helpers from './helpers.js';
-import {parse as parseMDL, Verifier} from '@auth0/mdl';
-import {encode as cborEncode} from 'cborg';
+import {Holder, IssuerSigned} from '@owf/mdoc';
 import {createRequire} from 'node:module';
 import {generateCertificateChain} from './certUtils.js';
-import {generateDeviceKeyPair} from './mdlUtils.js';
+import {generateDeviceKeyPair, mdocContext} from './mdlUtils.js';
 import {mockData} from './mock.data.js';
 import {randomUUID as uuid} from 'node:crypto';
 
@@ -136,73 +135,30 @@ describe('issue mDL', () => {
       .slice('data:application/mdl;base64,'.length);
     const encodedIssuerSigned = Buffer.from(b64, 'base64');
 
-    // create mdoc container with empty `issuerSigned` with the right Map
-    // size -- it will be replaced with the proper `issuerSigned` thereafter
-    const mdoc = new Map([
-      ['version', '1.0'],
-      ['documents', [
-        new Map([
-          ['docType', MDOC_TYPE_MDL],
-          ['issuerSigned', new Map([['nameSpaces', []], ['issuerAuth', []]])]
-        ])
-      ]]
-    ]);
-    const encodedMDL = new Uint8Array(Buffer.concat([
-      // 68 bytes into the payload, replace with encoded `issuerSigned`; this
-      // must be done because there is no API available to wrap the
-      // `issuerSigned` document with an mdoc container that does not also
-      // include a `deviceSigned` document
-      cborEncode(mdoc).subarray(0, 68),
-      encodedIssuerSigned
-    ]));
-
-    const mDL = parseMDL(encodedMDL);
+    // decode issuerSigned directly — no CBOR container wrapping needed
+    const issuerSigned = IssuerSigned.decode(encodedIssuerSigned);
+    const fields = issuerSigned.getPrettyClaims(MDL_NAMESPACE);
 
     // issuer signed document should have matching fields from
     // credential subject's driver's license
     const expectedFields = {...credential.credentialSubject.driversLicense};
     delete expectedFields.type;
 
-    should.exist(mDL?.documents?.[0]);
-    const issuerSignedDoc = mDL.documents[0];
-    issuerSignedDoc.docType.should.equal('org.iso.18013.5.1.mDL');
-    const fields = _convertMapsToObjects(
-      issuerSignedDoc.getIssuerNameSpace('org.iso.18013.5.1'));
+    should.exist(fields);
+    issuerSigned.issuerAuth.mobileSecurityObject.docType.should.equal(
+      MDOC_TYPE_MDL);
     fields.should.deep.equal(expectedFields);
 
-    // ensure mDL can verify
-    const verifierCertificateChain = [
+    // verify issuer signature on mDL
+    const trustedCertificates = [
       certificateEntities.intermediate.pemCertificate,
       certificateEntities.root.pemCertificate
-    ];
-    const verifier = new Verifier(verifierCertificateChain);
-    await verifier.verify(encodedMDL, {
-      onCheck: (verification, original) => {
-        // skip device authentication, only checking issuer signature
-        if(verification.category === 'DEVICE_AUTH') {
-          return;
-        }
-        original(verification);
-      }
-    });
+    ].map(pem => new Uint8Array(Buffer.from(
+      pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, ''), 'base64')));
+
+    await Holder.verifyIssuerSigned(
+      {issuerSigned, trustedCertificates},
+      mdocContext
+    );
   });
 });
-
-// this is needed to convert `@auth0/mdl` mDL expression to simple JSON types
-function _convertMapsToObjects(value) {
-  if(Array.isArray(value)) {
-    value = value.map(_convertMapsToObjects);
-  } else if(_isObject(value) || value instanceof Map) {
-    const entries = [...(value instanceof Map ?
-      value.entries() : Object.entries(value))];
-    return Object.fromEntries(entries.map(
-      ([k, v]) => [k, _convertMapsToObjects(v)]));
-  } else if(value && typeof value === 'object') {
-    value = value.toString();
-  }
-  return value;
-}
-
-function _isObject(v) {
-  return Object.prototype.toString.call(v) === '[object Object]';
-}
