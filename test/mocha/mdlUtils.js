@@ -22,7 +22,7 @@ export const mdocContext = {
     sign1: {
       async sign({key, toBeSigned}) {
         const cryptoKey = await webcrypto.subtle.importKey(
-          'jwk', key.toJwk({privateKey: true}),
+          'jwk', _cleanJwk(key.jwk),
           {name: 'ECDSA', namedCurve: 'P-256'},
           false, ['sign']);
         const sig = await webcrypto.subtle.sign(
@@ -31,7 +31,7 @@ export const mdocContext = {
       },
       async verify({sign1, key}) {
         const cryptoKey = await webcrypto.subtle.importKey(
-          'jwk', key.toJwk({privateKey: false}),
+          'jwk', _cleanJwk(key.jwk),
           {name: 'ECDSA', namedCurve: 'P-256'},
           false, ['verify']);
         return webcrypto.subtle.verify(
@@ -95,6 +95,12 @@ export const mdocContext = {
     }
   }
 };
+
+// strip undefined fields from a CoseKey JWK before passing to webcrypto
+function _cleanJwk(jwk) {
+  return Object.fromEntries(
+    Object.entries(jwk).filter(([, v]) => v !== undefined));
+}
 
 export async function generateDeviceKeyPair() {
   // FIXME: generate new key pair each time
