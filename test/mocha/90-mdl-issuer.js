@@ -170,16 +170,32 @@ describe('issue mDL', () => {
 });
 
 function _deepMapToObject(value) {
-  // handle both native Map and @owf/mdoc's TypedMap (which wraps a Map)
-  if(value instanceof Map || value?.map instanceof Map) {
+  // handle native Map
+  if(value instanceof Map) {
     const obj = {};
     for(const [k, v] of value) {
       obj[k] = _deepMapToObject(v);
     }
     return obj;
   }
+  // handle @owf/mdoc's TypedMap, which wraps a native Map in a .map property
+  if(value?.map instanceof Map) {
+    const obj = {};
+    for(const [k, v] of value.map) {
+      obj[k] = _deepMapToObject(v);
+    }
+    return obj;
+  }
   if(Array.isArray(value)) {
     return value.map(_deepMapToObject);
+  }
+  // recurse into plain objects so nested Maps are converted
+  if(value !== null && typeof value === 'object') {
+    const obj = {};
+    for(const [k, v] of Object.entries(value)) {
+      obj[k] = _deepMapToObject(v);
+    }
+    return obj;
   }
   return value;
 }
