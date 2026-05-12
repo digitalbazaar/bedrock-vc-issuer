@@ -4,7 +4,9 @@
  * Standalone unit test for mdocContext — runs without the Bedrock stack.
  * Execute with: node --experimental-vm-modules test/unit/mdocContext.test.js
  */
-import {CoseKey, DeviceKey, Holder, Issuer, SignatureAlgorithm} from '@owf/mdoc';
+import {
+  CoseKey, DeviceKey, Holder, Issuer, SignatureAlgorithm
+} from '@owf/mdoc';
 import {generateCertificateChain, generateKeyPair} from '../mocha/certUtils.js';
 import {mdocContext} from '../mocha/mdlUtils.js';
 
@@ -111,10 +113,11 @@ await test('Holder.verifyIssuerSigned(): verifies a signed mDL', async () => {
   });
 
   // should not throw
-  await Holder.verifyIssuerSigned({issuerSigned, trustedCertificates}, mdocContext);
+  await Holder.verifyIssuerSigned(
+    {issuerSigned, trustedCertificates}, mdocContext);
 });
 
-await test('Holder.verifyIssuerSigned(): rejects untrusted certificate', async () => {
+await test('verifyIssuerSigned(): rejects untrusted certificate', async () => {
   const {keyPair, jwk} = await generateKeyPair();
   const {leaf} = await generateCertificateChain({
     leafKeyPairInfo: {keyPair, jwk}

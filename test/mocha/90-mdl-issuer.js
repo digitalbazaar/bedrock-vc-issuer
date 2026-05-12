@@ -4,10 +4,12 @@
 import * as bedrock from '@bedrock/core';
 import * as EcdsaMultikey from '@digitalbazaar/ecdsa-multikey';
 import * as helpers from './helpers.js';
+
+import {generateDeviceKeyPair, mdocContext} from './mdlUtils.js';
 import {Holder, IssuerSigned} from '@owf/mdoc';
+
 import {createRequire} from 'node:module';
 import {generateCertificateChain} from './certUtils.js';
-import {generateDeviceKeyPair, mdocContext} from './mdlUtils.js';
 import {mockData} from './mock.data.js';
 import {randomUUID as uuid} from 'node:crypto';
 

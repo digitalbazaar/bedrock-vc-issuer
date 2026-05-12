@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2025-2026 Digital Bazaar, Inc. All rights reserved.
  */
-import {CoseKey} from '@owf/mdoc';
 import * as x509Lib from '@peculiar/x509';
 import {exportJWK, importX509} from 'jose';
+import {CoseKey} from '@owf/mdoc';
 import {webcrypto} from 'node:crypto';
 
 // mdocContext implements the crypto/cose/x509 interfaces required by @owf/mdoc
@@ -77,7 +77,9 @@ export const mdocContext = {
       for(let i = 0; i < parsedChain.length; i++) {
         const cert = parsedChain[i];
         const prev = parsedChain[i - 1];
-        await cert.verify({publicKey: prev?.publicKey, date: now ?? new Date()});
+        await cert.verify({
+          publicKey: prev?.publicKey, date: now ?? new Date()
+        });
       }
     },
     async getCertificateData({certificate}) {
