@@ -139,7 +139,11 @@ describe('issue mDL', () => {
 
     // decode issuerSigned directly — no CBOR container wrapping needed
     const issuerSigned = IssuerSigned.decode(encodedIssuerSigned);
-    const fields = issuerSigned.getPrettyClaims(MDL_NAMESPACE);
+    const rawFields = issuerSigned.getPrettyClaims(MDL_NAMESPACE);
+
+    // @owf/mdoc decodes nested CBOR maps as JS Map instances; convert to
+    // plain objects for comparison
+    const fields = _deepMapToObject(rawFields);
 
     // issuer signed document should have matching fields from
     // credential subject's driver's license
@@ -164,3 +168,17 @@ describe('issue mDL', () => {
     );
   });
 });
+
+function _deepMapToObject(value) {
+  if(value instanceof Map) {
+    const obj = {};
+    for(const [k, v] of value) {
+      obj[k] = _deepMapToObject(v);
+    }
+    return obj;
+  }
+  if(Array.isArray(value)) {
+    return value.map(_deepMapToObject);
+  }
+  return value;
+}
