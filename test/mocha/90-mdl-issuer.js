@@ -170,7 +170,8 @@ describe('issue mDL', () => {
 });
 
 function _deepMapToObject(value) {
-  if(value instanceof Map) {
+  // handle both native Map and @owf/mdoc's TypedMap (which wraps a Map)
+  if(value instanceof Map || value?.map instanceof Map) {
     const obj = {};
     for(const [k, v] of value) {
       obj[k] = _deepMapToObject(v);
