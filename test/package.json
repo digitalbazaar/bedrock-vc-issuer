@@ -5,13 +5,13 @@
   "private": true,
   "scripts": {
     "test": "node --preserve-symlinks test.js test",
+    "test:unit": "node unit/mdocContext.test.js",
     "debug": "node --preserve-symlinks test.js test --log-level debug",
     "coverage": "cross-env NODE_ENV=test c8 npm test",
     "coverage-ci": "cross-env NODE_ENV=test c8 --reporter=lcovonly --reporter=text-summary --reporter=text npm test",
     "coverage-report": "c8 report"
   },
   "dependencies": {
-    "@auth0/mdl": "^3.0.1",
     "@bedrock/app-identity": "^4.2.0",
     "@bedrock/core": "^6.3.0",
     "@bedrock/credentials-context": "^5.0.3",
@@ -43,6 +43,7 @@
     "@bedrock/vc-status-list-context": "^6.0.3",
     "@bedrock/veres-one-context": "^16.0.0",
     "@bedrock/zcap-storage": "^9.6.0",
+    "@peculiar/x509": "^1.14.3",
     "@digitalbazaar/ecdsa-multikey": "^1.8.0",
     "@digitalbazaar/ed25519-signature-2020": "^5.4.0",
     "@digitalbazaar/edv-client": "^16.3.0",
