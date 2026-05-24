@@ -1,10 +1,9 @@
 /*
  * Copyright (c) 2025-2026 Digital Bazaar, Inc. All rights reserved.
  */
-import {CoseKey} from '@owf/mdoc';
-import * as x509Lib from '@peculiar/x509';
 import {exportJWK, importX509} from 'jose';
-import {webcrypto} from 'node:crypto';
+import {webcrypto, X509Certificate} from 'node:crypto';
+import {CoseKey} from '@owf/mdoc';
 
 // mdocContext implements the crypto/cose/x509 interfaces required by @owf/mdoc
 export const mdocContext = {
@@ -42,11 +41,11 @@ export const mdocContext = {
   },
   x509: {
     getIssuerNameField({certificate, field}) {
-      const cert = new x509Lib.X509Certificate(certificate);
-      return cert.issuerName.getField(field);
+      const cert = new X509Certificate(certificate);
+      return _parseDN(cert.issuer)[field] ?? [];
     },
     async getPublicKey({certificate, alg}) {
-      const cert = new x509Lib.X509Certificate(certificate);
+      const cert = new X509Certificate(certificate);
       const key = await importX509(cert.toString(), alg, {extractable: true});
       return CoseKey.fromJwk(await exportJWK(key));
     },
@@ -54,47 +53,87 @@ export const mdocContext = {
       if(x5chain.length === 0) {
         throw new Error('Certificate chain is empty');
       }
-      const leafCert = new x509Lib.X509Certificate(x5chain[0]);
-      const mdocCerts = x5chain.map(c => new x509Lib.X509Certificate(c));
-      const trustedCerts = trustedCertificates.map(
-        c => new x509Lib.X509Certificate(c));
-      const builder = new x509Lib.X509ChainBuilder({
-        certificates: [...mdocCerts, ...trustedCerts]
-      });
-      const chain = await builder.build(leafCert);
-      let parsedChain = chain.map(
-        c => new x509Lib.X509Certificate(c.rawData)).reverse();
-      if(parsedChain.length < x5chain.length) {
-        throw new Error('Could not parse the full chain');
+      const chain = x5chain.map(c => new X509Certificate(c));
+      const trusted = trustedCertificates.map(c => new X509Certificate(c));
+
+      // verify each cert in the chain is issued by the next
+      for(let i = 0; i < chain.length - 1; i++) {
+        const cert = chain[i];
+        const issuer = chain[i + 1];
+        if(!cert.checkIssued(issuer)) {
+          throw new Error(
+            `Certificate at index ${i} was not issued by ` +
+            `certificate at index ${i + 1}`);
+        }
+        if(!cert.verify(issuer.publicKey)) {
+          throw new Error(
+            `Certificate at index ${i} failed signature verification`);
+        }
+        _checkValidity(cert, now);
       }
-      const trustedIdx = parsedChain.findIndex(
-        cert => trustedCerts.some(t => cert.equal(t)));
-      if(trustedIdx === -1) {
+
+      // the last cert in the chain must be trusted (or self-signed by trusted)
+      const lastCert = chain[chain.length - 1];
+      const isTrusted = trusted.some(t => {
+        try {
+          return lastCert.verify(t.publicKey) && lastCert.checkIssued(t);
+        } catch {
+          return false;
+        }
+      });
+      if(!isTrusted) {
         throw new Error(
           'No trusted certificate was found while validating the X.509 chain');
       }
-      parsedChain = parsedChain.slice(0, trustedIdx);
-      for(let i = 0; i < parsedChain.length; i++) {
-        const cert = parsedChain[i];
-        const prev = parsedChain[i - 1];
-        await cert.verify({publicKey: prev?.publicKey, date: now ?? new Date()});
-      }
+      _checkValidity(lastCert, now);
     },
     async getCertificateData({certificate}) {
-      const cert = new x509Lib.X509Certificate(certificate);
-      const thumbprint = await cert.getThumbprint(webcrypto);
+      const cert = new X509Certificate(certificate);
+      // fingerprint256 is "XX:XX:..." — strip colons for a hex thumbprint
+      const thumbprint = cert.fingerprint256.replace(/:/g, '').toLowerCase();
       return {
-        issuerName: cert.issuerName.toString(),
-        subjectName: cert.subjectName.toString(),
+        issuerName: cert.issuer,
+        subjectName: cert.subject,
         pem: cert.toString(),
         serialNumber: cert.serialNumber,
-        thumbprint: Buffer.from(thumbprint).toString('hex'),
-        notBefore: cert.notBefore,
-        notAfter: cert.notAfter
+        thumbprint,
+        notBefore: new Date(cert.validFrom),
+        notAfter: new Date(cert.validTo)
       };
     }
   }
 };
+
+// parse a distinguished name string into a field map; handles both
+// " + " (Node.js multi-valued RDN format) and "\n" separators
+function _parseDN(dn) {
+  const fields = {};
+  for(const part of dn.split(/\s*\+\s*|\n/)) {
+    const idx = part.indexOf('=');
+    if(idx === -1) {
+      continue;
+    }
+    const key = part.slice(0, idx).trim();
+    const val = part.slice(idx + 1).trim();
+    if(!fields[key]) {
+      fields[key] = [];
+    }
+    fields[key].push(val);
+  }
+  return fields;
+}
+
+// check certificate validity window; throw if outside [notBefore, notAfter]
+function _checkValidity(cert, now) {
+  const date = now ?? new Date();
+  const notBefore = new Date(cert.validFrom);
+  const notAfter = new Date(cert.validTo);
+  if(date < notBefore || date > notAfter) {
+    throw new Error(
+      `Certificate is not valid at ${date.toUTCString()} ` +
+      `(valid ${notBefore.toUTCString()} to ${notAfter.toUTCString()})`);
+  }
+}
 
 // strip undefined fields from a CoseKey JWK before passing to webcrypto
 function _cleanJwk(jwk) {
@@ -116,4 +155,3 @@ export async function generateDeviceKeyPair() {
   };
   return {publicJwk, privateJwk};
 }
-
