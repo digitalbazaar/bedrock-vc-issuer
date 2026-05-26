@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2025-2026 Digital Bazaar, Inc.
  */
 import {exportJWK, importX509} from 'jose';
 import {webcrypto, X509Certificate} from 'node:crypto';
@@ -56,8 +56,10 @@ export const mdocContext = {
       const chain = x5chain.map(c => new X509Certificate(c));
       const trusted = trustedCertificates.map(c => new X509Certificate(c));
 
-      // verify each cert in the chain is issued by the next
-      for(let i = 0; i < chain.length - 1; i++) {
+      // do minimal checking: verify each cert in the chain is issued by the
+      // next; do NOT copy this code to verify a cert chain in a real app, it
+      // is likely not sufficient
+      for(let i = 0; i < chain.length - 1; ++i) {
         const cert = chain[i];
         const issuer = chain[i + 1];
         if(!cert.checkIssued(issuer)) {
