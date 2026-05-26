@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2025-2026 Digital Bazaar, Inc.
  *
  * Standalone unit test for mdocContext — runs without the Bedrock stack.
  * Execute with: node --experimental-vm-modules test/unit/mdocContext.test.js
