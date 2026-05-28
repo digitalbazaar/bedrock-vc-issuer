@@ -51,8 +51,8 @@ function testStatusPurpose({
     let bslInstance;
     before(async () => {
       // provision dependencies
-      ({issuer, capabilityAgent, zcaps} = await helpers.provisionDependencies(
-        depOptions));
+      ({issuer, capabilityAgent, zcaps} = await helpers.provisionDependencies({
+        ...depOptions, status: false}));
 
       // create issuer instance w/ bitstring status list options
       const statusListOptions = [{
