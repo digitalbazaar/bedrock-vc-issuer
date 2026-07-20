@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2025-2026 Digital Bazaar, Inc.
  */
 import * as asn1js from 'asn1js';
 import * as pkijs from 'pkijs';
@@ -7,23 +7,53 @@ import {randomUUID, webcrypto} from 'node:crypto';
 
 const crypto = _createCrypto();
 
-export async function generateCertificateChain({leafKeyPairInfo} = {}) {
+export async function importJwk({jwk: inputJwk} = {}) {
+  const algorithm = {
+    algorithm: {name: 'ECDSA', namedCurve: 'P-256'},
+    usages: ['verify']
+  };
+  if(inputJwk.d) {
+    algorithm.usages.push('sign');
+  }
+  const cryptoKey = await crypto.subtle.importKey(
+    'jwk', inputJwk, algorithm.algorithm, true, algorithm.usages);
+  let keyPair;
+  if(cryptoKey.privateKey) {
+    keyPair = cryptoKey;
+  } else {
+    keyPair = {publicKey: cryptoKey};
+  }
+  const jwk = await crypto.subtle.exportKey(
+    'jwk', keyPair.privateKey ?? keyPair.publicKey);
+  jwk.kid = inputJwk.kid ?? `urn:uuid:${randomUUID()}`;
+  delete jwk.key_ops;
+  delete jwk.ext;
+  return {keyPair, jwk};
+}
+
+export async function generateCertificateChain({leafConfig} = {}) {
   const root = await _createEntity({
     commonName: 'Root',
+    cA: true,
     serialNumber: 1
   });
 
   const intermediate = await _createEntity({
     issuer: root.subject,
     commonName: 'Intermediate',
+    cA: true,
     serialNumber: 2
   });
 
   const leaf = await _createEntity({
     issuer: intermediate.subject,
-    commonName: 'Leaf',
+    commonName: leafConfig?.commonName ?? 'Leaf',
+    dnsName: leafConfig?.dnsName ?? 'example.test',
+    cA: leafConfig?.cA,
     serialNumber: 3,
-    keyPairInfo: leafKeyPairInfo
+    keyPairInfo: leafConfig?.keyPairInfo,
+    privateKeyJwk: leafConfig?.privateKeyJwk,
+    publicKeyJwk: leafConfig?.publicKeyJwk
   });
 
   return {root, intermediate, leaf};
@@ -44,14 +74,24 @@ export async function generateKeyPair() {
 }
 
 async function _createEntity({
-  issuer, commonName, serialNumber, keyPairInfo
+  issuer, commonName, dnsName, cA = false, serialNumber,
+  keyPairInfo, privateKeyJwk, publicKeyJwk
 } = {}) {
-  // generate subject key pair
-  const {keyPair, jwk} = keyPairInfo ?? await generateKeyPair();
+  let keyPair;
+  let jwk;
+  if(keyPairInfo) {
+    ({keyPair, jwk} = keyPairInfo);
+  } else {
+    // import or generate key pair
+    const givenJwk = privateKeyJwk || publicKeyJwk;
+    ({keyPair, jwk} = await (givenJwk ?
+      importJwk({jwk: givenJwk}) : generateKeyPair()));
+  }
 
   // subject ID
   const subject = {
     commonName: commonName ?? 'Root',
+    dnsName,
     keyPair,
     jwk
   };
@@ -99,32 +139,65 @@ async function _createEntity({
   // extensions are optional
   certificate.extensions = [];
 
-  // `BasicConstraints` extension
-  const basicConstr = new pkijs.BasicConstraints({
-    cA: true,
-    pathLenConstraint: 3
-  });
-  certificate.extensions.push(new pkijs.Extension({
-    extnID: '2.5.29.19',
-    critical: false,
-    extnValue: basicConstr.toSchema().toBER(false),
-    parsedValue: basicConstr // Parsed value for well-known extensions
-  }));
+  if(cA !== undefined) {
+    // `BasicConstraints` extension
+    const basicConstr = new pkijs.BasicConstraints({
+      cA,
+      pathLenConstraint: cA === true ? 3 : undefined
+    });
+    certificate.extensions.push(new pkijs.Extension({
+      extnID: '2.5.29.19',
+      critical: true,
+      extnValue: basicConstr.toSchema().toBER(false),
+      // Parsed value for well-known extensions
+      parsedValue: basicConstr
+    }));
+  }
 
   // `KeyUsage` extension
   const bitArray = new ArrayBuffer(1);
   const bitView = new Uint8Array(bitArray);
-  // key usage `cRLSign` flag
-  bitView[0] |= 0x02;
-  // key usage `keyCertSign` flag
-  bitView[0] |= 0x04;
+  if(cA) {
+    // key usage `cRLSign` flag
+    bitView[0] |= 0x02;
+    // key usage `keyCertSign` flag
+    bitView[0] |= 0x04;
+  }
   const keyUsage = new asn1js.BitString({valueHex: bitArray});
   certificate.extensions.push(new pkijs.Extension({
     extnID: '2.5.29.15',
-    critical: false,
+    critical: true,
     extnValue: keyUsage.toBER(false),
-    parsedValue: keyUsage // Parsed value for well-known extensions
+    // Parsed value for well-known extensions
+    parsedValue: keyUsage
   }));
+
+  if(subject.dnsName) {
+    // Subject Alternative Name
+    const altNames = new pkijs.GeneralNames({
+      names: [
+        /*
+        new pkijs.GeneralName({
+          // email
+          type: 1,
+          value: "email@address.com"
+        }),*/
+        new pkijs.GeneralName({
+          // domain
+          type: 2,
+          value: subject.dnsName
+        })
+      ]
+    });
+
+    certificate.extensions.push(new pkijs.Extension({
+      // subject alt names
+      // id-ce-subjectAltName
+      extnID: '2.5.29.17',
+      critical: false,
+      extnValue: altNames.toSchema().toBER(false)
+    }));
+  }
 
   // export public key into `subjectPublicKeyInfo` value of certificate
   await certificate.subjectPublicKeyInfo.importKey(
@@ -136,8 +209,9 @@ async function _createEntity({
   // export certificate to PEM
   const raw = certificate.toSchema().toBER();
   const pemCertificate = _toPem(raw);
+  const b64Certificate = Buffer.from(raw).toString('base64');
 
-  return {subject, issuer, certificate, pemCertificate};
+  return {subject, issuer, certificate, pemCertificate, b64Certificate};
 }
 
 function _createCrypto() {

@@ -71,9 +71,14 @@ describe('issue mDL', () => {
 
     // create a certificate chain that ends in the MDL issuer (leaf)
     certificateEntities = await generateCertificateChain({
-      leafKeyPairInfo: {
-        keyPair: issuerKeyPair,
-        jwk: issuerPublicJwk
+      leafConfig: {
+        // FIXME: leaf must be marked as a CA to pass verification; investigate
+        // to see if this is correct or not and adjust accordingly
+        cA: true,
+        keyPairInfo: {
+          keyPair: issuerKeyPair,
+          jwk: issuerPublicJwk
+        }
       }
     });
 
