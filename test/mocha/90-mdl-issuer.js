@@ -17,8 +17,8 @@ const require = createRequire(import.meta.url);
 
 const mockVDL = require('./mock-vdl.json');
 
-const MDL_NAMESPACE = 'org.iso.18013.5.1';
-const MDOC_TYPE_MDL = `${MDL_NAMESPACE}.mDL`;
+const MDOC_TYPE_MDL = 'org.iso.18013.5.1';
+const MDL_NAMESPACE = `${MDOC_TYPE_MDL}.mDL`;
 
 describe('issue mDL', () => {
   let capabilityAgent;
