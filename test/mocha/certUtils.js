@@ -32,17 +32,21 @@ export async function importJwk({jwk: inputJwk} = {}) {
 }
 
 export async function generateCertificateChain({leafConfig} = {}) {
+  const now = new Date();
+
   const root = await _createEntity({
     commonName: 'Root',
     cA: true,
-    serialNumber: 1
+    serialNumber: 1,
+    now
   });
 
   const intermediate = await _createEntity({
     issuer: root.subject,
     commonName: 'Intermediate',
     cA: true,
-    serialNumber: 2
+    serialNumber: 2,
+    now
   });
 
   const leaf = await _createEntity({
@@ -53,7 +57,8 @@ export async function generateCertificateChain({leafConfig} = {}) {
     serialNumber: 3,
     keyPairInfo: leafConfig?.keyPairInfo,
     privateKeyJwk: leafConfig?.privateKeyJwk,
-    publicKeyJwk: leafConfig?.publicKeyJwk
+    publicKeyJwk: leafConfig?.publicKeyJwk,
+    now
   });
 
   return {root, intermediate, leaf};
@@ -75,7 +80,7 @@ export async function generateKeyPair() {
 
 async function _createEntity({
   issuer, commonName, dnsName, cA = false, serialNumber,
-  keyPairInfo, privateKeyJwk, publicKeyJwk
+  keyPairInfo, privateKeyJwk, publicKeyJwk, now
 } = {}) {
   let keyPair;
   let jwk;
@@ -131,8 +136,8 @@ async function _createEntity({
   }));
 
   // validity period
-  certificate.notBefore.value = new Date();
-  const notAfter = new Date();
+  certificate.notBefore.value = new Date(now);
+  const notAfter = new Date(now);
   notAfter.setUTCFullYear(notAfter.getUTCFullYear() + 1);
   certificate.notAfter.value = notAfter;
 
