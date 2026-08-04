@@ -4,6 +4,7 @@
 
 ### Fixed
 - Reverse mdoc mDL doc type and namespace in issued mdoc mDLs.
+- Use proper certificate validity period when issuing mdoc mDLs.
 
 ## 31.2.0 - 2026-05-10
 
