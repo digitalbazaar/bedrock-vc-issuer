@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "test": "node --preserve-symlinks test.js test",
-    "test:unit": "node unit/mdocContext.test.js",
     "debug": "node --preserve-symlinks test.js test --log-level debug",
     "coverage": "cross-env NODE_ENV=test c8 npm test",
     "coverage-ci": "cross-env NODE_ENV=test c8 --reporter=lcovonly --reporter=text-summary --reporter=text npm test",
