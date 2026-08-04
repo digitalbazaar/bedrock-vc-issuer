@@ -1,6 +1,6 @@
 # bedrock-vc-issuer ChangeLog
 
-## 31.2.1 - 2026-mm-dd
+## 31.2.1 - 2026-08-04
 
 ### Fixed
 - Reverse mdoc mDL doc type and namespace in issued mdoc mDLs.
