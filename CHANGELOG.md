@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 31.2.2 - 2026-mm-dd
+
+### Fixed
+- Make mdoc mDL doc type and namespace consistent.
+
 ## 31.2.1 - 2026-08-04
 
 ### Fixed
