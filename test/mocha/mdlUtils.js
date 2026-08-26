@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Digital Bazaar, Inc.
  */
-import {exportJWK, importX509} from 'jose';
 import {webcrypto, X509Certificate} from 'node:crypto';
 import {CoseKey} from '@owf/mdoc';
 
@@ -28,14 +27,14 @@ export const mdocContext = {
           {name: 'ECDSA', hash: 'SHA-256'}, cryptoKey, toBeSigned);
         return new Uint8Array(sig);
       },
-      async verify({sign1, key}) {
+      async verify({toBeVerified, signature, key}) {
         const cryptoKey = await webcrypto.subtle.importKey(
           'jwk', _cleanJwk(key.jwk),
           {name: 'ECDSA', namedCurve: 'P-256'},
           false, ['verify']);
         return webcrypto.subtle.verify(
           {name: 'ECDSA', hash: 'SHA-256'}, cryptoKey,
-          sign1.signature, sign1.toBeSigned);
+          signature, toBeVerified);
       }
     }
   },
@@ -44,10 +43,14 @@ export const mdocContext = {
       const cert = new X509Certificate(certificate);
       return _parseDN(cert.issuer)[field] ?? [];
     },
-    async getPublicKey({certificate, alg}) {
+    async getPublicKey({certificate}) {
+      /* Read from the certificate rather than from a named algorithm. The
+      caller supplies a COSE algorithm identifier, which is a number, and
+      passing that where a JOSE algorithm name belongs is rejected as an
+      unsupported "alg". The certificate already carries the key and its
+      curve, so nothing here needs the name. */
       const cert = new X509Certificate(certificate);
-      const key = await importX509(cert.toString(), alg, {extractable: true});
-      return CoseKey.fromJwk(await exportJWK(key));
+      return CoseKey.fromJwk(cert.publicKey.export({format: 'jwk'}));
     },
     async verifyCertificateChain({trustedCertificates, x5chain, now}) {
       if(x5chain.length === 0) {
@@ -88,6 +91,10 @@ export const mdocContext = {
           'No trusted certificate was found while validating the X.509 chain');
       }
       _checkValidity(lastCert, now);
+      // the verified chain is returned, not just accepted: callers destructure
+      // `chain` from the result, and returning nothing surfaces as a
+      // destructuring TypeError that hides whatever the real verdict was
+      return {chain: x5chain};
     },
     async getCertificateData({certificate}) {
       const cert = new X509Certificate(certificate);

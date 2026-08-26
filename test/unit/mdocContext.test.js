@@ -5,7 +5,7 @@
  * Execute with: node --experimental-vm-modules test/unit/mdocContext.test.js
  */
 import {
-  CoseKey, DeviceKey, Holder, Issuer, SignatureAlgorithm
+  CoseKey, DeviceKey, Holder, Issuer, IssuerSigned, SignatureAlgorithm
 } from '@owf/mdoc';
 import {generateCertificateChain, generateKeyPair} from '../mocha/certUtils.js';
 import {mdocContext} from '../mocha/mdlUtils.js';
@@ -48,7 +48,7 @@ console.log('\nmdocContext unit tests\n');
 await test('issue(): signs an mDL with mdocContext', async () => {
   const {keyPair, jwk} = await generateKeyPair();
   const {leaf} = await generateCertificateChain({
-    leafKeyPairInfo: {keyPair, jwk}
+    leafConfig: {keyPairInfo: {keyPair, jwk}}
   });
 
   const toDer = pem => new Uint8Array(Buffer.from(
@@ -83,17 +83,23 @@ await test('issue(): signs an mDL with mdocContext', async () => {
 await test('Holder.verifyIssuerSigned(): verifies a signed mDL', async () => {
   const {keyPair, jwk} = await generateKeyPair();
   const {leaf, intermediate, root} = await generateCertificateChain({
-    leafKeyPairInfo: {keyPair, jwk}
+    leafConfig: {cA: true, keyPairInfo: {keyPair, jwk}}
   });
 
   const toDer = pem => new Uint8Array(Buffer.from(
     pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, ''), 'base64'));
 
   const issuerCertDer = toDer(leaf.pemCertificate);
-  const trustedCertificates = [
-    toDer(intermediate.pemCertificate),
-    toDer(root.pemCertificate)
-  ];
+  /* Anchors are grouped by what they are trusted FOR: `issuance` for the
+  document signer's chain, and optionally `status` for a status list's. A flat
+  array of certificates is silently read as a list of groups with no
+  `issuance`, which fails later inside a byte comparison rather than here. */
+  const trustedCertificates = [{
+    issuance: [
+      toDer(intermediate.pemCertificate),
+      toDer(root.pemCertificate)
+    ]
+  }];
 
   const devicePublicJwk = {
     kty: 'EC', crv: 'P-256',
@@ -120,7 +126,7 @@ await test('Holder.verifyIssuerSigned(): verifies a signed mDL', async () => {
 await test('verifyIssuerSigned(): rejects untrusted certificate', async () => {
   const {keyPair, jwk} = await generateKeyPair();
   const {leaf} = await generateCertificateChain({
-    leafKeyPairInfo: {keyPair, jwk}
+    leafConfig: {keyPairInfo: {keyPair, jwk}}
   });
 
   // use a different chain as trusted — should fail verification
@@ -129,7 +135,9 @@ await test('verifyIssuerSigned(): rejects untrusted certificate', async () => {
     pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, ''), 'base64'));
 
   const issuerCertDer = toDer(leaf.pemCertificate);
-  const wrongTrustedCerts = [toDer(untrustedRoot.pemCertificate)];
+  const wrongTrustedCerts = [{
+    issuance: [toDer(untrustedRoot.pemCertificate)]
+  }];
 
   const devicePublicJwk = {
     kty: 'EC', crv: 'P-256',
@@ -148,14 +156,68 @@ await test('verifyIssuerSigned(): rejects untrusted certificate', async () => {
     validityInfo: _validityInfo()
   });
 
-  let threw = false;
+  /* The REASON is asserted, not merely that something threw. A context with a
+  broken method throws too, and a test satisfied by any exception passes while
+  reporting nothing about trust. */
+  let error;
   try {
     await Holder.verifyIssuerSigned(
       {issuerSigned, trustedCertificates: wrongTrustedCerts}, mdocContext);
-  } catch {
-    threw = true;
+  } catch(e) {
+    error = e;
   }
-  assert(threw, 'verification should fail with untrusted certificate');
+  assert(error !== undefined,
+    'verification should fail with untrusted certificate');
+  assert(
+    /trusted certificate/i.test(error.message),
+    'the failure must be about trust, not an incidental error: ' +
+    error.message);
+});
+
+/* The header this bump exists for. RFC 9052 makes the COSE `kid` a byte
+string, and an mdoc library that wrote it as a text string produced documents a
+conformant reader refuses at header decode -- before any signature is checked.
+Nothing asserted on its type, which is how that shipped. */
+await test('sign(): writes the COSE kid as a byte string', async () => {
+  const {keyPair, jwk} = await generateKeyPair();
+  const {leaf} = await generateCertificateChain({
+    leafConfig: {cA: true, keyPairInfo: {keyPair, jwk}}
+  });
+  const toDer = pem => new Uint8Array(Buffer.from(
+    pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, ''), 'base64'));
+
+  /* Public-only, as the three tests above it are. `generateKeyPair` exports
+  its JWK from the private key, so passing that whole JWK here writes the
+  private scalar into the issued document's device key. */
+  const devicePublicJwk = {
+    kty: 'EC', crv: 'P-256',
+    x: 'QiUaYhZak1NubJEphQWmafykivrD80D2IpwqkkCU0oQ',
+    y: 'sdNfR3813hzaUqF3-kWWOjI1xtSEqb93-graWFK-bA4'
+  };
+
+  const issuer = new Issuer(MDOC_TYPE_MDL, mdocContext);
+  issuer.addIssuerNamespace(MDL_NAMESPACE, {family_name: 'SMITH'});
+  const issuerSigned = await issuer.sign({
+    signingKey: CoseKey.fromJwk({...jwk, kid: 'urn:example:signing-key'}),
+    algorithm: SignatureAlgorithm.ES256,
+    digestAlgorithm: 'SHA-256',
+    certificates: [toDer(leaf.pemCertificate)],
+    validityInfo: _validityInfo(),
+    deviceKeyInfo: {deviceKey: DeviceKey.fromJwk(devicePublicJwk)}
+  });
+
+  /* Read the header off a decoded document rather than the builder that wrote
+  it. The claim is about what a reader sees, and an assertion against the
+  in-memory structure would hold even if the encoder emitted something else. */
+  const decoded = IssuerSigned.decode(issuerSigned.encode());
+  const kid = decoded.issuerAuth.unprotectedHeaders.structure.get(4);
+  assert(kid !== undefined, 'a kid was requested, so one must be written');
+  assert(
+    kid instanceof Uint8Array,
+    `the COSE kid must be a byte string, got ${typeof kid}`);
+  assert(
+    Buffer.from(kid).toString('utf8') === 'urn:example:signing-key',
+    'the kid must still carry the key identifier it was given');
 });
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

@@ -1,5 +1,23 @@
 # bedrock-vc-issuer ChangeLog
 
+## 31.3.0 - TBD
+
+### Fixed
+- Update `@owf/mdoc` to `^0.7.0`, which writes the COSE `kid` header on an
+  issued mdoc as a byte string. RFC 9052 requires a byte string; `0.6.0` wrote
+  a text string, and its own decoder accepted one, so the malformed header went
+  unnoticed. A conformant reader refuses such a document at header decode,
+  before any signature is checked. A reader that had adapted to the text string
+  now receives a byte string and may need a change of its own.
+
+### Changed
+- An issued mdoc's `x5chain` header now always holds an array of certificates.
+  `@owf/mdoc` `0.6.0` stored a lone certificate unwrapped, so the encoding of a
+  single-certificate chain changes. RFC 9360 permits both forms and a reader
+  that accepts either is unaffected; a reader accepting only the unwrapped form
+  will refuse documents issued by this version. Credentials already issued are
+  unaffected -- only newly issued ones carry the new encoding.
+
 ## 31.2.2 - 2026-08-06
 
 ### Fixed

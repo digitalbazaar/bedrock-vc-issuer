@@ -160,12 +160,16 @@ describe('issue mDL', () => {
       MDOC_TYPE_MDL);
     fields.should.deep.equal(expectedFields);
 
-    // verify issuer signature on mDL
-    const trustedCertificates = [
-      certificateEntities.intermediate.pemCertificate,
-      certificateEntities.root.pemCertificate
-    ].map(pem => new Uint8Array(Buffer.from(
-      pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, ''), 'base64')));
+    // verify issuer signature on mDL; anchors are grouped by what they are
+    // trusted for, and a flat array of certificates is read as a list of
+    // groups that name no anchors at all
+    const trustedCertificates = [{
+      issuance: [
+        certificateEntities.intermediate.pemCertificate,
+        certificateEntities.root.pemCertificate
+      ].map(pem => new Uint8Array(Buffer.from(
+        pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, ''), 'base64')))
+    }];
 
     await Holder.verifyIssuerSigned(
       {issuerSigned, trustedCertificates},
