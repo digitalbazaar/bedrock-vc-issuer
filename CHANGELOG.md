@@ -3,7 +3,9 @@
 ## 31.3.0 - 2026-08-dd
 
 ### Added
-- Support mdoc mDL issuance with `application/mdoc` media type.
+- Support mdoc mDL issuance with `application/mdoc` media type and the
+  use of `mdoc` named options. Use of the `application/mdl` and options
+  named `mdl` are now deprecated in favor of their `mdoc` variants.
 
 ## 31.2.2 - 2026-08-06
 
