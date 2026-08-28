@@ -20,7 +20,7 @@ const mockVDL = require('./mock-vdl.json');
 const MDL_NAMESPACE = 'org.iso.18013.5.1';
 const MDOC_TYPE_MDL = `${MDL_NAMESPACE}.mDL`;
 
-describe('issue mdoc mDL with "application/mdoc" media type', () => {
+describe('issue mDL with deprecated "application/mdl" media type', () => {
   let capabilityAgent;
   let did;
   let zcaps;
@@ -31,7 +31,7 @@ describe('issue mdoc mDL with "application/mdoc" media type', () => {
   beforeEach(async () => {
     // use envelope-based security
     const envelope = {
-      mediaType: 'application/mdoc',
+      mediaType: 'application/mdl',
       algorithm: 'P-256'
     };
 
@@ -69,7 +69,7 @@ describe('issue mdoc mDL with "application/mdoc" media type', () => {
     // add DID doc to map with DID docs to be served
     mockData.didWebDocuments.set(localId, didDocument);
 
-    // create a certificate chain that ends in the mdoc issuer (leaf)
+    // create a certificate chain that ends in the MDL issuer (leaf)
     certificateEntities = await generateCertificateChain({
       leafConfig: {
         // FIXME: leaf must be marked as a CA to pass verification; investigate
@@ -102,11 +102,11 @@ describe('issue mdoc mDL with "application/mdoc" media type', () => {
     noStatusListIssuerRootZcap =
       `urn:zcap:root:${encodeURIComponent(noStatusListIssuerId)}`;
   });
-  it('issues an mdoc mDL', async () => {
-    // create device key pair for mdoc
+  it('issues an mDL', async () => {
+    // create device key pair for mDL
     const {publicJwk: devicePublicJwk} = await generateDeviceKeyPair();
 
-    // issue mdoc mDL
+    // issue mDL
     const credential = structuredClone(mockVDL);
     let error;
     let result;
@@ -118,7 +118,7 @@ describe('issue mdoc mDL with "application/mdoc" media type', () => {
         json: {
           credential,
           options: {
-            mdoc: {devicePublicJwk}
+            mdl: {devicePublicJwk}
           }
         }
       });
@@ -135,11 +135,11 @@ describe('issue mdoc mDL with "application/mdoc" media type', () => {
     should.exist(verifiableCredential.type);
     verifiableCredential.type.should.equal('EnvelopedVerifiableCredential');
     verifiableCredential.id.should.be.a('string');
-    verifiableCredential.id.should.include('data:application/mdoc;base64,');
+    verifiableCredential.id.should.include('data:application/mdl;base64,');
 
-    // assert mdoc contents
+    // assert mDL contents
     const b64 = verifiableCredential.id
-      .slice('data:application/mdoc;base64,'.length);
+      .slice('data:application/mdl;base64,'.length);
     const encodedIssuerSigned = Buffer.from(b64, 'base64');
 
     // decode issuerSigned directly — no CBOR container wrapping needed

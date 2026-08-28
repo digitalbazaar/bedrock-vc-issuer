@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2022-2026 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2022-2026 Digital Bazaar, Inc.
  */
 import {
   MAX_BLOCK_COUNT, MAX_BLOCK_SIZE, MAX_LIST_COUNT,
@@ -92,8 +92,9 @@ const envelope = {
   properties: {
     mediaType: {
       type: 'string',
-      // supported envelope media types in this version
-      enum: ['application/jwt', 'application/mdl']
+      // supported envelope media types in this version; `application/mdl` is
+      // deprecated, use `application/mdoc` instead
+      enum: ['application/jwt', 'application/mdoc', 'application/mdl']
     },
     // deprecated; use `mediaType` instead
     format: {
@@ -110,7 +111,7 @@ const envelope = {
           type: 'string',
           enum: ['ES256', 'EdDSA', 'Ed25519']
         },
-        // X.509 certificate chain w/PEM-formatted certs for mDL issuance
+        // X.509 certificate chain w/PEM-formatted certs for mdoc issuance
         issuerCertificateChain: {
           type: 'array',
           minItems: 1,
@@ -355,6 +356,19 @@ const languageValue = {
   ]
 };
 
+const mdocIssuanceOptions = {
+  title: 'mdoc Issuance Options',
+  type: 'object',
+  required: ['devicePublicJwk'],
+  additionalProperties: false,
+  properties: {
+    devicePublicJwk: {
+      title: 'mdoc Device Public Key in JWK format',
+      type: 'object'
+    }
+  }
+};
+
 export const issueCredentialBody = {
   title: 'Issue Credential',
   type: 'object',
@@ -372,19 +386,10 @@ export const issueCredentialBody = {
         extraInformation: {
           type: 'string'
         },
-        // mdl issuance options
-        mdl: {
-          title: 'mDL Issuance Options',
-          type: 'object',
-          required: ['devicePublicJwk'],
-          additionalProperties: false,
-          properties: {
-            devicePublicJwk: {
-              title: 'mDL Device Public Key in JWK format',
-              type: 'object'
-            }
-          }
-        }
+        // mdoc issuance options; `mdl` is deprecated but takes the same
+        // parameters
+        mdoc: mdocIssuanceOptions,
+        mdl: mdocIssuanceOptions
       }
     },
     credential: {

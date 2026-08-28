@@ -1,5 +1,10 @@
 # bedrock-vc-issuer ChangeLog
 
+## 31.3.0 - 2026-08-dd
+
+### Added
+- Support mdoc mDL issuance with `application/mdoc` media type.
+
 ## 31.2.2 - 2026-08-06
 
 ### Fixed
