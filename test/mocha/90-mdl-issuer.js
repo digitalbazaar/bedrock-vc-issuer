@@ -167,10 +167,10 @@ describe('issue mdoc mDL with "application/mdoc" media type', () => {
     ].map(pem => new Uint8Array(Buffer.from(
       pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, ''), 'base64')));
 
-    await Holder.verifyIssuerSigned(
-      {issuerSigned, trustedCertificates},
-      mdocContext
-    );
+    await Holder.verifyIssuerSigned({
+      issuerSigned,
+      trustedCertificates: [{issuance: trustedCertificates}]
+    }, mdocContext);
   });
 });
 
