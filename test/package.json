@@ -53,7 +53,7 @@
     "@digitalbazaar/vdl-aamva-context": "^1.0.0",
     "@digitalbazaar/vdl-context": "^1.0.0",
     "@digitalbazaar/webkms-client": "^14.3.0",
-    "@owf/mdoc": "^0.6.0",
+    "@owf/mdoc": "^0.8.1",
     "asn1js": "^3.0.10",
     "c8": "^11.0.0",
     "cborg": "^5.1.0",

@@ -1,5 +1,14 @@
 # bedrock-vc-issuer ChangeLog
 
+## 31.4.0 - 2026-mm-dd
+
+### Changed
+- Update dependencies:
+  - `@owf/mdoc@0.8.1`.
+
+### Fixed
+- Ensure mdoc signature date matches `validFrom` date.
+
 ## 31.3.0 - 2026-08-29
 
 ### Added

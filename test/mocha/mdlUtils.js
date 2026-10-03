@@ -28,24 +28,35 @@ export const mdocContext = {
           {name: 'ECDSA', hash: 'SHA-256'}, cryptoKey, toBeSigned);
         return new Uint8Array(sig);
       },
-      async verify({sign1, key}) {
+      async verify({signature, key, toBeVerified}) {
         const cryptoKey = await webcrypto.subtle.importKey(
           'jwk', _cleanJwk(key.jwk),
           {name: 'ECDSA', namedCurve: 'P-256'},
           false, ['verify']);
         return webcrypto.subtle.verify(
           {name: 'ECDSA', hash: 'SHA-256'}, cryptoKey,
-          sign1.signature, sign1.toBeSigned);
+          signature, toBeVerified);
       }
     }
   },
   x509: {
+    getSubjectNameField({certificate, field}) {
+      const cert = new X509Certificate(certificate);
+      return _parseDN(cert.subject)[field] ?? [];
+    },
     getIssuerNameField({certificate, field}) {
       const cert = new X509Certificate(certificate);
       return _parseDN(cert.issuer)[field] ?? [];
     },
-    async getPublicKey({certificate, alg}) {
+    async getPublicKey({certificate, alg, algorithm}) {
       const cert = new X509Certificate(certificate);
+      if(!alg && algorithm) {
+        if(algorithm === -7) {
+          alg = 'ES256';
+        } else if(algorithm === -35) {
+          alg = 'ES384';
+        }
+      }
       const key = await importX509(cert.toString(), alg, {extractable: true});
       return CoseKey.fromJwk(await exportJWK(key));
     },
@@ -75,10 +86,15 @@ export const mdocContext = {
       }
 
       // the last cert in the chain must be trusted (or self-signed by trusted)
+      let trustedCertificate;
       const lastCert = chain[chain.length - 1];
       const isTrusted = trusted.some(t => {
         try {
-          return lastCert.verify(t.publicKey) && lastCert.checkIssued(t);
+          if(lastCert.verify(t.publicKey) && lastCert.checkIssued(t)) {
+            trustedCertificate = t;
+            return true;
+          }
+          return false;
         } catch {
           return false;
         }
@@ -88,6 +104,13 @@ export const mdocContext = {
           'No trusted certificate was found while validating the X.509 chain');
       }
       _checkValidity(lastCert, now);
+
+      return {
+        // return verified chain + trusted certificate it descends from
+        chain: [
+          ...x5chain.slice(), new Uint8Array(trustedCertificate.rawData)
+        ]
+      };
     },
     async getCertificateData({certificate}) {
       const cert = new X509Certificate(certificate);
